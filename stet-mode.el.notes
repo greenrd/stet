@@ -1,0 +1,33 @@
+stet-mode:
+ - kill-all-local-variables
+ - switches to stet-mode in the current(?) buffer
+ - setq (major-mode "Stet")
+ - sets up keymap: use-local-map stet-mode-map
+ - sets up syntax table
+ - sets up buffer-local variables
+ - font-lock-defaults from xml/sgml modes
+
+ - make current file read-only
+
+ - (put 'stet-mode 'mode-class 'special)
+
+- documentation string for C-h m (`describe-mode')
+
+(defun stet-mode ()
+  "Major mode for editing the Master Text for a Stet system (for GPLv3) 
+ Special commands: \\{stet-mode-map}
+Turning on stet-mode runs the hook `stet-mode-hook'."
+  (interactive)
+  (kill-all-local-variables)
+  (use-local-map stet-mode-map)
+  (setq local-abbrev-table stet-mode-abbrev-table)
+  (set-syntax-table stet-mode-syntax-table)
+  (make-local-variable 'paragraph-start)
+  (setq paragraph-start (concat "[ \t]*$\\|" page-delimiter))
+  (make-local-variable 'paragraph-separate)
+  (setq paragraph-separate paragraph-start)
+  (make-local-variable 'indent-line-function)
+  (setq indent-line-function 'indent-relative-maybe)
+  (setq mode-name "Stet")
+  (setq major-mode 'stet-mode)
+  (run-hooks 'stet-mode-hook))

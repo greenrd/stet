@@ -1,0 +1,151 @@
+$Id: core-comment-pointer-behavior.txt 3 2005-10-11 17:44:19Z orion $
+
+This is a scratchpad for hashing out the functions and objects and
+general organization of the comment pointers.  I'm committing this
+document to svn so that I may keep track of it; nothing here should be
+considered normative or even english.
+
+core comment pointer behavior: capturing xpointers from browser and
+emacs.  In emacs this means psgmlx; in browser it means an up-to-date
+DOM implementation and some ajaxy stuff.
+
+references: xpointer rec (http://www.w3.org/XML/Linking); o'reilly
+xpath & xpointer book; psgmlx xpointer.el code
+
+look at psgmlx code and xpointer.el.  mock up an xml file and code to
+select xpointers.  Oh, I'll just use that docbook GPL2 for the moment.
+
+this will soon need somewhere to store its data.  this should be
+abstracted, though, so I'll make some general utility functions that,
+for the moment, just dump to a temp txt file.  eventually these
+functions will be upgraded to go to SQL or via RT.
+
+
+once the xpointers are working on a static document, then I will move
+on to what happens when they are revised.
+
+so let's get started.  I installed psgmlx and found that it doesn't
+actually hav the sgml-xpointer.el code that it says it has.  I found a
+1999 revision of this elsewhere and put it in place; I opened
+gpl2-docbook.xml and found that it gives xpointers like this:
+
+root.child(1,#element,'appendixinfo').child(1,#element,'legalnotice').child(1,#element,'para').child(1,#element,'address').child(1,#element,'street')
+
+This isn't really what I was expecting and I'm not crazy about it.
+checking the documentation.  This is a freaky-deaky xpointer, it
+seems, but even at their least freaky, xpointers don't really turn
+into the thing that I want them to be, which is XPaths plus a unique
+string.  If I really want compatibility and fallback I may be best
+served to use xpaths+strings from the start.
+
+notes from conversation with bkuhn, 2005-10-06:
+
+you can't even backspace or insert-char: everything must be marked
+and indicated.  emacs sees buffer read-only; when you mark a section
+and run the stet-commands, that's when it does modification
+
+hightlight a sentence: which of the following phrases
+
+make the system present them with the choices
+
+telling hte difference between moved and deleted
+
+here are old pushbuttons from the deleted/modified text; here is the
+new text and what phrases I think are still there; please ID and
+confirm and add anything that needs adding
+
+at the end of an hour-long conversation there will be a drafting moment.
+
+intensity highlighting
+
+prompting and self-categorization
+
+dan greenwood at MIT: autocategorization of legal texts ways to figure
+out if some court decision change sthe impact of some statute
+dang@mit.edu legalxml
+
+look at psgml-api.info
+
+it should be possible to relocate objects without messing up the
+numbering.
+
+
+So, after conversation with bkuhn the current plan for locating
+commented nodes is this:
+
+Before release, the document will be tagged so that each commentable
+phrase is its own node. E.g.:
+
+
+
+All users will mark the section they wish to comment on, and initiate
+a comment submission.
+
+
+storing start and end blocks
+
+issues: comments, drafter notes, note
+
+comments may reference multiple blocks
+
+comments are contained within issues
+
+comments
+issues 
+drafters' notes 
+calendar items: contain issues
+	 -agenda
+	 -plan
+
+
+drafters have a lot of date and time information to keep track of
+
+ways of relating issues/comments to time: date to act, date of
+expiration.  expiration is just an action.  time in relation to other
+elements
+
+how many telephone calls to resolve issues are pending in the next
+five days.
+
+keep notes/make updates while the meeting is happening -- batch them.
+
+require some sort of issue reference number/name when parsing a
+paragraph of stuff.  so a meeting minutes:
+
+#9i820938409 blah blah
+
+#9w88430980 dsjk lkjs okj
+
+thousands of issues
+
+how a volunteer knows what issues a comment addresses.  
+
+comments go in containers that relate to parts of text
+
+type your comment - get a list of issues that already relat eto those issues
+
+shows some comments contained by issues: which comment here do you see
+as most closely related to your point?
+
+- each issue should have an editorial summary of what it is
+
+novalis already has 4 dozen {issues|comments} stored up
+
+somewhere there's a whole bunch of radio buttons
+
+issue metadata: discussed at meeting x, discussed with community y
+
+emacs desktop?
+
+storage of an arbitrary out-of-license reference: audio recording of
+meeting, slashdot story, article.  associate a pool of URIs with a
+comment/issue/whatever.  linked item not searchable or queryable or
+whatever.
+
+
+So right now it seems like we're talking about two, or maybe three,
+axes of text resolution: xpaths+selectionstrings; and simple xpaths to
+phraseblocks.  (three because we could see xpaths+selection as 1 or 2
+axes).
+
+

@@ -1,0 +1,499 @@
+Specification for stet, a system for public comment on gplv3
+Orion Montoya <orion@diderot.uchicago.edu>
+$Id: stet-spec.txt 28 2005-11-01 01:45:09Z orion $
+
+
+O V E R V I E W
+
+This software is being developed to facilitate public comment on
+drafts of the GPLv3, with the goal of creating as much consensus as
+possible.  The goals of the GPLv3 process are outside the scope of
+this document, but this software will allow those goals to be met, by
+allowing all voices and viewpoints to be heard and considered.
+
+The system is named "stet", after the proofreader's mark meaning "let
+it stand as it is".  Stet is collaborative document revision system,
+getting its users and commenters to the point where they can say "let
+it stand as it is" about the whole document.
+
+The present document is being developed by Orion Montoya after
+discussions with Eben Moglen and Bradley Kuhn of the Software Freedom
+Law Center.
+
+BASIC BEHAVIOR
+
+Three interfaces:
+ - PUBLIC comment-submission, querying and tracking (Perl/CGI)
+ - VOLUNTEER comment triage/categorization/description (Perl/CGI)
+ - DRAFTERS editing, implicit comment querying & overlaid
+   coloring/styling for different criteria (Perl/CGI/elisp)
+
+PUBLIC USERS will select specific sections of the license to comment
+on, and these comments will remain tied to the license across
+revisions of the document.  Public users will receive notification
+upon changes to sections they've commented on, and will also be able
+to perform and syndicate arbitrary queries to keep track of sections
+or issues that concern them.  Users will also indicate their level of
+agreement with existing comments, as an aid to volunteer triage.
+
+VOLUNTEERS will manage incoming comments: group individual comments by
+common areas of concern, apply predefined issue categories to these
+groups, and indicate higher-level relationships among comments and
+groups.
+
+DRAFTERS will read the aggregated comments processed by volunteers,
+record notes on these comments, and will eventually make changes to
+individual sections.  These changes will modify the master text
+document, preserving past revisions within the text itself, and
+maintaining consistency with the pointers to the previous revisions.
+
+COMPONENTS
+
+The development timeframe for this system is fairly short, so it is
+essential to use existing packages to manage as much as possible, and
+avoid duplicating any effort.  The specifics of these components are
+still subject to revision and change, but various things are more or less
+certain:
+- obviously: Apache, GNU/Linux, Free Software
+- certain: subversion
+- highly likely: libxml, perl xml modules, emacs psgml/psgmlx/nxml, 
+   mysql/postgres
+- basic idea: Request Tracker or other coherent bug tracker with
+   custom fields and a usable API.  It is almost certain that this
+   will need to store its data in SQL.
+
+ON METADATA RELATIONSHIPS
+
+Volunteers will "indicate higher-level relationships among comments
+and groups": a limited but exhaustive set of these will be set out
+beforehand, but additional categories/relationships will be added if
+they prove necessary.  It will be preferable to keep these under
+control, but as descriptive as is reasonable.  Example relationships:
+
+GPLv2, section 7, paragraph 1, sentence 2:
+
+   If you cannot distribute so as to satisfy simultaneously your
+   obligations under this License and any other pertinent obligations,
+   then as a consequence you may not distribute the Program at all.
+
+Some global metadata properties that could apply to this sentence include:
+
+Resolving Conflicting Obligations
+Outside Conditions
+Circumstances Precluding Distribution
+Other Licenses:General
+
+and from the enclosing section/preceding sentences:
+
+Consequences Of Court Judgments
+Consequences Of Outside Agreements
+Patent Licensing
+Outside Conditions
+
+These properties may apply to multiple sections:
+
+GPLv2 Sections concerning price, charge, royalty or fee include:
+ - Preamble, paragraph 2 sentence 1.
+ - Preamble p2 s2
+ - Preamble p4 s1
+ - Preamble p7 s3
+ - Section 1 p2 s1
+ - Section 2b p1 s1
+ - Section 3b p1 s1
+ - Section 3c p1 s1
+ - Section 7 p1 s3
+ - Section 11 p1 s1
+
+A query for the broad category of "money" would return
+comments/revisions on all of these sections, as well as any additional
+comments that had been tagged by volunteers as concerning money.
+(Alternatively, comments on these sections that do not concern money
+-- as judged by volunteers -- might not be returned).
+
+I N T E R F A C E S
+
+PUBLIC CGI INTERFACE
+
+Public users will be required to create a username, for authentication
+and notification puposes.  They will initially browse a simple,
+formatted view of the License.  They will highlight a section of text
+for comment, and javascript will use the XPath and the value of the
+selection to generate a persistent path to the selection in question.
+Users will then enter the text of their comment, selecting additional
+options/attributes as appropriate:
+
+- Notify on change? (default yes; this may not be optional: if you
+don't want to hear about revisions, maybe you aren't really interested
+in the issue)
+- Related issues (this is mostly a volunteer task, but if the
+submitter wants to help set default values, or bring volunteer
+attention to particular relationships, allowing user selection of
+issues may be useful)
+- regional scope
+
+This user-submitted information, as well as various tracking metadata
+(date/time/IP/current subversion revision number) will be stored in an
+issue tracker, where it will be processed by volunteers.  The XPath
+and the highlighted selection will uniquely identify the text that is
+the subject of the comment; if the selection is too short to be unique
+within the xpath, the user should receive an error that asks them to
+select more text.
+
+Public users will also be able to view/aggregate/query comments as
+discussed in QUERIES and in COMMON INTERFACE ELEMENTS below.
+
+VOLUNTEER CGI INTERFACE
+
+Trained volunteers will view (or query) a queue of new comments, which
+they will categorize according to relevance, urgency and uniqueness --
+grouping and summarizing comments that express the same idea -- and
+assign them to the various issue metadata categories.
+
+The volunteer training will focus on correctly triaging incoming
+comments: exhaustively assigning related issues, while not assigning
+things to irrelevant categories.
+
+The interface will be substantially the same as any bug/issue tracking
+interface, with each comment existing as a single bug/issue with
+additional custom subfields
+
+The volunteers will determine when, for example, 300 comments have
+come in saying essentially the same thing about the same
+issue/section, so that the drafters may see these comments in the
+aggregate rather than reading 300 separate notes.
+
+Volunteer users will also be able to view/aggregate/query comments as
+discussed in QUERIES and in COMMON INTERFACE ELEMENTS below.
+
+In a conversation on 2005-10-12, Dan Ravicher made a good case for
+using Slashdot-style moderation and agreement rather than volunteers.
+Orion's concern with volunteers is that they might not be numerous or
+active enough to handle all the incoming comments; with community
+moderation, trained volunteers would still have a role --
+e.g. rescuing good comments that had been wrongly modded down -- but
+the whole system would not be dependent on them in the way that it is
+currently specified.  In this system, users would be able to limit the
+proliferation of comments by simply saying "I agree/disagree" and
+optionally "I wish to expand on this comment."  This would be more
+threaded-discussion style commenting, which should also be more
+manageable generally.
+
+DRAFTERS' EMACS MODE
+
+Once the initial license draft has been written and encoded, all
+further revisions of the license will be done in emacs, in a
+project-specific "stet-mode" that will handle the necessary markup and
+validity tasks for the drafters.  This mode will be built atop
+existing xml modes; most likely psgmlx, which appears to have the best
+support for XPath and XPointer.
+
+Changes made to the License will be recorded, to the extent
+practicable, in the document's XML format itself.  When discussion on
+a section is judged to be settled, it will be possible to 'lock' that
+section, to discourage or disable future comments -- but this should
+come in only near the end of the process.
+
+stet-mode functions will include:
+
+- stet-remove-region: marks the selected region for deletion, by putting
+it within xml tags that indicate that it is deprecated from the
+current version.
+
+- stet-add-sentence: creates a new empty sentence container with an
+  id= attribute, as well as other housekeeping attributes: date-added,
+  creator.  Issue-tracker metadata -- e.g. the reason for a change --
+  will be entered when the changes are committed, but may also be
+  entered here.
+
+- stet-display [arg]
+- stet-hide [arg]
+This pair of functions toggles the display of various types of
+metadata: deletions, insertions, hot topic notifiers,
+comment-breakdowns, etc.
+
+- stet-query-display-comments: creates a minibuffer to craft a query
+  to display an arbitrary selection of sections or comments, as
+  discussed below in QUERIES:
+
+- stet-commit-changes: executes callbacks to ensure document validity,
+  section-id consistency; requests any needed drafter input; commits
+  changes to svn repository
+
+- stet-comment-on-region: grabs the XPath and selection, and submits
+  the same sort of information as described for public users and in
+  NON-CGI SUBMISSIONS, with additional options for setting issue
+  metadata and skipping volunteer triage.
+
+- stet-note-on-comment: adds drafters' notes on a given comment or
+  comment-group; this is presumably stored in the issue tracker's
+  database.
+
+QUERIES
+
+Sections and their related issues are one plane of metadata that must
+be queryable, but there will be also be several other planes of
+information available to limit queries:
+
+[Date|reason] for any change in [status|content]
+[list|aggregate number] of [comments|changes] on [issue|section|same opinion]
+     [in range of time|in range of revisions|by user]
+
+Types of issues:
+ - Scope of [comment|section] (region, copyright law, patents,
+   distribution, license compatibility)
+ - Clarifications/loopholes
+ - Events (primarily meetings/conferences; these are aggregations of
+    issues to be discussed ) 
+ - show comments from [time range|user|region] concerning [section|issue|event]
+ - define hot topics: count above [threshold]; [time-range]; [limit]
+ - etc. [ *discuss* or request ]
+
+To proliferate excessive proliferation or disjunction of metadata
+properties, new properties should be added only after reasonable
+amount of human coordination.  But the process of adding will itself
+be fairly fast and easy, requiring just the name of the property and a
+changelog-style reason for the addition.  Drafters and volunteers will
+receive a daily notification if new properties have been added -- this
+will both ensure oversight, and keep the concerned parties informed as
+to what properties are available to them.
+
+The system will be built upon an existing issue/bug tracker to avoid
+reimplementing existing software, but depending on the overhead for
+querying the issue database through the bug tracker's API, it may be
+necessary instead to query the underlying database; for this reason
+the chosen bug tracker should store its data in an SQL database.
+
+The underlying query system must return its values as a data structure
+that may be formatted into arbitrary output formats.  Public users
+will see results in HTML or as the results of an XmlHttpRequest;
+Volunteers may interact directly with the issue tracker, or may use a
+custom CGI interface.  Drafters will see their results in an emacs
+mode.
+
+IMPLICIT QUERIES
+
+For the default interface to be functional, a number of QUERIES must
+take place in the background when the document is initally loaded.
+This is particularly important for the drafters, who will have
+up-to-date display of visual notifications whenever they load the
+document.  For the public interface, on the other hand, it may be
+necessary to cache these, if complicated queries impede performance.
+See SLASHDOT NOTES.
+
+COMMON INTERFACE ELEMENTS
+
+- hot topic notifiers: when a particular section has recieved a number
+  of comments (above a given threshold) in a given period of time
+  (default: past n days/week), there will be a visual indication of
+  this, for example in Emacs, possibly on the modeline, but possibly
+  inline in the text:
+
+    [!!!] If, as a consequence of a court judgment or allegation ...
+
+- general comment views: in addition to hot topics, comments must be
+  browseable by license section and by issue.  These will essentially
+  be returned by queries as described above.
+
+- toggle of styled display of XML "invisible ink": deletions,
+  additions, revision history.
+
+Upon a given comment area, the user may toggle a view of the comment
+breakdown on that area, with the most frequently-occurring opinions first:
+
+    [!!!] If, as a consequence of a court judgment or allegation of infringement...
+      |
+      |-> 25 comments: "What if the allegation is spurious/abusive?" [actions]
+      |-> 10 comments: "I should be able to distribute illegally if I want, as long as 
+      |	 	       	     I comply with the GPL and assume any liability" [actions]
+      |-> 2 comments: "If such a judgment is made, no one should distribute any GPL 
+          		      	   code of any kind ever" [actions]
+
+the "[actions]" slug will offer various kinds of actions/status
+changes that the drafter may take in response to the comment:
+- this revision should fix -- [ping|don't ping] commenters
+- this is necessary for compatibility with [choose] -- [ping|don't ping] commenters
+- this is the intended/implicit behavior -- [ping|don't ping] commenters
+- this opinion is a troll/shill -- ignore, [don't ping|ping] commenters
+- this is on hold pending resolution of [section|issue] -- [don't ping|ping] commenters
+- etc [*discuss* or request]
+
+PUTTING IT ALL TOGETHER
+
+As a consequence of all this, if someone asks a drafter about a money
+clause in section 2b, the drafter will be able to easily find
+yesterday's similar comment in section 3b, and he will see that the
+money issue implicit in "noncommercial distribution" in section 3c has
+been particularly "hot".  He will easily be able to view those
+comments, any drafters' "changelog entries" on these sections, and
+other drafters' notes-on-comments.  From this he will be able to
+determine the current position on that issue, and to characterize the
+nature of any changes or decisions not to change, etc.
+
+NON-CGI SUBMISSIONS
+
+For extensibility and accessiblity, comments should be submittable by
+other means than the CGI interface.  They may arrive in batches or
+singly; a standard format for the server request allows them to come
+from any client that writes this format.  The server script parses the
+input and makes entries in the issue tracker, making them ready for
+volunteer triage (unless submitted by the drafters' emacs mode).
+
+OUTSTANDING PRE-IMPLEMENTATION TASKS
+
+At this stage, only a limited amount of implementation can be done
+before we work out certain specifics: most importantly, an encoding
+model for the license text, and the constrained list of anticipated
+issues and concerns.  The following tasks may be worked around
+indefinitely, but they must be completed well in advance of launch in
+order to ensure that the system can be tested with real data.
+
+- schema/dtd/encoding model
+
+XML, tagging major divisions (preamble/body/applying this license),
+sections, paragraphs, sentences.  Each of these will also have a
+unique, human-assigned ID number, which will be persistent across
+revisions (i.e. even if the paragraph is marked for deletion).  The
+unique ID is provisional; if someone has a better way of keeping track
+of changes across revisions, we should certainly adopt that instead.
+
+- issue list
+
+For issues/concerns, key drafters will go through the draft license
+section-by-section, enumerating various conceptual issues that relate
+to each clause.  See ON METADATA RELATIONSHIPS.
+
+SLASHDOT NOTES
+
+At some point someone will post a link to Stet on the front page of
+Slashdot.  This will be helpful in alerting a certain portion of the
+concerned population to the opportunity for comment, but it will also
+put a very heavy load on the server, and subject the system as a whole
+to extensive scrutiny.  Although the system will be built for optimal
+performance, it would be wise, in resource-intensive subroutines, to
+write alternate behavior for a lightweight version that would run when
+the server is under heavy load.  Further discussion on this topic is
+necessary.  One idea floated in a conference on 2005-10-11 was to
+disable new user registrations under heavy load; this seems like bad
+PR.  But we should certainly profile to find what part of the system
+is the heaviest, and figure out ways of limiting this when under load.
+
+DEVELOPMENT TIMELINE
+
+Substantial portions of the functionality must be completed by the end
+of January, 2006.  This means, at a minimum, and in roughly this order:
+
+- initial prototype, with highlights, notes, note storage & display: 28 Oct.
+
+- storing pointers in the issue tracker
+   in a way manageable by volunteers; (1 week) (perl, elisp, javascript)
+- querying pointers; display & intensity highlighting (1.5 weeks) (xmlhttprequest)
+- adding and querying relationships (1 week)
+- user auth & comment rating/agreement (2 weeks)
+
+- core query implementation: returning usable data structures; (2-3 weeks)
+  (sql, perl, elisp)
+- core drafter elisp behavior: comment navigation & explicit query; notes 
+   on comments (4-6 weeks) (elisp, perl)
+- volunteer interface: customization of issue tracker; volunteer training;
+  (2-3 weeks) (meetings required) (perl, js, xslt)
+
+[ - draft license markup/schema (core comment behavior may be
+  implemented on sample text, presumably the gplv2); (< 1 week; meeting required)
+  (xml, xslt) ONGOING, IN PROGRESS ]
+[ - list of expected issues; their relationships to the marked-up license text.
+  (< 1 week, meeting required) (perl, legalese) ONGOING, IN PROGRESS ]
+
+After this deadline, additional features will be implemented, probably
+focusing on the drafters' interface first:
+
+- stet-mode for additions and deletions; (2-3 weeks)
+- implicit query interleaved with stet-mode; fine-tuning display;
+  (2 weeks)
+- additional behavior for stet-mode; (4-6 weeks)
+- non-cgi (offline) comment queuing, caching and submission; (3-5 weeks)
+- user notification of changes (2-3 weeks)
+- query interface for public users; alternate result formats (4-8 weeks)
+- ongoing maintenance and improvement
+
+Additional features discussed with Dave Turner et al. on 2005-10-11:
+- merging/unmerging of sentences
+- tracking alternate proposed language (to be posted in Decision
+  Statements)
+- Translation branches and cross-branch synchronization
+
+
+NOTES FOR SOPINSPACE
+
+- how are the data stored?
+
+- can we get a more abstract interface to this backend? this could
+  conceivably be good for conversation threading (I couldn't actually
+  post a comment yet) but building the comment-target stuff into this
+  would be as much of an investment as doing it any other way.
+
+NOTES FROM EBEN TALK 2005-10-17
+
+I have this list of issues that we're discussing; as we're navigating
+it should pop me to the position in the document that this issue
+concerns.
+
+- navigating the issues in one pane, and the text follows me in another
+- navigatiing through issues navigates through text
+- open a little notes pane, type my note, move on (AJAX)
+- make a link to a piece of text somewhere: a URI or a MSG ID.
+- ideally, typing one key will let me enter/open a URI, and another
+  will let me enter an arbitrary command-line string (to open a msg
+  with provided msg id)
+
+So Stallman asks, where did we write down (in email) our last revision
+of the AGPL clause?  Stet should associate that message id with the
+issue we're discussing.
+
+The canonical GPL3 file will be plaintext (? ugh for me)
+
+So by the end of October: a system that:
+
+ - navigates issues
+ - highlights parts of the document that must be highlighted, in
+    relation to location & spans
+ - a distinction between *highlighted* and *highlighted with notes*
+
+
+MUSING
+
+Stet will be released under the GPLv3 as soon as the license is
+finalized -- so in some ways this process may be seen as a sort of
+meta-licensing bootstrap operation: a program whose sole purpose is to
+develop the terms for its own distribution.
+
+
+
+Project database for 'Stet' created.
+
+ Customize settings for your project using the command:
+
+   trac-admin /var/trac
+
+ Don't forget, you also need to copy (or symlink) "trac/cgi-bin/trac.cgi"
+ to you web server's /cgi-bin/ directory, and then configure the server.
+
+ If you're using Apache, this config example snippet might be helpful:
+
+    Alias /trac "/wherever/you/installed/trac/htdocs/"
+    <Location "/cgi-bin/trac.cgi">
+        SetEnv TRAC_ENV "/var/trac"
+    </Location>
+
+    # You need something like this to authenticate users
+    <Location "/cgi-bin/trac.cgi/login">
+        AuthType Basic
+        AuthName "Stet"
+        AuthUserFile /somewhere/trac.htpasswd
+        Require valid-user
+    </Location>
+
+ The latest documentation can also always be found on the project website:
+ http://projects.edgewall.com/trac/
+
+Congratulations!
+
