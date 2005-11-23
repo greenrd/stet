@@ -26,7 +26,6 @@
       <head>
         <title><xsl:value-of select="/gpl/head/title"/></title>
         <script type="text/javascript" src="stet.js"/>
-        <script type="text/javascript" src="searchhi.js"/>
         <link rel="stylesheet" type="text/css" href="stet.css"/>
       </head>
       <body onkeypress="checkKeyPressed(event);" bgcolor="#FFFFFF">

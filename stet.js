@@ -58,7 +58,7 @@ function XpathSel() {
 	myNoteIfy = createNoteDiv();
 	textString = textObj.toString();
 
-	//	highlightWord(startNode,textString,'','noteLive');
+	//	highlightWord(startNode,textString,'','','');
 
 	thisNode = document.getElementById(startid);
 
@@ -91,18 +91,23 @@ if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
 }
 
 function submitComment() {
+
 var form = document.getElementById('noteify');
+ var noteText = form.NoteText.value;
+ form.NoteText.value = "OK, submitting...";
+ form.NoteText.style.background = '#aaa';
+ form.style.background = '#aaa';
 
-var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+form.Selection.value+'&amp;NoteText='+form.NoteText.value+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
+var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+form.Selection.value+'&amp;NoteText='+noteText+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
 
-var pyparams = encodeURI('custom_note_dom_path='+form.DomPath.value+'&amp;custom_note_selection='+form.Selection.value+'&amp;custom_start_node='+form.StartNode.value+'&amp;custom_end_node='+form.EndNode.value+'&amp;custom_note_start_node_id='+form.StartNodeId.value+'&amp;custom_note_end_node_id='+form.EndNodeId.value+'&amp;custom_note_url='+location.href+'&amp;description='+form.NoteText.value+'&amp;summary='+form.Selection.value+'&amp;reporter=moglen@columbia.edu&amp;mode=newticket&amp;action=create&amp;status=new&amp;component=component1&amp;severity=normal&amp;submit=create');
+var pyparams = encodeURI('custom_note_dom_path='+form.DomPath.value+'&amp;custom_note_selection='+form.Selection.value+'&amp;custom_start_node='+form.StartNode.value+'&amp;custom_end_node='+form.EndNode.value+'&amp;custom_note_start_node_id='+form.StartNodeId.value+'&amp;custom_note_end_node_id='+form.EndNodeId.value+'&amp;custom_note_url='+location.href+'&amp;description='+noteText+'&amp;summary='+form.Selection.value+'&amp;reporter=moglen@columbia.edu&amp;mode=newticket&amp;action=create&amp;status=new&amp;component=component1&amp;severity=normal&amp;submit=create');
 
 
 
 //oStr = document.getElementById('DomPath').value;
 //textObj = document.getElementById('Selection').value;
 //startid = document.getElementById('NoteText').value;
-//noteText = document.getElementById('StartNodeId').value;
+//noteSelection = document.getElementById('StartNodeId').value;
 //endid = document.getElementById('EndNodeId').value;
 //start = document.getElementById('StartNode').value;
 //end = document.getElementById('EndNode').value;
@@ -113,10 +118,11 @@ var pyparams = encodeURI('custom_note_dom_path='+form.DomPath.value+'&amp;custom
 //dump('would open '+theUrl+"\n");
 var theUrl = 'http://localhost/cgi-bin/stet-submit.pl'+'?'+params;
 
-//loadXMLDoc(theUrl);
+//highlightWord(form.StartNode.value,form.Selection.value,noteText,'');
+loadXMLDoc(theUrl);
 //cancelNote("noteify")
 
-window.location = 'http://trac.localdomain.org/trac.cgi'+'?'+pyparams;
+//window.location = 'http://trac.localdomain.org/trac.cgi'+'?'+pyparams;
 }
 
 function toggle(myClass) {
@@ -180,7 +186,8 @@ function processReqChange()
     if (req.readyState == 4) {
         // only if "OK"
         if (req.status == 200) {
-
+	  cancelNote("noteify");
+//	dump(req.responseText);
 	response  = req.responseXML.documentElement;
 	//foo_arr = response.getElementsByTagName("annotation");
 //	dump(req.responseXML+"\n");
@@ -190,13 +197,21 @@ function processReqChange()
 //	dump(selections_arr + ' ' + selections_arr.length + ' ' + selections_arr.item(0)+"\n");
 	startnodes_arr = response.getElementsByTagName("i");
 	annotations_arr = response.getElementsByTagName("n");
+	rtids_arr = response.getElementsByTagName("id");
 	for (i = 0; i < selections_arr.length; i++) {
+//		dump("n "+i+"="+annotations_arr[i].firstChild.innerHTML+"\n");
 		startNode = startnodes_arr[i].firstChild.data;
-        	noteText = selections_arr[i].firstChild.data;
-		annoteText = annotations_arr[i].firstChild.data;
+        	noteSelection = selections_arr[i].firstChild.data;
+		annoteText = annotations_arr[i];
+//		if (annotations_arr[i].firstChild.nextSibling) {
+//		annoteText += annotations_arr[i].firstChild.toString();
+//		}
+		
+		rtid = rtids_arr[i] ? rtids_arr[i].firstChild.data : "";
 
-		//				dump("highlighting "+startNode+' '+noteText+' '+annoteText+"\n"); // debug
-		highlightWord(document.getElementById(startNode),noteText,annoteText);
+		//dump("highlighting "+startNode+' '+noteSelection+' '+annoteText+"\n"); // debug
+		highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid);
+
 	//        eval(method + '(\'\', result)');
 	}
 
@@ -242,9 +257,11 @@ function checkKeyPressed(keyEvent) {
 	  }
   }
 }
+
 function cancelNote(div) {
-cancelme = document.getElementById(div);
-cancelme.parentNode.removeChild(cancelme);
+  if (cancelme = document.getElementById(div)) {
+    cancelme.parentNode.removeChild(cancelme);
+  }
 }
 
 function createNoteDiv() {
@@ -254,6 +271,7 @@ noteifyDiv.setAttribute('action','http://localhost/cgi-bin/stet-submit.pl');
 noteifyDiv.setAttribute('class','noteify');
 noteifyDiv.setAttribute('id','noteify');
 noteifyDiv.setAttribute('name','noteify');
+// noteifyDiv.style.z-index = '100';
 
 var DomPathTxt = document.createElement('span');
 DomPathTxt.setAttribute('id','DomPathTxt');
@@ -337,3 +355,56 @@ noteifyDiv.appendChild(cancel);
 return noteifyDiv;
 
 }
+
+
+
+function highlightWord(node,word,tooltip,rtid,altClass) {
+
+/* this code is basically no longer descended from: */
+/*                                                 */
+/* http://www.kryogenix.org/code/browser/searchhi/ */
+/*                             */
+/* but it started out that way ... */
+
+  var haveHighlighted = false;
+  //dump("doing highlightword of "+word+"\n");
+  if (node.hasChildNodes) {
+    var iCN;
+    //dump("this node has "+node.childNodes.length+" childNodes\n");
+    for (iCN=0;iCN<node.childNodes.length;iCN++) {
+      //dump("going in to "+node.childNodes[iCN].nodeName+"\nfor "+word+" iCN="+iCN+"\n");
+      highlightWord(node.childNodes[iCN],word,tooltip,rtid);
+    }
+  }
+  if (node.nodeType == 3) { // text node
+    dump("node is "+node.parentNode.id+"\n");
+    if (!haveHighlighted) {
+      //dump("haven't highlighted\n");
+    paragraph = node.parentNode.parentNode;
+    paragraphString = (new XMLSerializer).serializeToString(paragraph);
+    paragraphString.replace(/\s+/g,' ');
+    tempNodeVal = paragraphString;
+    tempWordVal = word;
+    //tempWordVal = tempWordVal.replace(/\W+/g,'[\\W\\s]+(<[^>]+>)?');
+    tempWordVal = tempWordVal.replace(/\W+/g,'[^<]*(<[^>]+>)*');
+
+    var re = new RegExp(tempWordVal, 'mi');
+	//    var re = new RegExp("software", 'mig');
+    //dump("re is "+re+"\n");
+    tooltipString = (new XMLSerializer).serializeToString(tooltip);
+    var ticketLink = rtid ? '<a href="/rt/Ticket/Display.html?id='+rtid+'">[+]</a>' : '[reload for ticket link]';
+    
+    paragraphString = paragraphString.replace(re,'<span class="highlight" id="note.'+rtid+'.'+node.parentNode.id+'">$&<span class="annotation">'+tooltipString+" "+ticketLink+' </span></span>');
+    //     dump("replaced on "+$&+"\n");
+    //dump("pString is now "+paragraphString+"\n");
+    node.parentNode.parentNode.innerHTML = paragraphString;
+    
+    //    haveHighlighted=true;
+    }
+  }
+}
+
+
+
+
+window.onload = loadXMLDoc('http://localhost/cgi-bin/rt-test.pl?NoteUrl='+location.href);

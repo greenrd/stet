@@ -39,11 +39,11 @@ my $CurrentUser = RT::Interface::CLI::GetCurrentUser();
 my $CustomFieldObj = RT::CustomField->new($CurrentUser);
 #my $Query= " Requestor.EmailAddress LIKE 'moglen' ";
 my $Query;
-# if(param()) {
+ if(param()) {
 
-#     $NoteUrl = param('NoteUrl');
+     $NoteUrl = param('NoteUrl');
 #     $Query = " CustomFields.NoteUrl LIKE '$NoteUrl' ";
-# }
+ }
 # else {
     $Query= " Requestor.EmailAddress LIKE 'moglen' ";
 #}
@@ -51,6 +51,11 @@ my $Query;
 my $TicketObj = new RT::Tickets( $RT::SystemUser );
 $TicketObj->FromSQL($Query);
 $TicketObj->Query();
+$TicketObj->LimitCustomField(
+     CUSTOMFIELD => 3,
+     VALUE => $NoteUrl,
+     OPERATOR => "="
+);
 $count = $TicketObj->CountAll();
 #print $TicketObj->loc("Found [quant,_1,annotation].\n",$count);
 
@@ -67,7 +72,7 @@ $annotation = "";
           next unless ($Transaction->Type =~ /^(Create|Correspond|Comment$)/);
 
     my $attachments = $Transaction->Attachments;
-    my $CustomFields = $item->QueueObj->TicketCustomFields();
+     my $CustomFields = $item->QueueObj->TicketCustomFields();
     $attachments->GotoFirstItem;
     my $message = $attachments->Next;
     $annotation .= $message->Content;
@@ -85,6 +90,7 @@ $annotation = "";
     $returnme .= " <s>" . $item->FirstCustomFieldValue('NoteSelection') . "</s>\n"; 
     $returnme .= " <i>" . $item->FirstCustomFieldValue('NoteStartNodeId') . "</i>\n";
 
+	  $returnme .= " <id>" . $item->id . "</id>\n";
     $returnme .= "</annotation>\n";
 
 #    print Dumper($content);

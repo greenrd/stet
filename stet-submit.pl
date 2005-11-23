@@ -47,19 +47,19 @@ $notetext = param('NoteText');
 $returnme .=  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n";
 $returnme .= "<response>\n";
 
-    $returnme .= "<annotation>\n";
-    $returnme .= " <n>$notetext</n>\n";
-    $returnme .= " <e>$endid</e>\n";
-    $returnme .= " <s>$selectedtext</s>\n"; 
-    $returnme .= " <i>$startid</i>\n";
+$returnme .= "<annotation>\n";
+$returnme .= " <n>$notetext</n>\n";
+$returnme .= " <e>$endid</e>\n";
+$returnme .= " <s>$selectedtext</s>\n"; 
+$returnme .= " <i>$startid</i>\n";
 
-    $returnme .= "</annotation>\n";
+
 
 #    print Dumper($content);
 
-    }
+}
 
-$returnme .= "</response>\n";
+
 
 
 
@@ -92,4 +92,8 @@ use MIME::Entity;
   my ($id, $transaction_object, $err) = $ticket->Create(%ticket_vals);
   print STDERR $err . "\n" if $err;
 
+$returnme .= " <id>$id</id>\n";
+
+$returnme .= "</annotation>\n";
+$returnme .= "</response>\n";
 print $returnme;

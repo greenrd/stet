@@ -70,18 +70,20 @@ font-size: smaller;
 position: absolute;
 margin-left: 100%;
 //        border: 1px dotted #666;
-
+z-index: 100;
 background: #f0ecb3;
  }
 
 .annotation { 
 font-size: smaller;
-position: absolute;
-//float: right;
+//position: absolute;
+position: relative;
+float: right;
 right: -200px;
 width: 25%;
 border: 1px dotted #666;
 background: #f0ecb3;
+z-index: 10;
  }
 
 
