@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="selectxpath.xsl" type="text/xsl" ?>
+<!DOCTYPE annot SYSTEM "annot.dtd">
+
+<annot>
+  <head>
+      <title>Lincoln's 1863 Thanksgiving Proclamation</title>
+      <pubdate>bogus pubdate/version string</pubdate>
+  <copyright>
+      <year>1863</year>
+      <holder>Abraham Lincoln (public domain)</holder>
+  </copyright>
+  <legalnotice id="tgiving-legalnotice">
+      <address>
+	<name>Abraham Lincoln</name>
+	<street>1600 Pennsylvania Avenue NW</street>
+	<city>Washington</city>,
+	<state>DC</state>
+	<postcode>20500</postcode>
+	<country>USA</country>
+      </address>
+    </legalnotice>
+  </head>
+
+<body>
+<section id="tgiving" name="Lincoln's 1863 Thanksgiving Proclamation">
+
+<p id="tgiving.p2">
+ <sent id="tgiving.p2.s1">The year that is drawing towards its close<span class="del" id="tgiving.p2.s1">,</span> has been filled with the
+blessings of fruitful fields and healthful skies.</sent>
+ <sent id="tgiving.p2.s2">To these bounties,
+which are so constantly enjoyed that we are prone to forget the source
+from which they come, others have been added, which are of so
+extraordinary a nature, that they cannot fail to penetrate and soften
+even the heart which is habitually insensible to the ever watchful
+providence of <span class="del" id="tgiving.p2.s2">Almighty God</span><span class="add" id="tgiving.p2.s2">random coincidence</span>.</sent>
+ <sent id="tgiving.p2.s3">In the midst of a civil war of unequalled
+magnitude and severity, which has sometimes seemed to foreign States
+to invite and to provoke their aggression, peace has been preserved
+with all nations, order has been maintained, the laws have been
+respected and obeyed, and harmony has prevailed everywhere except in
+the theatre of military conflict; while that theatre has been greatly
+contracted by the advancing armies and navies of the Union.</sent>
+ <sent id="tgiving.p2.s4">Needful
+diversions of wealth and of strength from the fields of peaceful
+industry to the national defence, have not arrested the plough, the
+shuttle, or the ship; the axe had enlarged the borders of our
+settlements, and the mines, as well of iron and coal as of the
+precious metals, have yielded even more abundantly than
+heretofore.</sent>
+</p>
+
+<p id="tgiving.p3">
+ <sent id="tgiving.p3.s1">No human counsel hath devised nor hath any mortal hand worked out
+these great things.</sent>
+ <sent id="tgiving.p3.s2">They are the gracious gifts of the Most High God,
+who, while dealing with us in anger for our sins, hath nevertheless
+remembered mercy.</sent>
+ <sent id="tgiving.p3.s3">It has seemed to me fit and proper that they should
+be solemnly, reverently and gratefully acknowledged as with one heart
+and voice by the whole American People.</sent>
+ <sent id="tgiving.p2.s5">Population has steadily increased, notwithstanding the
+waste that has been made in the camp, the siege and the battle-field;
+and the country, rejoicing in the consciousness of augmented strength
+and vigor, is permitted to expect continuance of years with large
+increase of freedom.</sent>
+ <sent id="tgiving.p3.s4">I do therefore invite my
+fellow citizens in every part of the United States, and also those who
+are at sea and those who are sojourning in foreign lands, to set apart
+and observe the last Thursday of November next, as a day of
+Thanksgiving and Praise to our beneficent Father who dwelleth in the
+Heavens.</sent>
+ <sent id="tgiving.p3.s5">And I recommend to them that while offering up the
+ascriptions justly due to Him for such singular deliverances and
+blessings, they do also, with humble penitence for our national
+perverseness and disobedience, commend to his tender care all those
+who have become widows, orphans, mourners or sufferers in the
+lamentable civil strife in which we are unavoidably engaged, and
+fervently implore the interposition of the Almighty Hand to heal the
+wounds of the nation and to restore it as soon as may be consistent
+with the Divine purposes to the full enjoyment of peace, harmony,
+tranquillity and Union.</sent>
+</p>
+
+<p id="tgiving.p4">
+ <sent id="tgiving.p4.s1">Abraham Lincoln</sent>
+</p>
+</section>
+</body>
+</annot>
