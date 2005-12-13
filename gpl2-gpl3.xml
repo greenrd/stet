@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="selectxpath.xsl" type="text/xsl" ?>
 <!DOCTYPE gpl SYSTEM "gpl3.dtd">
-<!-- $Id$ -->
+<!-- $Id: gpl2-gpl3.xml 39 2005-12-13 21:31:52Z orion $ -->
 <gpl>
     <head>
       <title>GNU General Public License</title>

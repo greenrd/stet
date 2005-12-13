@@ -24,7 +24,7 @@
   <xsl:template match="/">
     <html>
       <head>
-        <title><xsl:value-of select="/gpl/head/title"/></title>
+        <title><xsl:value-of select="//head/title"/></title>
         <script type="text/javascript" src="stet.js"/>
         <link rel="stylesheet" type="text/css" href="stet.css"/>
       </head>
@@ -46,7 +46,7 @@
 
 
 
-  <xsl:template match="/gpl/head">
+  <xsl:template match="//head">
     <h1><xsl:value-of select="title"/></h1>
     <p><xsl:value-of select="pubdate"/></p>
     <p>Copyright (C) <xsl:value-of select="copyright/year"/> 
@@ -68,8 +68,9 @@
     
   </xsl:template>
   
-  <xsl:template match="/gpl/body">
+  <xsl:template match="//body">
     <p><a href="javascript:XpathSel()">select some text and then type "c" to submit comments.</a>
+    <p><a href="javascript:LimitQuery()">limit your query by various criteria.</a></p>
   </p>
     <p>Toggle display of <a href="javascript:toggle('add')">additions</a> | <a href="javascript:toggle('del')">deletions</a></p>
 

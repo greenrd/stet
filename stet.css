@@ -48,15 +48,17 @@ background: #ff99ff;
 
 #maintext { 
 
+float:left
+
         position: absolute;
 	margin-left: 3em;
         margin-top: 1em;
         float: left;
-        left: 0;
-        top: 0;
-	width: 66%;
+//        left: 0;
+//        top: 0;
+//	margin-right: 33%;
 //        border: 1px dotted #666;
-
+        width: 65%;
  }
 
 
@@ -67,8 +69,10 @@ background: #ff99ff;
 //        top: 0;
         width: 30%;
 font-size: smaller;
+//left: 70%;
+float: right;
 position: absolute;
-margin-left: 100%;
+margin-left: 68%;
 //        border: 1px dotted #666;
 z-index: 100;
 background: #f0ecb3;
@@ -77,13 +81,16 @@ background: #f0ecb3;
 .annotation { 
 font-size: smaller;
 //position: absolute;
-position: relative;
+//position: relative;
 float: right;
-right: -200px;
+//margin-left: 100%;
+left: 70%;
+//right: -%;
 width: 25%;
 border: 1px dotted #666;
 background: #f0ecb3;
 z-index: 10;
+clear: right;
  }
 
 
