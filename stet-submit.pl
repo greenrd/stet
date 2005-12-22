@@ -21,39 +21,56 @@
 # and the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 
+# Copyright (c) 2005 Software Freedom Law Center
+# Author: Orion Montoya <orion@mdcclv.com>
 
 use CGI qw/:standard/;
 use Data::Dumper;
+use MIME::Base64;
+use RPC::XML;
+use RPC::XML::Client;
+use RPC::XML::Client::send_request;
+
+use lib '/usr/share/request-tracker3.2/lib';
+use lib '/usr/share/request-tracker3.2/libexec';
 
 use lib '/usr/share/request-tracker3.4/lib';
 use lib '/usr/share/request-tracker3.4/libexec';
+
 #use RT::Interface::CLI;
 use RT;
 
 print header('text/xml');
 
 my $returnme;
+
 if(param()) {
-    
+
 $url = param('NoteUrl');
 $dompath = param('DomPath');
 $selectedtext = param('Selection');
-$start = param('StartNode');
+# $start = param('StartNode');
 $startid = param('StartNodeId');
-$end = param('EndNode');
+# $end = param('EndNode');
 $endid = param('EndNodeId');
 $notetext = param('NoteText');
+
+# ($name, $pass) = split(/:/, decode_base64(cookie('__ac')));
+
+$cli = RPC::XML::Client->new('http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users');
+$resp = $cli->send_request('system.listMethods');
 
 $returnme .=  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n";
 $returnme .= "<response>\n";
 
 $returnme .= "<annotation>\n";
-$returnme .= " <n>$notetext</n>\n";
+$returnme .= " <n>$notetext " .  (ref $resp) ? join(', ', @{$resp->value}) : "Error: $resp" . "</n>\n";
 $returnme .= " <e>$endid</e>\n";
 $returnme .= " <s>$selectedtext</s>\n"; 
 $returnme .= " <i>$startid</i>\n";
 
 
+print
 
 #    print Dumper($content);
 
@@ -97,3 +114,7 @@ $returnme .= " <id>$id</id>\n";
 $returnme .= "</annotation>\n";
 $returnme .= "</response>\n";
 print $returnme;
+
+
+
+

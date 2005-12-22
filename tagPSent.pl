@@ -18,6 +18,8 @@
 # <http://www.gnu.org/licenses/>.
 
 
+# Copyright (c) 2005 Software Freedom Law Center
+# Author: Orion Montoya <orion@mdcclv.com>
 
 use Lingua::EN::Sentence qw( get_sentences add_acronyms );
 

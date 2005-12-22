@@ -1,6 +1,6 @@
 Specification for stet, a system for public comment on gplv3
 Orion Montoya <orion@diderot.uchicago.edu>
-$Id: stet-spec.txt 28 2005-11-01 01:45:09Z orion $
+$Id: stet-spec.txt 42 2005-12-15 23:18:11Z orion $
 
 
 O V E R V I E W
@@ -459,12 +459,18 @@ So by the end of October: a system that:
  - a distinction between *highlighted* and *highlighted with notes*
 
 
+*** simplified submission based on comment match via procmail and cgi ***
+
+*** you can highlight the title of the document as an easteregg scratch buffer ***
+
+
 MUSING
 
 Stet will be released under the GPLv3 as soon as the license is
 finalized -- so in some ways this process may be seen as a sort of
 meta-licensing bootstrap operation: a program whose sole purpose is to
 develop the terms for its own distribution.
+
 
 
 

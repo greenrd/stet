@@ -1,4 +1,4 @@
-$Id: core-comment-pointer-behavior.txt 3 2005-10-11 17:44:19Z orion $
+$Id: core-comment-pointer-behavior.txt 39 2005-12-13 21:31:52Z orion $
 
 This is a scratchpad for hashing out the functions and objects and
 general organization of the comment pointers.  I'm committing this

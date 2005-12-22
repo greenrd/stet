@@ -2,6 +2,8 @@
 <?xml-stylesheet href="selectxpath.xsl" type="text/xsl" ?>
 <!DOCTYPE annot SYSTEM "annot.dtd">
 
+<!-- $Id: lincoln-thanksgiving.xml 41 2005-12-13 21:35:10Z orion $ -->
+
 <annot>
   <head>
       <title>Lincoln's 1863 Thanksgiving Proclamation</title>
@@ -20,20 +22,21 @@
 	<country>USA</country>
       </address>
     </legalnotice>
+    <svn revision="$LastChangedRevision: 41 $"/>
   </head>
 
 <body>
 <section id="tgiving" name="Lincoln's 1863 Thanksgiving Proclamation">
 
 <p id="tgiving.p2">
- <sent id="tgiving.p2.s1">The year that is drawing towards its close<span class="del" id="tgiving.p2.s1">,</span> has been filled with the
+ <sent id="tgiving.p2.s1">The year that is drawing towards its close, has been filled with the
 blessings of fruitful fields and healthful skies.</sent>
  <sent id="tgiving.p2.s2">To these bounties,
 which are so constantly enjoyed that we are prone to forget the source
 from which they come, others have been added, which are of so
 extraordinary a nature, that they cannot fail to penetrate and soften
 even the heart which is habitually insensible to the ever watchful
-providence of <span class="del" id="tgiving.p2.s2">Almighty God</span><span class="add" id="tgiving.p2.s2">random coincidence</span>.</sent>
+providence of Almighty God.</sent>
  <sent id="tgiving.p2.s3">In the midst of a civil war of unequalled
 magnitude and severity, which has sometimes seemed to foreign States
 to invite and to provoke their aggression, peace has been preserved
@@ -48,6 +51,11 @@ shuttle, or the ship; the axe had enlarged the borders of our
 settlements, and the mines, as well of iron and coal as of the
 precious metals, have yielded even more abundantly than
 heretofore.</sent>
+ <sent id="tgiving.p2.s5">Population has steadily increased, notwithstanding the
+waste that has been made in the camp, the siege and the battle-field;
+and the country, rejoicing in the consciousness of augmented strength
+and vigor, is permitted to expect continuance of years with large
+increase of freedom.</sent>
 </p>
 
 <p id="tgiving.p3">
@@ -59,11 +67,6 @@ remembered mercy.</sent>
  <sent id="tgiving.p3.s3">It has seemed to me fit and proper that they should
 be solemnly, reverently and gratefully acknowledged as with one heart
 and voice by the whole American People.</sent>
- <sent id="tgiving.p2.s5">Population has steadily increased, notwithstanding the
-waste that has been made in the camp, the siege and the battle-field;
-and the country, rejoicing in the consciousness of augmented strength
-and vigor, is permitted to expect continuance of years with large
-increase of freedom.</sent>
  <sent id="tgiving.p3.s4">I do therefore invite my
 fellow citizens in every part of the United States, and also those who
 are at sea and those who are sojourning in foreign lands, to set apart

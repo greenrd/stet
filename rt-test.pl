@@ -21,6 +21,9 @@
 # and the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 
+# Copyright (c) 2005 Software Freedom Law Center
+# Author: Orion Montoya <orion@mdcclv.com>
+
 use CGI qw(:standard);
 use lib '/usr/share/request-tracker3.4/lib/';
 use lib '/etc/request-tracker3.4/';
@@ -56,7 +59,7 @@ $TicketObj->LimitCustomField(
      VALUE => $NoteUrl,
      OPERATOR => "="
 );
-$count = $TicketObj->CountAll();
+#$count = $TicketObj->CountAll();
 #print $TicketObj->loc("Found [quant,_1,annotation].\n",$count);
 
 print header('text/xml');

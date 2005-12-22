@@ -58,7 +58,7 @@ float:left
 //        top: 0;
 //	margin-right: 33%;
 //        border: 1px dotted #666;
-        width: 65%;
+        width: 50%;
  }
 
 
@@ -67,12 +67,12 @@ float:left
 //	float: left;
 //	left: 80%;
 //        top: 0;
-        width: 30%;
+           width: 40%;
 font-size: smaller;
-//left: 70%;
+left: 55%;
 float: right;
 position: absolute;
-margin-left: 68%;
+//margin-left: 68%;
 //        border: 1px dotted #666;
 z-index: 100;
 background: #f0ecb3;
@@ -80,24 +80,28 @@ background: #f0ecb3;
 
 .annotation { 
 font-size: smaller;
-//position: absolute;
+position: absolute;
 //position: relative;
-float: right;
+//float: right;
 //margin-left: 100%;
-left: 70%;
+left: 55%;
 //right: -%;
-width: 25%;
+width: 40%;
 border: 1px dotted #666;
 background: #f0ecb3;
 z-index: 10;
-clear: right;
+//clear: right;
  }
 
 
 textarea { 
-background: #f0ecb3;
+background-color: #f0ecb3;
  }
 
 p { 
-clear:right;
- }
+ clear:right;
+}
+
+.annoteButton {
+background-color: #f0ecb3;
+}
