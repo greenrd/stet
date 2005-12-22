@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+%# Copyright 2005 Software Freedom Law Center, Inc.
+%#
+%# This program is free software: you may copy, modify, or redistribute it
+%# and/or modify it under either:
+%#
+%#  (a) the terms of the GNU Affero General Public License as published by
+%#      the Free Software Foundation, either version 3 of the License, or
+%#      (at your option) any later version.
+%#    or
+%#  (b) the terms of the GNU General Public license, version 2, as
+%#      published by the Free Software Foundation.
+%#
+%# This program is distributed in the hope that it will be useful, but
+%# WITHOUT ANY WARRANTY; without even the implied warranty of
+%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+%# General Public License and/or GNU General Public License for more
+%# details.
+%#
+%# You should have received a copy of the GNU Affero General Public License
+%# and the GNU General Public License along with this program. If not, see
+%# <http://www.gnu.org/licenses/>.
+%
+%
+<response>
+% if ($Tickets) {
+<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> (found <% $Tickets->CountAll()%>)</cs>
+% } else {
+<cs> Showing comment <a href="/rt/NoAuth/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/rt/NoAuth/changeshown.html">change</a> </cs>
+% }
+% while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
+<annotation>
+<n><% $item->Transactions->First->Content %></n>
+<e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
+<s><% cleanNoteSel(\$item) %></s>
+<i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
+<!-- <u><% $item->Requestors->MemberEmailAddressesAsString %></u> -->
+<u><% $item->CreatorObj->Name %></u>
+% my ($agree,$agr_count) = showAgree(\$item);
+<ua><% $agree |n %></ua>
+<at><% $agr_count %></at>
+<id><% $item->id %></id>
+</annotation>
+% $Ticket = '';
+% }
+</response>
+%
+%
+%
+<%INIT>
+
+use CGI qw/standard/;
+use MIME::Base64;
+use Frontier::Client;
+use Data::Dumper;
+require "/var/www/stet/stetsubs.pl";
+
+my ($name, $resp, $pass, $agr_vals, $CurrentUser);
+# our $session;
+# print STDERR Dumper(%ARGS);
+
+ my $rsslink = "/rt/NoAuth/rssresults.rdf?Query=".$ARGS{'Query'};
+#  my $printargs = param('Query')." (".$Tickets->CountAll()." found)";
+
+
+($CurrentUser, $resp) = getUser("foo");
+print STDERR "Currentuser $CurrentUser, $resp\n";
+#my $Tickets = RT::Tickets->new($session{'CurrentUser'});
+
+my ($Tickets, $Ticket);
+
+if ($ARGS{'Query'}) {
+    $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL($ARGS{'Query'});
+}
+elsif ($ARGS{'id'}) {
+    $Ticket = RT::Ticket->new($CurrentUser);
+    $Ticket = LoadTicket($ARGS{'id'});
+}
+
+#my $Tickets = RT::Tickets->new($CurrentUser);
+#$Tickets->FromSQL($ARGS{'Query'});
+#$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+
+$r->content_type('text/xml');
+
+
+</%INIT>

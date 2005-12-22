@@ -1,0 +1,129 @@
+%# Copyright 2005 Software Freedom Law Center, Inc.
+%#
+%# This program is free software: you may copy, modify, or redistribute it
+%# and/or modify it under either:
+%#
+%#  (a) the terms of the GNU Affero General Public License as published by
+%#      the Free Software Foundation, either version 3 of the License, or
+%#      (at your option) any later version.
+%#    or
+%#  (b) the terms of the GNU General Public license, version 2, as
+%#      published by the Free Software Foundation.
+%#
+%# This program is distributed in the hope that it will be useful, but
+%# WITHOUT ANY WARRANTY; without even the implied warranty of
+%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+%# General Public License and/or GNU General Public License for more
+%# details.
+%#
+%# You should have received a copy of the GNU Affero General Public License
+%# and the GNU General Public License along with this program. If not, see
+%# <http://www.gnu.org/licenses/>.
+%
+
+%# Copyright (c) 2005 Software Freedom Law Center
+%# Author: Orion Montoya <orion@mdcclv.com>
+% if ($resp == 0) {
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response>
+ <cs>Your comment was not submitted because you could not be authenticated.  <a href="changeshown.html">change query</a></cs>
+ <annotation>
+  <u>Authentication error</u>
+  <i><% $startid %></i>
+  <e><% $endid %></e>
+  <n>Your comment was not saved.  You need to <a href="http://gplv3.fsf.org:8800/launch/login_form?came_from=<% $urlpath %>">login</a> in order to make comments.  The text of your comment was:<br/> <strong>Subject:</strong><% $notesubj %><br/><% $notetext %></n>
+  <s><% $selectedtext %></s>
+  <id>x</id>
+  <ua>x</ua>
+  <at>x</at>
+ </annotation>
+</response>
+% } elsif ($resp == 1) {
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response>
+<cs>Your comment "$notesubj" was submitted.  <a href="changeshown.html">change query</a></cs>
+<annotation>
+<n><% $notetext %></n>
+<e><% $endid %></e>
+<s><% $selectedtext %></s> 
+<i><% $startid %></i>
+<id><% $id %></id>
+<u><% $name %></u>
+<ua>unagree</ua>
+<at>1</at>
+</annotation>
+</response>
+% }
+<%INIT>
+
+use MIME::Entity;
+use CGI qw/:standard/;
+use Data::Dumper;
+
+use MIME::Base64;
+use URI::Escape;
+use Frontier::Client;
+
+require "/var/www/stet/stetsubs.pl";
+
+our $name;
+my ($CurrentUser, $resp) = getUser();
+
+
+if(%ARGS) {
+
+$url = $ARGS{'NoteUrl'};
+
+$urlpath = $url;
+$urlpath =~ s/http:\/\/([^\/]+)(\/.*)\?/$2/;
+
+$url =~ s/.*\/([^\/]+)\.(html|xml)/$1/;
+
+$dompath = $ARGS{'DomPath'};
+$selectedtext = URI::Escape::uri_unescape($ARGS{'Selection'});
+$notesubj = URI::Escape::uri_unescape($ARGS{'NoteSubj'});
+# $start = $ARGS{'StartNode'};
+$startid = $ARGS{'StartNodeId'};
+# $end = $ARGS{'EndNode'};
+$endid = $ARGS{'EndNodeId'};
+$notetext = URI::Escape::uri_unescape($ARGS{'NoteText'});
+
+$ARGS{'queue'} ? $queue = $ARGS{'queue'} : $queue = "Inbox";
+
+my $ThisQueue = RT::Queue->new($CurrentUser);
+  $ThisQueue->Load($queue);
+  if ($CurrentUser->HasRight( Right => 'CreateTicket', Object => $ThisQueue )) {
+      $realqueue = $queue;
+  }
+  else {
+      $realqueue = "Inbox";
+  }
+
+
+if ($resp == 1) {
+my $ticket = new RT::Ticket($CurrentUser);
+my $ticket_body = MIME::Entity->build(Data => $notetext,
+				      Type => 'text/plain');
+my %ticket_vals = ( Queue => $realqueue,
+		    Subject => $notesubj,
+#                      Owner => 'Nobody',
+                      Requestor => $name, # will work with new users
+                      #InitialPriority => '11',
+                      #FinalPriority => '20',
+                      MIMEObj => $ticket_body,
+		      'CustomField-1' => $selectedtext,
+		      'CustomField-2' => $dompath,
+		      'CustomField-3' => $url,
+		      'CustomField-4' => $startid,
+		      'CustomField-5' => $endid,
+		      'CustomField-6' => $notetext,
+		      'CustomField-7' => $name,
+		      );
+  my ($id, $transaction_object, $err) = $ticket->Create(%ticket_vals);
+  print STDERR $err . "\n" if $err;
+
+}
+
+$r->content_type('text/xml');
+</%INIT>
+

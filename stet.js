@@ -20,17 +20,67 @@
 //  His license is:
 //     You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-// Copyright (C) 2005 Software Freedom Law Center
-// Author: Orion Montoya <orion@mdcclv.com>
+/* Copyright (C) 2005 Software Freedom Law Center */
+/* Author: Orion Montoya <orion@mdcclv.com>       */
 
+var ticketObj = new Object;
+ticketObj.rtidsBySn = new Object;
+var status = new Object;
+status.msg = new Array;
+status.last = last;
+
+var base64Chars = new Array(
+			    'A','B','C','D','E','F','G','H',
+			    'I','J','K','L','M','N','O','P',
+			    'Q','R','S','T','U','V','W','X',
+			    'Y','Z','a','b','c','d','e','f',
+			    'g','h','i','j','k','l','m','n',
+			    'o','p','q','r','s','t','u','v',
+			    'w','x','y','z','0','1','2','3',
+			    '4','5','6','7','8','9','+','/'
+			    );
+
+var reverseBase64Chars = new Array();
+for (var i=0; i < base64Chars.length; i++){
+  reverseBase64Chars[base64Chars[i]] = i;
+}
+
+
+function initPage() {
+  statusbox("Please wait while we load some comments.");
+  var filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
+  if((!filename.length) || (filename.match(/index.html/))) {
+    filename = 'gplv3-draft-1';
+  }
+
+if(window.location.search.length) {
+  //dump('loadxmldoc /rt/NoAuth/xmlresults.html?'+window.location.search.substring(1)+'\n');
+  loadXMLDoc('/rt/NoAuth/xmlresults.html',window.location.search.substring(1));
+}
+ else {
+   //dump('loadXMLDoc /rt/NoAuth/xmlresults.html?Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+   loadXMLDoc('/rt/NoAuth/xmlresults.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=ASC');
+ }
+}
+
+window.onload = initPage();
+
+
+// XpathSel adapted from http://www.quirksmode.org/js/selected.html
 function XpathSel() {
+
+      if (!readCookie('__ac')) {
+	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
+	return;
+      }
+
+
   var textObj = '';
   var start = '';
   var end = '';
   if (window.getSelection)
     {
       textObj = window.getSelection();
-      
     }
   else if (document.getSelection)
     {
@@ -40,7 +90,11 @@ function XpathSel() {
     {
       textObj= document.selection.createRange().text;
     }
-  else return;
+  
+  if(!textObj.length) {
+    document.getElementById('selectsome').setAttribute('class','error');
+    return;
+  }
 
       startNode = textObj.anchorNode.parentNode;
       startid= startNode.id;
@@ -49,96 +103,87 @@ function XpathSel() {
       endnode = textObj.focusNode.parentNode;
       endid = endnode.id;
       end = endnode.nodeName;
-  
 
-    for (var oStr='' ; startNode && startNode.nodeName != '#document'; startNode=startNode.parentNode) { 
-      if (startNode.nodeName!='#text') { 
-	oStr = startNode.nodeName 
-	+ (startNode.id?('[id='+startNode.id+']'):'')
-	+ (oStr?('/'+oStr):'');
+      if (!readCookie('__ac')) {
+	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
       }
-    }
+      else {
+
+	oStr = getDomPath(startNode);
+	
 	myNoteIfy = createNoteDiv();
 	textString = textObj.toString();
-
-	//	highlightWord(startNode,textString,'','','');
-
+	
 	thisNode = document.getElementById(startid);
-
-	if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
-	thisNode.previousSibling.previousSibling.appendChild(myNoteIfy);
-	}
-	else 
-if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
+    
+    if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
+      thisNode.previousSibling.previousSibling.appendChild(myNoteIfy);
+    }
+    else 
+      if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
 	thisNode.previousSibling.appendChild(myNoteIfy);
-	}
-	else {
+      }
+      else {
 	thisNode.appendChild(myNoteIfy);
-	}
-	document.getElementById('DomPath').value = oStr;
-//	document.getElementById('DomPathTxt').innerHTML = 'xpath: <strong>'+oStr+'</strong>';
-	document.getElementById('Selection').value = textString;
-	document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
-//	document.getElementById('NoteText').value = startid;
-	document.getElementById('StartNodeId').value = startid;
-	document.getElementById('EndNodeId').value = endid;
-	document.getElementById('StartNode').value = start;
-	document.getElementById('EndNode').value = end;
-	document.getElementById('NoteUrl').value = location.href;
-	//	document.getElementById('cancel').setAttribute('parent',startid);
+      }
+    document.getElementById('DomPath').value = oStr;
+    document.getElementById('Selection').value = textString;
+    loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
+    //    document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
+    document.getElementById('NoteSubj').value = 'Subject/summary [required]';
+    document.getElementById('StartNodeId').value = startid;
+    document.getElementById('EndNodeId').value = endid;
+    document.getElementById('StartNode').value = start;
+    document.getElementById('EndNode').value = end;
+    document.getElementById('NoteUrl').value = location.href;
+
+    if(startid != endid) {
+      document.getElementById('NoteText').value = 'Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.';      
+      document.getElementById('submitNote').setAttribute('disabled','disabled');
+      document.getElementById('NoteSubj').setAttribute('disabled','disabled');
+      //document.getElementById('NoteText').setAttribute('disabled','disabled');
+    }
+  }
+}
 
 
-
-//    location.href='http://localhost/cgi-bin/stet-submit.pl?url='+escape(location.href)+'&dompath='+oStr+'&selectedtext='+escape(textObj)+'&start='+escape(start)+'&startid='+escape(startid)+'&end='+escape(end)+'&endid='+escape(endid);;
-
+function getDomPath(startNode) {
+  // helped here by http://www.howtocreate.co.uk/emails/FlorianSauvin.html
+  for (var oStr='' ; startNode && startNode.nodeName != '#document'; startNode=startNode.parentNode) { 
+    if (startNode.nodeName!='#text') { 
+      oStr = startNode.nodeName 
+	+ (startNode.id?('[id='+startNode.id+']'):'')
+	+ (oStr?('/'+oStr):'');
+    }
+  }
 }
 
 function submitComment() {
+  
+  if ((document.getElementById('NoteSubj').value == 'Subject/summary [required]') || (document.getElementById('NoteSubj').value == ' ')) {
+    //    document.getElementById('SelectionTxt').innerHTML = '<span class="error">Please enter a brief explanatory subject for this comment</span>';
 
-var form = document.getElementById('noteify');
- var noteText = form.NoteText.value;
- form.NoteText.value = "OK, submitting...";
- form.NoteText.style.background = '#aaa';
- form.style.background = '#aaa';
+    loadHTMLtoDiv('<span class="error">Please enter a brief explanatory subject for this comment</span>','SelectionTxt');
+  }
+  else {
+  
+  var form = document.getElementById('noteify');
+  var noteText = form.NoteText.value;
+  loadHTMLtoDiv('Ok, submitting...','SelectionTxt');
+  form.NoteText.style.background = '#aaa';
+  form.NoteSubj.style.background = '#aaa';
+  document.getElementById('submitNote').setAttribute('disabled','disabled');
+  document.getElementById('cancel').setAttribute('disabled','disabled');
+  form.style.background = '#aaa';
 
-var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+form.Selection.value+'&amp;NoteText='+noteText+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
+  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
+  
+  
 
-var pyparams = encodeURI('custom_note_dom_path='+form.DomPath.value+'&amp;custom_note_selection='+form.Selection.value+'&amp;custom_start_node='+form.StartNode.value+'&amp;custom_end_node='+form.EndNode.value+'&amp;custom_note_start_node_id='+form.StartNodeId.value+'&amp;custom_note_end_node_id='+form.EndNodeId.value+'&amp;custom_note_url='+location.href+'&amp;description='+noteText+'&amp;summary='+form.Selection.value+'&amp;reporter=moglen@columbia.edu&amp;mode=newticket&amp;action=create&amp;status=new&amp;component=component1&amp;severity=normal&amp;submit=create');
-
-
-
-//oStr = document.getElementById('DomPath').value;
-//textObj = document.getElementById('Selection').value;
-//startid = document.getElementById('NoteText').value;
-//noteSelection = document.getElementById('StartNodeId').value;
-//endid = document.getElementById('EndNodeId').value;
-//start = document.getElementById('StartNode').value;
-//end = document.getElementById('EndNode').value;
-
-//http://localhost/cgi-bin/stet-submit.pl?DomPath=&Selection=&NoteText=&StartNode=&EndNode=&StartNodeId=&EndNodeId&NoteUrl=
-
-//var theUrl = 'http://localhost/cgi-bin/stet-submit.pl?NoteUrl='+escape(location.href)+'&DomPath='+oStr+'&Selection='+escape(textObj)+'&StartNode='+escape(start)+'&StartNodeId='+escape(startid)+'&EndNode='+escape(end)+'&EndNodeId='+escape(endid);
-//dump('would open '+theUrl+"\n");
-var theUrl = 'http://localhost/cgi-bin/stet-submit.pl'+'?'+params;
-
-//highlightWord(form.StartNode.value,form.Selection.value,noteText,'');
-loadXMLDoc(theUrl);
-//cancelNote("noteify")
-
-//window.location = 'http://trac.localdomain.org/trac.cgi'+'?'+pyparams;
-}
-
-function toggle(myClass) {
-
-var toggleUs = getElementsByClass(myClass);
-for (var i=0; i < toggleUs.length; i++) {
-//	if (toggleUs[i].style.display == 'inline') {
-		toggleUs[i].style.display='none';
-//		}
-//	else if (toggleUs[i].style.display == 'none') {
-//		toggleUs[i].style.display='inline';
-//		}
-	}
+  var theUrl = 'stet-submit.pl'; 
+  //highlightWord(form.StartNode.value,form.Selection.value,noteText,'');   
+  loadXMLDoc(theUrl,params);
+  }
 }
 
 function getElementsByClass(needle)
@@ -147,105 +192,251 @@ function getElementsByClass(needle)
   var         retvalue = new Array();
   var        i;
   var        j;
-
+  
   for (i = 0, j = 0; i < my_array.length; i++)
-  {
-    var c = " " + my_array[i].className + " ";
-    if (c.indexOf(" " + needle + " ") != -1) {
-      retvalue[j++] = my_array[i];
+    {
+      var c = " " + my_array[i].className + " ";
+      if (c.indexOf(" " + needle + " ") != -1) {
+	retvalue[j++] = my_array[i];
+      }
     }
-  }
   return retvalue;
 }
 
 
 // help from http://www.xml.com/pub/a/2005/02/09/xml-http-request.html
-
 var req;
-
-function loadXMLDoc(url) 
+function loadXMLDoc(url,theData) 
 {
-    // branch for native XMLHttpRequest object
-    if (window.XMLHttpRequest) {
-        req = new XMLHttpRequest();
-        req.onreadystatechange = processReqChange;
-	//	netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
-        req.open("GET", url, true); // true = asynchronous
-        req.send(null);
-    // branch for IE/Windows ActiveX version
-    } else if (window.ActiveXObject) {
-        req = new ActiveXObject('Microsoft.XMLHTTP');
-        if (req) {
-            req.onreadystatechange = processReqChange;
-            req.open("GET", url, true);
-            req.send();
-        }
+  dump('loading '+url+'?'+theData+'\n');
+  // branch for native XMLHttpRequest object
+  if (window.XMLHttpRequest) {
+    req = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    req = new ActiveXObject('Microsoft.XMLHTTP');
+  }
+  req.onreadystatechange = processReqChange;
+  
+  req.open("POST", url, true);
+  //  req.open("GET", url, false);
+  req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+  req.setRequestHeader('X-Referer',document.location);
+  //  theData = encodeURI(theData);
+  req.send(theData);
+}
+
+function loadHTMLtoDiv(text,targetid,caller) {
+  // this won't work in Safari so we need a Safari case:
+  if(targetid) {
+  dump('targetid is '+targetid);
+  if(caller) { dump(', caller is '+caller);}
+  dump('\n');
+  if (myElement = document.getElementById(targetid)) {
+	//	dump(e);
+	try {	
+	  myElement.innerHTML = text;
+	}
+	catch(e) {
+	  var newDiv = document.createElement('span');
+	  newDiv.innerHTML = text;
+	  myElement.appendChild(newDiv);
+	}
+  }
+  }
+}
+
+// thanks to http://www.mercurytide.com/knowledge/white-papers/issues-working-with-ajax
+function getXMLNodeSerialisation(xmlNode) {
+  var text = false;
+  try {
+    // Gecko-based browsers, Safari, Opera.
+    var serializer = new XMLSerializer();
+    text = serializer.serializeToString(xmlNode);
+  }
+  catch (e) {
+    try {
+      // Internet Explorer.
+      text = xmlNode.xml;
     }
+    catch (e) {}
+  }
+  return text;
+}
+
+function loadURLtoDiv(url,args,targetid) {
+  // branch for native XMLHttpRequest object
+  if (window.XMLHttpRequest) {
+    req = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    req = new ActiveXObject('Microsoft.XMLHTTP');
+  }
+  req.open('GET',url,false);
+  req.send(args);
+  
+  loadHTMLtoDiv(req.responseText,targetid,"loadurltodiv");
+  //  document.getElementById(targetid).innerHTML = req.responseText;
+
+
 }
 
 function processReqChange() 
 {
-    // only if req shows "complete"
-    if (req.readyState == 4) {
-        // only if "OK"
-        if (req.status == 200) {
-	  cancelNote("noteify");
-//	dump(req.responseText);
-	response  = req.responseXML.documentElement;
-	//foo_arr = response.getElementsByTagName("annotation");
-//	dump(req.responseXML+"\n");
-//	dump(foo_arr + ' ' + foo_arr.length + ' ' + foo_arr.item(1)+"\n");
 
-	selections_arr = response.getElementsByTagName("s");
-//	dump(selections_arr + ' ' + selections_arr.length + ' ' + selections_arr.item(0)+"\n");
-	startnodes_arr = response.getElementsByTagName("i");
-	annotations_arr = response.getElementsByTagName("n");
-	rtids_arr = response.getElementsByTagName("id");
-	for (i = 0; i < selections_arr.length; i++) {
-//		dump("n "+i+"="+annotations_arr[i].firstChild.innerHTML+"\n");
-		startNode = startnodes_arr[i].firstChild.data;
-        	noteSelection = selections_arr[i].firstChild.data;
-		annoteText = annotations_arr[i];
-//		if (annotations_arr[i].firstChild.nextSibling) {
-//		annoteText += annotations_arr[i].firstChild.toString();
-//		}
-		
-		rtid = rtids_arr[i] ? rtids_arr[i].firstChild.data : "";
+  // only if req shows "complete"
+  if (req.readyState == 4) {
+    // only if "OK"
+    if (req.status == 200) {
+/* <jag> [Exception... "Component returned failure code: 0x80040111
+      (NS_ERROR_NOT_AVAILABLE) [nsIXMLHttpRequest.status]"  nsresult:
+      "0x80040111 (NS_ERROR_NOT_AVAILABLE)"  location: "JS frame ::
+      http://gplv3.fsf.org/stet/stet.js :: processReqChange :: line 189"
+      data: no]
+ */
+      cancelNote("noteify");
+      //dump(req.responseText);
+      response  = req.responseXML.documentElement;
+      dump("pre processAnnot\n");
+      var resp_arrN;
+      var resp_arrA;
+      var resp_arrF;
+      cs = response.getElementsByTagName("cs");
+      statusbox(getXMLNodeSerialisation(cs[0]));
 
-		//dump("highlighting "+startNode+' '+noteSelection+' '+annoteText+"\n"); // debug
-		highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid);
+      resp_arrN = response.getElementsByTagName("annotation");
+      if(resp_arrN.length) {
+	dump("processAnnot\n")
+	  processAnnotation(response);
+      }
+      
+      else if (resp_arrF = response.getElementsByTagName("form")) {
+	dump("pre processNQ\n")
+	  if(resp_arrF.length) {
+	    dump("processNQ\n")
+	      processNewQuery(response);
+	  }
+      }
+      else if (resp_arrA = response.getElementsByTagName("agreement")) {
+	//	dump("pre processAgree\n"+resp_arr[0].firstChild.data+"\n");
 
-	//        eval(method + '(\'\', result)');
-	}
-	unOverlap("annotation",5);
-	
-
-    } else {
-      //        dump("There was a problem retrieving the XML data:\n" + req.statusText+"\n"); //debug
-        }
+	if(resp_arrA.length) {
+       dump("processAgree\n");
+        processAgreement(response);
+      }
+	   }
+      else {
+	statusbox("There was a problem retrieving the XML data:\n" + req.statusText+"\n"); //debug
+      }
     }
-    //	else { dump("readyState was "+req.readyState+"\n"); } // debug
-
+  }
+  //    else { dump("readyState was "+req.readyState+"\n"); } // debug
 }
-
-
-
-function postNote(xpath,selection,note) {
-
-
-
-
-}
-
+  
 function onNoteifyMouseover() {
-//this.onblur = onNoteifyBlur;
-
+  //this.onblur = onNoteifyBlur;
+  
 }
 
-function onNoteifyBlur() {
-	noteNode = document.getElementById('noteify');
-//	dump(noteNode);
+function processAnnotation(response) {
+  //	document.getElementById("statusbox").innerHTML = getXMLNodeSerialisation(cs[0]);
+  // dump("got an annotation\n");
+  //  dump(req.responseXML+"\n");
+  //	responseStringSer = getXMLNodeSerialisation(req.responseXML);
+  // dump(responseStringSer);
+  // dump(resp_arr + ' ' + resp_arr.length + ' ' + resp_arr.item(1)+"\n");
+  
+  selections_arr = response.getElementsByTagName("s");
+  // dump(selections_arr + ' ' + selections_arr.length + ' ' + selections_arr.item(0)+"\n");
+  startnodes_arr = response.getElementsByTagName("i");
+  annotations_arr = response.getElementsByTagName("n");
+  rtids_arr = response.getElementsByTagName("id");
+  users_arr = response.getElementsByTagName("u");
+  uagr_arr = response.getElementsByTagName("ua");
+  agrtot_arr = response.getElementsByTagName("at");
+	for (prI = 0; prI < selections_arr.length; prI++) {
+	  rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
+	  tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
+	  tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
 
+	  ticketObj[rtid] = new Object;
+
+	  ticketObj[rtid].link = rtid ? '<a href="/rt/NoAuth/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+	  agreechild = uagr_arr[prI].firstChild.data
+	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]);
+	  if ((agreechild == "agree") || (agreechild == "unagree")) {
+	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree(\''+rtid+'\',\''+agreechild+'\')">'+agreechild+'</a> | ';
+	  }
+	  else {
+	    ticketObj[rtid].link += ' '+agreestr+' | ';
+	  }
+	  if (agrtot_arr[prI].firstChild.data > 0) {
+	    ticketObj[rtid].link += ' ['+agrtot_arr[prI].firstChild.data+' agree]';
+	  }
+	  ticketObj[rtid].full = tooltipString;
+	  ticketObj[rtid].excerpt = tooltipSubString;
+	  ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	  ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
+	  if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
+	    ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	  }
+	  else {
+	    ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+	  }
+	  ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
+	  startNode = startnodes_arr[prI].firstChild.data;
+	  startNode = startNode.replace(/note\.[0-9]+\./,'');
+	  noteSelection = selections_arr[prI].firstChild.data;
+	  //		annoteText = users_arr[prI].firstChild.data+": "+ annotations_arr[prI].firstChild.data;
+	  annoteText = annotations_arr[prI];
+	  //		if (annotations_arr[prI].firstChild.nextSibling) {
+	  //		annoteText += annotations_arr[prI].firstChild.toString();
+	  //		}
+	  
+	  rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
+	  user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	  //		dump(users_arr[prI].firstChild.data);
+	  dump("\nhighlighting "+startNode+' '+noteSelection+' '+annoteText+' rt'+rtid+'\n');
+	  highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
+
+	  // FIXME: couple bugs left in intense_annot, 
+	  // new comments are not getting highlighted upon submission
+	  // and I want to sort out the rtidsBySn thing, so I can
+	  // annote one paragraph at a time.
+	  // also other distressing inconsistencies make the wack-ass
+	  // highlightWord() a better choice for the moment.
+	  
+		  // fixme: currently crashes browser :)
+	  
+	  //intense_annot(document.getElementById(startNode),noteSelection,rtid);
+
+	}
+	//	dump('rtidsBySn for gpl3.preamble.p2.s1 are: '+ticketObj.rtidsBySn['gpl3.preamble.p2.s1']+'\n');
+	unOverlap("annotation",5);
+}
+
+function processAgreement(response) {
+// dump("got an agreement\n");
+	myId = response.getElementsByTagName("id")[0].firstChild.data;
+	myOpn = response.getElementsByTagName("b")[0].firstChild.data;
+// dump('id is '+rtids_arr[0].firstChild.data);
+	myLink = document.getElementById('agree'+myId);
+	myOpn == "agree" ? opOpn = "unagree" : opOpn = "agree";
+	loadHTMLtoDiv(opOpn,'agree'+myId,"processagreement");
+	//	myLink.innerHTML = opOpn;
+
+	myLink.href = 'javascript:iAgree(\''+rtid+'\',\''+opOpn+'\')';
+      }
+
+
+function processNewQuery(response) {
+  dump("entering pNQ\n");
+  dump(getXMLNodeSerialisation(response));
+  statusbox(getXMLNodeSerialisation(response));
+}
+  
+function onNoteifyBlur() {
+//	noteNode = document.getElementById('noteify');
+//	dump(noteNode);
+	submitComment();
 //  window.location = 'http://localhost/cgi-bin/stet-submit.pl?foo=bar';
 }
 
@@ -271,11 +462,15 @@ function cancelNote(div) {
 
 function createNoteDiv() {
 
+  // this would be a lot more readable and maintainable if it were
+  // just a string.
+
 var noteifyDiv = document.createElement('form');
-noteifyDiv.setAttribute('action','http://localhost/cgi-bin/stet-submit.pl');
+noteifyDiv.setAttribute('action','stet-submit.pl');
 noteifyDiv.setAttribute('class','noteify');
 noteifyDiv.setAttribute('id','noteify');
 noteifyDiv.setAttribute('name','noteify');
+noteifyDiv.setAttribute('onblur','onNoteifyBlur()');
 // noteifyDiv.style.z-index = '100';
 
 var DomPathTxt = document.createElement('span');
@@ -286,6 +481,7 @@ var DomPath = document.createElement('input');
 DomPath.setAttribute('id','DomPath');
 DomPath.setAttribute('name','DomPath');
 DomPath.setAttribute('type','hidden');
+DomPath.setAttribute('class','addnote');
 
 var SelectionTxt = document.createElement('span');
 SelectionTxt.setAttribute('id','SelectionTxt');
@@ -296,11 +492,21 @@ Selection.setAttribute('id','Selection');
 Selection.setAttribute('name','Selection');
 Selection.setAttribute('type','hidden');
 
+var NoteSubj = document.createElement('input');
+NoteSubj.setAttribute('id','NoteSubj');
+NoteSubj.setAttribute('name','NoteSubj');
+NoteSubj.setAttribute('type','text');
+NoteSubj.setAttribute('size','40');
+NoteSubj.setAttribute('onfocus','if(this.value=="Subject/summary [required]") {this.value="";}');
+NoteSubj.setAttribute('onblur','if(this.value==""){this.value="Subject/summary [required]";}');
+NoteSubj.setAttribute('class','addnote');
+
 var NoteText = document.createElement('textarea');
 NoteText.setAttribute('id','NoteText');
 NoteText.setAttribute('name','NoteText');
 NoteText.setAttribute('rows','10');
-NoteText.setAttribute('cols','30');
+NoteText.setAttribute('cols','40');
+NoteText.setAttribute('class','addnote');
 
 var StartNode = document.createElement('input');
 StartNode.setAttribute('id','StartNode');
@@ -339,22 +545,32 @@ cancel.setAttribute('name','cancel');
 cancel.setAttribute('value','cancel');
 cancel.setAttribute('onClick','cancelNote("noteify")');
 cancel.setAttribute('class','annoteButton');
+cancel.setAttribute('class','addnote');
 
 var theBR = document.createElement('br');
+var theBR1 = document.createElement('br');
+var theBR2 = document.createElement('br');
+var theBR3 = document.createElement('br');
+var theBR4 = document.createElement('br');
 
 var submit = document.createElement('input');
 submit.setAttribute('type','button');
+submit.setAttribute('id','submitNote');
 submit.setAttribute('value','submit');
 //submit.onclick = 'dump("clicked submit")';
 submit.setAttribute('onClick','submitComment()');
 submit.setAttribute('class','annoteButton');
+submit.setAttribute('class','addnote');
 
 noteifyDiv.appendChild(DomPathTxt);
 noteifyDiv.appendChild(DomPath);
-noteifyDiv.appendChild(theBR);
+//noteifyDiv.appendChild(theBR);
 noteifyDiv.appendChild(SelectionTxt);
+noteifyDiv.appendChild(theBR1);
 noteifyDiv.appendChild(Selection);
-noteifyDiv.appendChild(theBR);
+// noteifyDiv.appendChild(theBR2);
+noteifyDiv.appendChild(NoteSubj);
+noteifyDiv.appendChild(theBR3);
 noteifyDiv.appendChild(NoteText);
 noteifyDiv.appendChild(StartNode);
 noteifyDiv.appendChild(EndNode);
@@ -362,7 +578,7 @@ noteifyDiv.appendChild(StartNodeId);
 noteifyDiv.appendChild(EndNodeId);
 noteifyDiv.appendChild(NoteUrl);
 noteifyDiv.appendChild(DocRevision);
-noteifyDiv.appendChild(theBR);
+noteifyDiv.appendChild(theBR4);
 noteifyDiv.appendChild(submit);
 noteifyDiv.appendChild(cancel);
 
@@ -370,53 +586,287 @@ return noteifyDiv;
 
 }
 
+function intense_annot(root,selection,rtid) {
+var selecObj = new Array;
+var rootObj = new Array;
+ dump('selection is '+selection+'\n');
+ dump('comment is '+ticketObj[rtid].excerpt+'\n');
+ var selections = new Array(selection);
+// couple lines of html-ignoring help from
+// http://www.notestips.com/80256B3A007F2692/1/NAMO5RNV2S 
+// by Mike Golding, 9/24/2003
+//Extract HTML Tags
+ regexp=/<[^<>]*>/ig;
+ // dump('node text is '+root.innerHTML+'\n');
+ rootHTMLArray = root.innerHTML.match(regexp);
+ //Replace HTML tags
+ // may not work in Safari
+ rootStrippedHTML = root.innerHTML.replace(regexp,"$!$");
+
+root_words = rootStrippedHTML.split(/\s+/);
+
+// there is one rootObj, each word in the root sentence a sub-obj
+for (i=0; i<root_words.length; i++) {
+    rootObj[i] = new Object;
+    rootObj[i].word = root_words[i];
+    rootObj[i].intensity = 0;
+    rootObj[i].annotations = new Array;
+}
+
+// each selecObj[n] refers to a single selection, and then has a .words[] array
+// that holds each word in the selection.
+for (i=0; i<selections.length; i++) {
+   selecObj[i] = new Object;
+   selecObj[i].selection = selections[i];
+   selecObj[i].words = new Array(selections[i].split(/\s+/));
+
+   // we're getting the comment from the ticketObj so don't bother here
+//   selecObj[i].comment = comments[i];
+//   selecObj[i].comment = 'this would be a comment'; // test foo
+
+   // this initializes a handy "matchindex" attribute that tells you 
+   // which array index of rootObj has the first char of the match
+   // (so you can skip the irrelevant indices that precede it)
+   intense_doRoughMatch(selections,selecObj,root_words);
+}
 
 
-function highlightWord(node,word,tooltip,rtid,altClass) {
+ intense_incrWords(selecObj,rootObj);
+ 
+ returnstring = intense_genReturn(rootObj);
+
+ loadHTMLtoDiv(returnstring,root.id);
+ //  root.innerHTML = returnstring; 
+// return returnstring;
+
+}
+
+
+function intense_doRoughMatch(selections,selecObj,root_words) {   
+   // ok, so it's not perfect.  something  weird about the $!$ and stuff.
+
+  var rer = deParen(selections[i]);
+  dump('rer is '+rer+'\n');
+  
+  foo = rer.replace(/ /g,'[\\s\\$\\!]+');
+  // foo = rer.replace(/\s+/g,"ACKACK");
+  //dump('foo is '+foo+'\n');
+  re = new RegExp(foo);
+  //dump('re is '+re+', rootBlah is '+rootStrippedHTML+'\n');
+  roughMatch = rootStrippedHTML.match(re);
+  if (roughMatch) {
+    dump('roughmatched at '+roughMatch.index+'\n');
+    selecObj[i].matchindex = roughMatch.index;
+    for (n=0,sum=0; sum<roughMatch.index&&n<root_words.length; n++) {
+      if (root_words[n]) {
+	dump('word "'+root_words[n]+'" length: '+root_words[n].length+'\n');
+	sum += root_words[n].length + 1;
+      }
+    }
+    n == 0 ? selecObj[i].arrayIndex = 0 : selecObj[i].arrayIndex = n-1;
+    dump('looks like '+n+' would get us to '+sum+' aka '+roughMatch.index+'\n');
+  }
+}
+
+
+function intense_incrWords(selecObj,rootObj) {
+
+// try: first match the whole selectstring against the whole
+// rootstring, and find the index/offset of the first character of the
+// selectstring in the rootstring.  then split the rootstring... but
+// how do you know which array index corresponds to the offset?  do
+// selecObj[i].length until you get to the offset?
+ 
+// for each selection...
+ for (j=0; j<selecObj.length; j++) { 
+   // for each word in the selection...
+   dump('starting j loop iteration '+j+'\n');
+   for (k=0; k<selecObj[j].words.length; k++) {
+     dump('starting k loop iteration '+k+'\n');
+     // start at the object's predetermined arrayindex, and look only until you get to
+     // the arrayindex + the number of words in the selection...
+     dump('should start at '+selecObj[j].arrayIndex+' looking across '+selecObj[j].words[k].length+' words in a '+rootObj.length+'-word sentence\n');
+     skip = 0;
+     // if we do i<...arrayIndex-1, gpl3 comments work
+     // if we do i<...arrayIndex, lincoln-thanksgiving works
+     // but they are mutually exclusive!
+     for (i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex-1; i++) {
+       dump('starting i loop iteration '+i+'\n');
+       dump('limit is '+selecObj[j].words[k].length+' plus '+selecObj[j].arrayIndex+'\n');
+   // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
+   // my desired result
+   
+       //   for (m=skip; ((skip<selecObj[j].words[k].length)); m++) {
+       m=skip;
+     matched = '';
+     dump('word is '+selecObj[j].words[k][m]+' '+j+' '+k+' '+m+' '+skip+'\n');
+     //         re = new RegExp('\\b'+selecObj[j].words[k][m]+'\\b','m');
+     re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
+     dump('i here is '+i+'\n');
+     thisMatch = rootObj[i].word.match(re);
+     if (thisMatch) {
+       dump('matched '+re+': '+thisMatch.index+'\n');
+       rootObj[i].intensity++;
+       matched = 'true';
+       skip++;
+       //       m = selecObj[j].words[k].length+skip;
+     }
+     if (matched && ((m+1) == selecObj[j].words[k].length-1)) {
+       dump('pushing an annotation\n');
+       var pushed = 1;
+       rootObj[i].annotations.push('foo');
+     }
+     //   }
+     }
+     // this is a hack: I need to find out why some loops are ending early
+     // (sort out the .length vs. maxindex problem)
+     // argh this, too, breaks gpl3 but not lincoln!
+     //if (!pushed) {
+     //rootObj[i].annotations.push('foo');
+     //}
+   }
+ }
+ }
+
+
+function intense_genReturn(rootObj) { 
+ returnstring = '';
+
+for (i=0; i<rootObj.length; i++) {
+  if(rootObj[i].intensity > 0) {
+//    intensereturn += '<span style="font-size: 1'+rootObj[i].intensity+'0%">';
+    intensereturn += '<span class="highlight">';
+  }
+  intensereturn += ' '+rootObj[i].word+' ';
+  if (rootObj[i].annotations.length) {
+    for (j=0; j<rootObj[i].annotations.length; j++) {
+
+      intensereturn += '<span class="annotation" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')">\
+  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
+  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt +'\
+  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
+</span>';
+
+
+
+   }
+  }
+  if(rootObj[i].intensity > 0) {
+    intensereturn += '</span>';
+  }
+
+}
+
+// thanks again, Mike Golding
+ for(i=0;intensereturn.indexOf("$!$") > -1;i++){
+   intensereturn = intensereturn.replace("$!$", rootHTMLArray[i]);
+ }
+ return intensereturn;
+ }
+ 
+function highlightWord(node,word,tooltip,rtid,user) {
 
 /* this code is basically no longer descended from: */
-/*                                                 */
-/* http://www.kryogenix.org/code/browser/searchhi/ */
-/*                             */
-/* but it started out that way ... */
+/*                                                  */
+/* http://www.kryogenix.org/code/browser/searchhi/  */
+/*                                                  */
+/* but it started out that way ...                  */
+
+// it's also too rickety and will be replaced by intense_annot as soon
+// as that is a little less buggy...
 
   var haveHighlighted = false;
-  //dump("doing highlightword of "+word+"\n");
-  if (node.hasChildNodes) {
+  //  node = ticketObj[rtid].startnode;
+  //  tooltip = ticketObj[rtid].excerpt;
+ dump("doing highlightword of "+word+"\n");
+  if ((node) && (node.hasChildNodes)) {
+
     var iCN;
-    //dump("this node has "+node.childNodes.length+" childNodes\n");
-    for (iCN=0;iCN<node.childNodes.length;iCN++) {
-      //dump("going in to "+node.childNodes[iCN].nodeName+"\nfor "+word+" iCN="+iCN+"\n");
-      highlightWord(node.childNodes[iCN],word,tooltip,rtid);
-    }
+ dump("this node has "+node.childNodes.length+" childNodes\n");
+ highlightWord(node.firstChild,word,tooltip,rtid,user);
+ //    for (iCN=0;iCN<node.childNodes.length;iCN++) {
+ //dump("going in to "+node.childNodes[iCN].nodeName+"\nfor "+word+" iCN="+iCN+"\n");
+ //     highlightWord(node.childNodes[iCN],word,tooltip,rtid,user);
+ //   }
+
   }
-  if (node.nodeType == 3) { // text node
-//    dump("node is "+node.parentNode.id+"\n");
+  if ((node) && (node.nodeType == 3)) { // text node
+// dump("node is "+node.parentNode.id+"\n");
+//    dump("node.parentNode.parentNode.id is "+node.parentNode.parentNode.id+"\n");
     if (!haveHighlighted) {
-      //dump("haven't highlighted\n");
-    paragraph = node.parentNode.parentNode;
-    paragraphString = (new XMLSerializer).serializeToString(paragraph);
+// dump("haven't highlighted, at ln 375\n");
+
+    if ((node.parentNode) && (node.parentNode.parentNode) && (paragraph = node.parentNode.parentNode)) {
+    paragraphString = getXMLNodeSerialisation(paragraph);
     paragraphString.replace(/\s+/g,' ');
     tempNodeVal = paragraphString;
     tempWordVal = word;
     //tempWordVal = tempWordVal.replace(/\W+/g,'[\\W\\s]+(<[^>]+>)?');
+
     tempWordVal = tempWordVal.replace(/\W+/g,'[^<]*(<[^>]+>)*');
 
     var re = new RegExp(tempWordVal, 'mi');
-	//    var re = new RegExp("software", 'mig');
-    //dump("re is "+re+"\n");
-    tooltipString = (new XMLSerializer).serializeToString(tooltip);
-    var ticketLink = rtid ? '<a href="/rt/Ticket/Display.html?id='+rtid+'">[+]</a>' : '[reload for ticket link]';
-    
-    paragraphString = paragraphString.replace(re,'<span class="highlight" id="note.'+rtid+'.'+node.parentNode.id+'">$&<span class="annotation" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')">'+tooltipString+" "+ticketLink+' </span></span>');
-    //     dump("replaced on "+$&+"\n");
-    //dump("pString is now "+paragraphString+"\n");
-    node.parentNode.parentNode.innerHTML = paragraphString;
+    //    var re = new RegExp("software", 'mig');
+// dump("re is "+re+"\n");
+
+
+
+
+paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.parentNode.id+'">$&\
+ <span class="annotation '+rtid+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
+  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
+  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt+'\
+  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
+ </span>\
+</span>');
+   //      dump("replaced on "+$&+"\n");
+// dump("pString is now "+paragraphString+"\n");
+ loadHTMLtoDiv(paragraphString,node.parentNode.parentNode.id,"highlightword 742"); 
+
+ //    node.parentNode.parentNode.innerHTML = paragraphString;
     
     //    haveHighlighted=true;
     }
   }
-  // dump(getCookie("__ac"));
+}
+}
+
+function notemouseover(rtid) {
+  var noteArr = getElementsByClass(rtid);
+  for (i = 0; i<noteArr.length; i++) {
+    noteArr[i].style.background="#dee7ec";
+  }
+}
+function notemouseout(rtid) {
+  var noteArr = getElementsByClass(rtid);
+  for (i = 0; i<noteArr.length; i++) {
+    noteArr[i].style.background="#f0ecb3";
+  }
+}
+
+
+function showFull (rtid) {
+  //dump('showing full for '+rtid+' since you asked\n');
+  myCollapsed = document.getElementById('rt'+rtid+'txt');
+  loadHTMLtoDiv(ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>',myCollapsed.id);
+  //  myCollapsed.innerHTML = ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>';
+  myCollapsed.parentNode.setAttribute('onclick','');
+  unOverlap("annotation",5);
+}
+
+function showExcerpt (rtid) {
+  //dump('showing excerpt for '+rtid+' since you asked\n');
+  myFull = document.getElementById('rt'+rtid+'txt');
+  loadHTMLtoDiv(ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>',myFull.id);
+  //  myFull.innerHTML = ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>';
+  myFull.parentNode.setAttribute('onclick','showFull(\''+rtid+'\')');
+  unOverlap("annotation",5);
+}
+
+function iAgree (rtid,opn) {
+// dump('agreeing with '+rtid+'\n');
+loadXMLDoc('agree.pl','rtid='+rtid+'&amp;opn='+opn);
+    
 }
 
 function unOverlap(cls,gapDesired) {
@@ -440,6 +890,41 @@ items = getElementsByClass(cls);
  }
 }
 
+function last(obj) {
+  return(this[obj][this.msg.length-1]);
+}
+
+function statusbox(text) {
+  status.msg.push(text);
+  //  document.getElementById("statustext").innerHTML = text+readCookie('__ac');
+  loadHTMLtoDiv(text,'statustext');
+  if((!name) && (readCookie('__ac'))) {
+	namepass = decodeBase64(readCookie('__ac'));
+	var name = namepass.substr(0,namepass.indexOf(':'));
+	//        document.getElementById("login").innerHTML = 'you are logged in as '+name+'. <a href="http://gplv3.fsf.org:8800/launch/logout">logout</a>';
+	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org:8800/launch/logout">logout</a>','login');
+  }
+  else {
+    //    document.getElementById("login").innerHTML = 'You need to <a href=\"http://gplv3.fsf.org:8800/launch/login_form?came_from='+location.pathname+'\">log in</a> to make comments.';
+    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org:8800/launch/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
+  }
+}
+
+function deParen(str) {
+  str = str.replace(/\(/g,'\\(');
+  str = str.replace(/\)/g,'\\)');
+  return str;
+}
+
+function newQuery() {
+  loadURLtoDiv('/rt/NoAuth/changeshown.html','NewQuery=1&came_from='+document.location,'statustext');
+//	document.getElementById("querydiv").style.display = "block";
+
+}
+
+function cancelNewQuery() {
+
+}
 
 //* dragging behavior courtesy of brainjar.com.  License is GPL2+
 
@@ -665,26 +1150,122 @@ function eraseIt(name)
 // end of brainjar code
 
 
-// http://www.webreference.com/js/column8/functions.html
 
-function getCookie(name) {
-  var dc = document.cookie;
-  var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
-  if (begin == -1) {
-    begin = dc.indexOf(prefix);
-    if (begin != 0) return null;
-  } else
-    begin += 2;
-  var end = document.cookie.indexOf(";", begin);
-  if (end == -1)
-    end = dc.length;
-  return unescape(dc.substring(begin + prefix.length, end));
+// http://ostermiller.org/calc/encode.html
+// Copyright Stephen Ostermiller 2003-2006
+// http://ostermiller.org/contact.pl?regarding=JavaScript+Encoding
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of the
+// License, or (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+var END_OF_INPUT = -1;
+
+var base64Str;
+var base64Count;
+function setBase64Str(str){
+  base64Str = str;
+  base64Count = 0;
+}
+function readBase64(){    
+  if (!base64Str) return END_OF_INPUT;
+  if (base64Count >= base64Str.length) return END_OF_INPUT;
+  var c = base64Str.charCodeAt(base64Count) & 0xff;
+  base64Count++;
+  return c;
+}
+function encodeBase64(str){
+  setBase64Str(str);
+  var result = '';
+  var inBuffer = new Array(3);
+  var lineCount = 0;
+  var done = false;
+  while (!done && (inBuffer[0] = readBase64()) != END_OF_INPUT){
+    inBuffer[1] = readBase64();
+    inBuffer[2] = readBase64();
+    result += (base64Chars[ inBuffer[0] >> 2 ]);
+    if (inBuffer[1] != END_OF_INPUT){
+      result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30) | (inBuffer[1] >> 4) ]);
+      if (inBuffer[2] != END_OF_INPUT){
+	result += (base64Chars [((inBuffer[1] << 2) & 0x3c) | (inBuffer[2] >> 6) ]);
+	result += (base64Chars [inBuffer[2] & 0x3F]);
+      } else {
+	result += (base64Chars [((inBuffer[1] << 2) & 0x3c)]);
+	result += ('=');
+	done = true;
+      }
+    } else {
+      result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30)]);
+      result += ('=');
+      result += ('=');
+      done = true;
+    }
+    lineCount += 4;
+    if (lineCount >= 76){
+      result += ('\n');
+      lineCount = 0;
+    }
+  }
+  return result;
+}
+function readReverseBase64(){   
+  if (!base64Str) return END_OF_INPUT;
+  while (true){      
+    if (base64Count >= base64Str.length) return END_OF_INPUT;
+    var nextCharacter = base64Str.charAt(base64Count);
+    base64Count++;
+    if (reverseBase64Chars[nextCharacter]){
+      return reverseBase64Chars[nextCharacter];
+    }
+    if (nextCharacter == 'A') return 0;
+  }
+  return END_OF_INPUT;
 }
 
-function initPage() {
-  loadXMLDoc('http://localhost/cgi-bin/rt-test.pl?NoteUrl='+location.href);
+function ntos(n){
+  n=n.toString(16);
+  if (n.length == 1) n="0"+n;
+  n="%"+n;
+  return unescape(n);
 }
 
+function decodeBase64(str){
+  setBase64Str(str);
+  var result = "";
+  var inBuffer = new Array(4);
+  var done = false;
+  while (!done && (inBuffer[0] = readReverseBase64()) != END_OF_INPUT
+	 && (inBuffer[1] = readReverseBase64()) != END_OF_INPUT){
+    inBuffer[2] = readReverseBase64();
+    inBuffer[3] = readReverseBase64();
+    result += ntos((((inBuffer[0] << 2) & 0xff)| inBuffer[1] >> 4));
+    if (inBuffer[2] != END_OF_INPUT){
+      result +=  ntos((((inBuffer[1] << 4) & 0xff)| inBuffer[2] >> 2));
+      if (inBuffer[3] != END_OF_INPUT){
+	result +=  ntos((((inBuffer[2] << 6)  & 0xff) | inBuffer[3]));
+      } else {
+	done = true;
+      }
+    } else {
+      done = true;
+    }
+  }
+  return result;
+}
 
-window.onload = initPage();
+// from rt:
+function hideshow(num) {
+    idstring = "element-" + num;
+    chunk = document.getElementById(idstring);
+    if ( chunk.style.display == "none")  {
+    chunk.style.display = chunk.style.tag;
+    } else {
+        chunk.style.tag = chunk.style.display;
+        chunk.style.display = "none";
+    }
+}   

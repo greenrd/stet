@@ -42,61 +42,190 @@ background: #F0ECB3;
 
  }
 
+
+#topbar {
+padding-left: 2%;
+padding-right: 2%;
+padding: 3px 2% 3px 2%;
+/* background: #CCCCCC; */
+/* background: #dee7ec; */
+background: #FFFFFF;
+/* position: fixed; */
+width: 96%;
+font-size: smaller;
+/* left: 0; */
+/* top: 0; */
+z-index: 100;
+}
+
+#topbar {
+background-color: #dee7ec;
+}
+
+#portal-globalnav {
+    background-color: #FFFFFF;
+    padding: 0em 0em 0em 2em;
+    white-space: nowrap;
+    list-style: none;
+    margin: 0;
+    height: auto;
+    line-height: normal;
+}
+#portal-globalnav li {
+    display: inline;
+}
+
+
+#portal-globalnav li a {
+    /* The normal, unselected tabs. They are all links */
+    background-color: #FFFFFF;
+    border-color: #8cacbb;
+    border-width: 1px;
+    border-style: solid solid none solid;
+    color: #436976;
+    height: auto;
+    margin-right: 0.5em;
+    padding: 0em 1.25em;
+    text-decoration: none;
+    text-transform: lowercase;
+}
+
+#portal-globalnav li.selected a {
+    /* The selected tab. There's only one of this */
+    background-color: #dee7ec;
+    border: 1px solid #8cacbb;
+    border-bottom: #dee7ec 1px solid;
+    color: #436976;
+}
+
+#portal-globalnav li a:hover {
+    background-color: #dee7ec;
+    border-color: #8cacbb;
+    border-bottom-color: #dee7ec;
+    color: #436976;
+}
+
+
+/* help here from Eric Bednarz and his 
+http://tagsoup.com/-dev/null-/css/fixed/legacy/fixed4all.css
+*/
+
+div#topbar
+  {
+background: #dee7ec;
+/*  background: transparent; */
+/* background: #FFFFFF; */
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 96%;
+  }
+div#topbar p
+  {
+background: #dee7ec;
+/*   background: transparent; */
+  margin: 0;
+  padding: 1em;
+  border: 1px solid #000;
+  color: #000;
+  background: #eee;
+  }
+@media screen
+  {
+  div#topbar
+    {
+    position: fixed;
+    }
+  /* Don't do this at home */
+  * html
+    {
+    overflow-y: hidden;
+    }
+  * html body
+    {
+    overflow-y: auto;
+    height: 100%;
+    padding: 0 1em 0 14em;
+    font-size: 100%;
+    }
+  * html div#topbar
+    {
+    position: absolute;  
+    }
+  /* All done. */
+  }
+
+
+.statustext {
+background: #dee7ec;
+/*  background: transparent; */
+float: left;
+}
+.login {
+background: #dee7ec;
+/*  background: transparent; */
+float: right;
+}
+
 .noteLive { 
 background: #ff99ff;
  }
 
 #maintext { 
 
-float:left
+float:left;
 
-        position: absolute;
+/*        position: absolute; */
 	margin-left: 3em;
-        margin-top: 1em;
+        margin-top: 2em;
         float: left;
-//        left: 0;
-//        top: 0;
-//	margin-right: 33%;
-//        border: 1px dotted #666;
+/*         left: 0; */
+/*         top: 0; */
+/* 	margin-right: 33%; */
+/*         border: 1px dotted #666; */
         width: 50%;
  }
 
 
 .noteify { 
-//        display: none;
-//	float: left;
-//	left: 80%;
-//        top: 0;
-           width: 40%;
+/*         display: none; */
+/* 	float: left; */
+/* 	left: 80%; */
+/*         top: 0; */
+           width: 30%;
 font-size: smaller;
 left: 55%;
 float: right;
 position: absolute;
-//margin-left: 68%;
-//        border: 1px dotted #666;
-z-index: 100;
+/* margin-left: 68%; */
+/*         border: 1px dotted #666; */
+z-index: 90;
 background: #f0ecb3;
  }
 
 .annotation { 
 font-size: smaller;
 position: absolute;
-//position: relative;
-//float: right;
-//margin-left: 100%;
+/* position: relative; */
+/* float: right; */
+/* margin-left: 100%; */
 left: 55%;
-//right: -%;
+/* right: -%; */
 width: 40%;
 border: 1px dotted #666;
 background: #f0ecb3;
-z-index: 10;
-//clear: right;
+/* z-index: 10; */
+/* clear: right; */
  }
 
 
 textarea { 
 background-color: #f0ecb3;
  }
+input.addnote { 
+background-color: #f0ecb3;
+ }
+
 
 p { 
  clear:right;
@@ -104,4 +233,38 @@ p {
 
 .annoteButton {
 background-color: #f0ecb3;
+}
+
+.error {
+color: red;
+font-weight: bold;
+}
+
+.ontextLabel {
+font-weight: bold;
+font-size: smaller;
+}
+
+.ontextText {
+font-style: italic;
+font-size: smaller;
+}
+
+.onecomment {
+border: 1px dotted #666;
+padding: 2px;
+/* background: #ffffcc; */
+}
+
+.onecomment a {
+text-decoration: none;
+}
+
+.inputcaption {
+font-size: smaller;
+font-color: #ffffcc;
+}
+
+.indent {
+margin-left: 4em;
 }
