@@ -265,3 +265,12 @@ padding: 2px;
 .onecomment a {
 text-decoration: none;
 }
+
+.inputcaption {
+font-size: smaller;
+font-color: #ffffcc;
+}
+
+.indent {
+margin-left: 4em;
+}

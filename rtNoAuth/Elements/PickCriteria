@@ -71,10 +71,8 @@
 <p>Aggregator:<& SelectAndOr, Name => "AndOr" &></p>
   <& PickBasics &>
   <& PickCFs, cfqueues => \%cfqueues &>
-  <tr><td>&nbsp;</td></tr>
-</table>
 
-<& /Elements/TitleBoxEnd &>
+%# <& /Elements/TitleBoxEnd &>
 
 <%ARGS>
 $addquery => 0

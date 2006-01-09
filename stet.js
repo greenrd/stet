@@ -73,6 +73,12 @@ window.onload = initPage();
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
 function XpathSel() {
 
+      if (!readCookie('__ac')) {
+	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
+	return;
+      }
+
+
   var textObj = '';
   var start = '';
   var end = '';
@@ -357,7 +363,7 @@ function processAnnotation(response) {
 
 	  ticketObj[rtid] = new Object;
 
-	  ticketObj[rtid].link = rtid ? '<a href="/rt/NoAuth/readsay.html?id='+rtid+'&addcomments=This+doesn%27t+actually+work+yet">read/say more</a> ' : '[problem with ticket link]';
+	  ticketObj[rtid].link = rtid ? '<a href="/rt/NoAuth/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
 	  agreechild = uagr_arr[prI].firstChild.data
 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]);
 	  if ((agreechild == "agree") || (agreechild == "unagree")) {

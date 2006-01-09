@@ -27,19 +27,19 @@
     <link rel="stylesheet" type="text/css" href="/comments/stet.css"/>
 </head>
 <body>
-<div id="maintext">
+<!-- <div id="maintext"> -->
 % if ($Tickets) {
-<h3> Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a><h3>
+<h3> Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% $Tickets->First->FirstCustomFieldValue('NoteUrl') %>?Query=<% $ARGS{'Query'} %>">[see on license]</a><h3>
 <h4>Found <% $Tickets->CountAll()%></h4>
 % } else {
-<h3> Showing comment <% $ARGS{'id'} %> <a class="rsslink" href="<% $rsslink %>">[rss]</a></h3>
+<h3> Showing comment <a href="/rt/NoAuth/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% $Ticket->FirstCustomFieldValue('NoteUrl') %>?id=<% $ARGS{'id'} %>#<% $Ticket->FirstCustomFieldValue('NoteStartNodeId') %>">[see on license]</a></h3>
 % }
 %
 % while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
 <div class="onecomment">
 <& /Elements/ListActions, actions => \@msgresults &>
 <& /Elements/ListActions, actions => \@linkresults &>
-<h4><a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a></h4>
+<h4><% $thing %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a></h4>
 <span class="tktheader">Regarding the text:</span> <span class="ontextText"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteSelection')) %></span><br/>
 In section: <span class="nodeLink"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></span><br/>
 Submitted by: <% $item->CreatorObj->Name %><br/>
@@ -48,23 +48,46 @@ Submitted by: <% $item->CreatorObj->Name %><br/>
 <% $agree |n %><br/>
 <span class="agreecount"><% $agr_count %> agree</span></span><br/>
 comments: <% getThread(\$item) |n %><br/>
-% if (($makeissue) && ($item->Queue != $issuequeue)) {
-<input type="checkbox" value="1" name="MakeIssue"/>Upgrade this to an Issue<br/>
-% }
-Parents:
-% while (my $link = $item->MemberOf->Next) {
-      <INPUT TYPE=CHECKBOX NAME="DeleteLink--<%$link->Type%>-<%$link->Target%>" value="1">
-        <& ShowLink, URI => $link->TargetURI &><br>
-% }
-<br/>
-Children:
-% while (my $link = $Object->Members->Next) {
-      <INPUT TYPE=CHECKBOX NAME="DeleteLink-<%$link->Base%>-<%$link->Type%>-" value="1">
-        <& ShowLink, URI => $link->BaseURI &><br>
-% }
 % if ($resp == 1) {
 <form action="readsay.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
 <input type="hidden" name="id" value="<% $item->id %>">
+% }
+% if (($makeissue) && ($item->Queue != $issuequeue)) {
+<input type="checkbox" value="1" name="MakeIssue"/>Upgrade this to an Issue<br/>
+% }
+<span class="TktLabel">Parents</span>
+% if (!$item->Members->GotoFirstItem) {
+<em>this <% $thing %> does not have any parents </em><br/>
+% }
+% while (my $link = $item->MemberOf->Next) {
+        <& Elements/ShowLink, URI => $link->TargetURI &><span class="TktInput">
+% if ($resp == 1) {
+	<span class="TktInput indent">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<%$link->Type%>-<%$link->Target%>" value="1">]</span>
+% }
+<br/>
+% }
+% if ($makeissue) {
+<span class="TktInput indent">add new: <INPUT NAME="<% $item->id %>-MemberOf"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+% }
+<br/>
+<span class="TicketLabel">Children:
+% if (!$item->Members->GotoFirstItem) {
+<em>this <% $thing %> does not have any children </em><br/>
+% }
+% while (my $link = $item->Members->Next) {
+        <& Elements/ShowLink, URI => $link->BaseURI &></span>
+% if ($makeissue) {
+ <span class="TktInput indent">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink-<%$link->Base%>-<%$link->Type%>-" value="1">]</span>
+% }
+<br/>
+% }
+% if ($makeissue) {
+<span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+</span><br/>
+<span class="TktInput">link to external item(s): <INPUT NAME="<% $item->id %>-RefersTo"> <span class="inputcaption">[URIs with protocol://, space separated]</span></span>
+% }
+</span><br/>
+% if ($resp == 1) {
 <textarea class="messagebox" COLS=72 ROWS=15 WRAP=HARD NAME="UpdateContent" onfocus="if(this.value=='Enter additional comments here') {this.value='';}" onblur="if(this.value==''){this.value='Enter additional comments here';}">
 % if($ARGS{'addcomments'}) {
 <% $ARGS{'addcomments'} %>
@@ -78,11 +101,11 @@ Enter additional comments here
 % } else {
 <INPUT TYPE=SUBMIT NAME="SubmitTicket" VALUE='Add comment'></form>
 % }
+<!-- </div> -->
 % }
-</div>
 % $Ticket = '';
 % }
-
+%
 </body>
 </html>
 %
@@ -95,15 +118,15 @@ use CGI qw/:standard/;
 use HTML::Scrubber;
 my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
 require "/var/www/stet/stetsubs.pl";
-my $issuequeue = 4; # I guess Issue will be queue 4...
+my $issuequeue = 5; # I guess Issue will be queue 4...
 sub debug {
     print STDERR @_ . "\n";
 }
 
-my ($name, $resp, $pass, $agr_vals, $CurrentUser);
+my ($name, $resp, $pass, $agr_vals, $CurrentUser, $thing);
 ($CurrentUser, $resp) = getUser("foo");
 
-my $rsslink = "/rt/NoAuth/rssresults.rdf?Query=".$ARGS{'Query'};
+my $rsslink = "/rt/NoAuth/rssresults.rdf?id=".$ARGS{'id'}."&Query=".$ARGS{'Query'};
 
 my ($Tickets, $Ticket, $makeissue, @msgresults, @linkresults);
 
@@ -116,8 +139,7 @@ elsif ($ARGS{'id'}) {
     $Ticket = RT::Ticket->new($CurrentUser);
     $Ticket = LoadTicket($ARGS{'id'});
     if ($ARGS{'UpdateContent'}) {
-	ProcessUpdateMessage(TicketObj => $item, ARGSRef=>\%ARGS, Actions=>\@msgresults);
-
+	ProcessUpdateMessage(TicketObj => $Ticket, ARGSRef=>\%ARGS, Actions=>\@msgresults);
     }
     if ($ARGS{'MakeIssue'}) {
 	$Ticket->SetQueue($issuequeue);
@@ -135,9 +157,17 @@ if (
             Object => $NewQueueObj
         )
       )
+)
     {
 	$makeissue = 1;
     }
+else {$makeissue = '';}
+if ($Ticket->Queue == 5) {
+    $thing = "issue";
+}
+else {
+    $thing = "comment";
+}
 
 sub getThread($) {
     my $itemref = shift;
@@ -166,7 +196,7 @@ sub getThread($) {
 #			     $cont = $scrubber->scrub($cont);
 #			 }
 
-			 $allcomments .= "<blockquote><h4>$subj</h4>\n$cont<br/>\n";
+			 $allcomments .= "<blockquote><h4>$subj</h4>\n".$message->Content."<br/>\n";
 			 $allcomments .= "<span class=\"posted\">noted by user <span class=\"userlink\">".$message->CreatorObj->Name."</span></span>\n";
 		     }
 		     $allcomments .= "</blockquote>" x $attachments->Count;

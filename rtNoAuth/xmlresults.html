@@ -24,9 +24,12 @@
 %
 %
 <response>
-%# <cs>Showing comments where <% humanQuery($ARGS{'Query'} |n %> (<% $Tickets->CountAll() %> found) <a href="<% $rsslink %>">[rss]</a>  <a href="javascript:newQuery()">change</a> </cs>
-<cs>Currently showing <% $printargs %> <a href="<% $rsslink %>">[rss]</a>  <a href="changeshown.html">change</a> </cs>
-% while ( my $item = $Tickets->Next()) {
+% if ($Tickets) {
+<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> (found <% $Tickets->CountAll()%>)</cs>
+% } else {
+<cs> Showing comment <a href="/rt/NoAuth/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/rt/NoAuth/changeshown.html">change</a> </cs>
+% }
+% while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
 <annotation>
 <n><% $item->Transactions->First->Content %></n>
 <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
@@ -39,6 +42,7 @@
 <at><% $agr_count %></at>
 <id><% $item->id %></id>
 </annotation>
+% $Ticket = '';
 % }
 </response>
 %
@@ -63,9 +67,21 @@ my ($name, $resp, $pass, $agr_vals, $CurrentUser);
 ($CurrentUser, $resp) = getUser("foo");
 print STDERR "Currentuser $CurrentUser, $resp\n";
 #my $Tickets = RT::Tickets->new($session{'CurrentUser'});
-my $Tickets = RT::Tickets->new($CurrentUser);
-$Tickets->FromSQL($ARGS{'Query'});
-$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+
+my ($Tickets, $Ticket);
+
+if ($ARGS{'Query'}) {
+    $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL($ARGS{'Query'});
+}
+elsif ($ARGS{'id'}) {
+    $Ticket = RT::Ticket->new($CurrentUser);
+    $Ticket = LoadTicket($ARGS{'id'});
+}
+
+#my $Tickets = RT::Tickets->new($CurrentUser);
+#$Tickets->FromSQL($ARGS{'Query'});
+#$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 
 $r->content_type('text/xml');
 

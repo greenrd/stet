@@ -102,11 +102,11 @@
 
     <xsl:for-each select="section">
       <h3><xsl:value-of select="title"/></h3>
-      <section id="{@id}">
+      <section id="{@id}" name="{@id}">
         <xsl:for-each select="p">
-          <p id="{@id}">
+          <p id="{@id}" name="{@id}">
             <xsl:for-each select="sent">
-              <sent id="{@id}">
+              <sent id="{@id}" name="{@id}">
                 <xsl:apply-templates select='node()|@*' />
                 <xsl:text>  </xsl:text>
               </sent>

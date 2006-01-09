@@ -155,21 +155,23 @@ $UserObj->SetPassword($pass);
 }
 
 sub humanQuery {
-    shift;
-    s/'CF.NoteUrl' LIKE/in file/g;
-    s/'CF.NoteUrl' NOT LIKE/not in file/g;
-#    s/'CF.NoteUrl' LIKE//g;
-#    s/'CF.NoteUrl' NOT LIKE//g;
+    $query = shift;
+    $query =~ s/['%0-9]+CF.NoteUrl'['%0-9]+ +LIKE/in file/g;
+    $query =~ s/'CF.NoteUrl' NOT LIKE/not in file/g;
+#    $query =~ s/'CF.NoteUrl' LIKE//g;
+#    $query =~ s/'CF.NoteUrl' NOT LIKE//g;
     
-    s/'CF.NoteSelection' LIKE/selected text matches/g;
-    s/'CF.NoteSelection' NOT LIKE/selected text does not match/g;
-    s/'CF.NoteStartNodeId' LIKE/in section id/g;
-    s/'CF.NoteStartNodeId' NOT LIKE/not in section id/g;
-    s/'CF.Agreeers' LIKE/agreeers include/g;
-    s/'CF.Agreeers' NOT LIKE/agreeers do not include/g;
-    s/ AND /, and /g;
-    s/ OR /, or /g;
-    return;
+    $query =~ s/'CF.NoteSelection' LIKE/selected text matches/g;
+    $query =~ s/'CF.NoteSelection' NOT LIKE/selected text does not match/g;
+    $query =~ s/'CF.NoteStartNodeId' LIKE/in section id/g;
+    $query =~ s/'CF.NoteStartNodeId' NOT LIKE/not in section id/g;
+    $query =~ s/'CF.Agreeers' LIKE/agreeers include/g;
+    $query =~ s/'CF.Agreeers' NOT LIKE/agreeers do not include/g;
+
+    $query =~ s/Requestor.Name LIKE/submitter matches/g;
+    $query =~ s/ AND /, and /g;
+    $query =~ s/ OR /, or /g;
+    return $query;
 }
 
 
