@@ -1,0 +1,1020 @@
+<!-- Copyright (C) 2006   Software Freedom Law Center, Inc.
+--   Author: Orion Montoya <orion@mdcclv.com>
+--
+-- This software gives you freedom; it is licensed to you under version
+-- 3 of the GNU Affero General Public License, along with the
+-- additional permission in the following paragraph.
+--
+-- This notice constitutes a grant of such permission as is necessary
+-- to combine or link this software, or a modified version of it, with
+-- Request Tracker (RT), published by Jesse Vincent and Best Practical
+-- Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+-- distribute the resulting work.  RT is licensed under version 2 of
+-- the GNU General Public License.
+-- 
+-- This software is distributed WITHOUT ANY WARRANTY, without even the
+-- implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+-- PURPOSE.  See the GNU Affero General Public License for further
+-- details.
+--  
+-- You should have received a copy of the GNU Affero General Public
+-- License, version 3, and the GNU General Public License, version 2,
+-- along with this software.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<html>
+<head>
+<title>stet query builder</title>
+<link rel="stylesheet" href="/rt/NoAuth/webrt.css" type="text/css">
+</head>
+<body>
+<FORM METHOD="GET" ACTION="/comments/getnotes.pl" NAME="BuildQuery">
+<input type=hidden name=SearchId value="new">
+<input type=hidden name=Query value="">
+<input type=hidden name=Format value="&#39;   &lt;b&gt;&lt;a href=&#34;/rt/Ticket/Display.html?id=__id__&#34;&gt;__id__&lt;/a&gt;&lt;/b&gt;/TITLE:#&#39;, 
+&#39;&lt;b&gt;&lt;a href=&#34;/rt/Ticket/Display.html?id=__id__&#34;&gt;__Subject__&lt;/a&gt;&lt;/b&gt;/TITLE:Subject&#39;, 
+&#39;__Status__&#39;, 
+&#39;__QueueName__&#39;, 
+&#39;__OwnerName__&#39;, 
+&#39;__Priority__&#39;, 
+&#39;__NEWLINE__&#39;, 
+&#39;&#39;, 
+&#39;&lt;small&gt;__Requestors__&lt;/small&gt;&#39;, 
+&#39;&lt;small&gt;__CreatedRelative__&lt;/small&gt;&#39;, 
+&#39;&lt;small&gt;__ToldRelative__&lt;/small&gt;&#39;, 
+&#39;&lt;small&gt;__LastUpdatedRelative__&lt;/small&gt;&#39;, 
+&#39;&lt;small&gt;__TimeLeft__&lt;/small&gt;&#39;">
+<table>
+<tr>
+<td valign=top class="boxcontainer">
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('229.921962281885')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Add Criteria</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-229.921962281885">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+<table width=100% cellspacing=0 cellpadding=0 border=0>
+  <tr>
+    <td>
+      <table cellspacing=0 border=0>
+        <tr><td class=label>
+        Aggregator:
+        </td>
+        <td><input type=radio NAME="AndOr" CHECKED VALUE="AND">AND</input>
+<input type=radio NAME="AndOr" VALUE="OR">OR</input>
+
+
+        </td></tr>
+      </table>
+    </td></tr>
+  <tr>
+    <td colspan=3>
+      <hr>
+    </td>
+  </tr>
+  <tr><td>
+<tr><td align=right>
+<SELECT NAME="AttachmentField">
+<OPTION VALUE="Subject">Subject</OPTION>
+<OPTION VALUE="Content">Content</OPTION>
+<OPTION VALUE="ContentType">Content-Type</OPTION>
+<OPTION VALUE="Filename">Filename</OPTION>
+</SELECT>
+
+</td><td>
+<SELECT NAME ="AttachmentOp">
+<OPTION VALUE="LIKE" SELECTED>matches</OPTION>
+<OPTION VALUE="NOT LIKE" >does not match</OPTION>
+</SELECT>
+
+
+ 
+</td><td>
+<Input Name="ValueOfAttachment" Size=20>
+</td></tr>
+<tr><td align=right>
+Queue
+</td><td>
+<SELECT NAME ="QueueOp">
+<OPTION VALUE="=" SELECTED>is</OPTION>
+<OPTION VALUE="!=" >isn&#39;t</OPTION>
+</SELECT>
+
+
+
+</td><td>
+<SELECT NAME ="ValueOfQueue">
+<OPTION VALUE="">-</OPTION>
+<OPTION VALUE="General" >General
+</OPTION>
+</SELECT>
+
+
+</td></tr>
+<tr><td align=right>
+Status
+</td><td>
+<SELECT NAME ="StatusOp">
+<OPTION VALUE="=" SELECTED>is</OPTION>
+<OPTION VALUE="!=" >isn&#39;t</OPTION>
+</SELECT>
+
+
+  
+</td><td>
+<SELECT NAME ="ValueOfStatus">
+<OPTION SELECTED VALUE="">-</OPTION>
+<OPTION  VALUE="new">new</OPTION>
+<OPTION  VALUE="open">open</OPTION>
+<OPTION  VALUE="stalled">stalled</OPTION>
+<OPTION  VALUE="resolved">resolved</OPTION>
+<OPTION  VALUE="rejected">rejected</OPTION>
+</SELECT>
+
+</td></tr>
+<tr><td align=right>
+<tr><td class="label">
+<SELECT NAME="ActorField">
+<OPTION VALUE="Owner">Owner</OPTION>
+<OPTION VALUE="Creator">Creator</OPTION>
+<OPTION VALUE="LastUpdatedBy">LastUpdatedBy</OPTION>
+</SELECT>
+</td><td>
+<SELECT NAME ="ActorOp">
+<OPTION VALUE="=" SELECTED>is</OPTION>
+<OPTION VALUE="!=" >isn&#39;t</OPTION>
+</SELECT>
+
+
+ 
+</td><td>
+<SELECT NAME="ValueOfActor">
+<OPTION SELECTED VALUE="">-</OPTION>
+<OPTION  VALUE="10">Nobody</OPTION>
+<OPTION  VALUE="112">alphauser</OPTION>
+<OPTION  VALUE="12">root</OPTION>
+</SELECT>
+
+
+
+</td></tr>
+<tr><td class="label">
+<SELECT NAME ="WatcherField">
+<OPTION VALUE="">-</OPTION>
+<OPTION VALUE="Requestor.EmailAddress" SELECTED >Requestor EmailAddress</OPTION>
+<OPTION VALUE="Requestor.Name"  >Requestor Name</OPTION>
+<OPTION VALUE="Requestor.RealName"  >Requestor RealName</OPTION>
+<OPTION VALUE="Requestor.Nickname"  >Requestor Nickname</OPTION>
+<OPTION VALUE="Requestor.Organization"  >Requestor Organization</OPTION>
+<OPTION VALUE="Requestor.Address1"  >Requestor Address1</OPTION>
+<OPTION VALUE="Requestor.Address2"  >Requestor Address2</OPTION>
+<OPTION VALUE="Requestor.WorkPhone"  >Requestor WorkPhone</OPTION>
+<OPTION VALUE="Requestor.HomePhone"  >Requestor HomePhone</OPTION>
+<OPTION VALUE="Requestor.MobilePhone"  >Requestor MobilePhone</OPTION>
+<OPTION VALUE="Requestor.PagerPhone"  >Requestor PagerPhone</OPTION>
+<OPTION VALUE="Cc.EmailAddress"  >Cc EmailAddress</OPTION>
+<OPTION VALUE="Cc.Name"  >Cc Name</OPTION>
+<OPTION VALUE="Cc.RealName"  >Cc RealName</OPTION>
+<OPTION VALUE="Cc.Nickname"  >Cc Nickname</OPTION>
+<OPTION VALUE="Cc.Organization"  >Cc Organization</OPTION>
+<OPTION VALUE="Cc.Address1"  >Cc Address1</OPTION>
+<OPTION VALUE="Cc.Address2"  >Cc Address2</OPTION>
+<OPTION VALUE="Cc.WorkPhone"  >Cc WorkPhone</OPTION>
+<OPTION VALUE="Cc.HomePhone"  >Cc HomePhone</OPTION>
+<OPTION VALUE="Cc.MobilePhone"  >Cc MobilePhone</OPTION>
+<OPTION VALUE="Cc.PagerPhone"  >Cc PagerPhone</OPTION>
+<OPTION VALUE="AdminCc.EmailAddress"  >AdminCc EmailAddress</OPTION>
+<OPTION VALUE="AdminCc.Name"  >AdminCc Name</OPTION>
+<OPTION VALUE="AdminCc.RealName"  >AdminCc RealName</OPTION>
+<OPTION VALUE="AdminCc.Nickname"  >AdminCc Nickname</OPTION>
+<OPTION VALUE="AdminCc.Organization"  >AdminCc Organization</OPTION>
+<OPTION VALUE="AdminCc.Address1"  >AdminCc Address1</OPTION>
+<OPTION VALUE="AdminCc.Address2"  >AdminCc Address2</OPTION>
+<OPTION VALUE="AdminCc.WorkPhone"  >AdminCc WorkPhone</OPTION>
+<OPTION VALUE="AdminCc.HomePhone"  >AdminCc HomePhone</OPTION>
+<OPTION VALUE="AdminCc.MobilePhone"  >AdminCc MobilePhone</OPTION>
+<OPTION VALUE="AdminCc.PagerPhone"  >AdminCc PagerPhone</OPTION>
+<OPTION VALUE="Watcher.EmailAddress"  >Watcher EmailAddress</OPTION>
+<OPTION VALUE="Watcher.Name"  >Watcher Name</OPTION>
+<OPTION VALUE="Watcher.RealName"  >Watcher RealName</OPTION>
+<OPTION VALUE="Watcher.Nickname"  >Watcher Nickname</OPTION>
+<OPTION VALUE="Watcher.Organization"  >Watcher Organization</OPTION>
+<OPTION VALUE="Watcher.Address1"  >Watcher Address1</OPTION>
+<OPTION VALUE="Watcher.Address2"  >Watcher Address2</OPTION>
+<OPTION VALUE="Watcher.WorkPhone"  >Watcher WorkPhone</OPTION>
+<OPTION VALUE="Watcher.HomePhone"  >Watcher HomePhone</OPTION>
+<OPTION VALUE="Watcher.MobilePhone"  >Watcher MobilePhone</OPTION>
+<OPTION VALUE="Watcher.PagerPhone"  >Watcher PagerPhone</OPTION>
+<OPTION VALUE="Owner.EmailAddress"  >Owner EmailAddress</OPTION>
+<OPTION VALUE="Owner.Name"  >Owner Name</OPTION>
+<OPTION VALUE="Owner.RealName"  >Owner RealName</OPTION>
+<OPTION VALUE="Owner.Nickname"  >Owner Nickname</OPTION>
+<OPTION VALUE="Owner.Organization"  >Owner Organization</OPTION>
+<OPTION VALUE="Owner.Address1"  >Owner Address1</OPTION>
+<OPTION VALUE="Owner.Address2"  >Owner Address2</OPTION>
+<OPTION VALUE="Owner.WorkPhone"  >Owner WorkPhone</OPTION>
+<OPTION VALUE="Owner.HomePhone"  >Owner HomePhone</OPTION>
+<OPTION VALUE="Owner.MobilePhone"  >Owner MobilePhone</OPTION>
+<OPTION VALUE="Owner.PagerPhone"  >Owner PagerPhone</OPTION>
+</SELECT>
+
+
+</td><td>
+<SELECT NAME ="WatcherOp">
+<OPTION VALUE="LIKE" SELECTED>contains</OPTION>
+<OPTION VALUE="NOT LIKE" >doesn&#39;t contain</OPTION>
+<OPTION VALUE="=" >is</OPTION>
+<OPTION VALUE="!=" >isn&#39;t</OPTION>
+</SELECT>
+
+
+</td><td>
+<Input Name="ValueOfWatcher" Size=20>
+</td></tr>
+</td></tr>
+<tr><td align=right>
+<SELECT NAME="DateField">
+<OPTION VALUE="Created">Created</OPTION>
+<OPTION VALUE="Started">Started</OPTION>
+<OPTION VALUE="Resolved">Resolved</OPTION>
+<OPTION VALUE="Told">Last Contacted</OPTION>
+<OPTION VALUE="LastUpdated">Last Updated</OPTION>
+<OPTION VALUE="Starts">Starts</OPTION>
+<OPTION VALUE="Due">Due</OPTION>
+<OPTION VALUE="Updated">Updated</OPTION>
+</SELECT>
+
+</td><td>
+<SELECT NAME ="DateOp">
+<OPTION VALUE="&lt;">Before</OPTION>
+<OPTION VALUE="=">On</OPTION>
+<OPTION VALUE="&gt;">After</OPTION>
+</SELECT>
+
+
+</td><td>
+<INPUT NAME="ValueOfDate" VALUE="" size=16> 
+
+
+
+</td></tr>
+<tr><td align=right>
+<SELECT NAME="TimeField">
+<OPTION VALUE="TimeWorked">Time Worked</OPTION>
+<OPTION VALUE="TimeEstimated">Time Estimated</OPTION>
+<OPTION VALUE="TimeLeft">Time Left</OPTION>
+</SELECT>
+</td><td>
+<SELECT NAME ="TimeOp">
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="="
+>equal to</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+<OPTION VALUE="!="
+>not equal to</OPTION>
+</SELECT>
+
+
+</td><td>
+<INPUT Name="ValueOfTime" SIZE=5>
+</td></tr>
+<tr><td align=right>
+<SELECT NAME="PriorityField">
+<OPTION VALUE="Priority">Priority</OPTION>
+<OPTION VALUE="InitialPriority">Initial Priority</OPTION>
+<OPTION VALUE="FinalPriority">Final Priority</OPTION>
+</SELECT>
+</td><td>
+<SELECT NAME ="PriorityOp">
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="="
+>equal to</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+<OPTION VALUE="!="
+>not equal to</OPTION>
+</SELECT>
+
+
+</td><td>
+<INPUT Name="ValueOfPriority" SIZE=5>
+</td></tr>
+<tr><td align=right>
+<SELECT NAME="LinksField">
+<OPTION VALUE="HasMember">HasMember</OPTION>
+<OPTION VALUE="MemberOf">MemberOf</OPTION>
+<OPTION VALUE="DependsOn">DependsOn</OPTION>
+<OPTION VALUE="DependentOn">DependentOn</OPTION>
+<OPTION VALUE="RefersTo">RefersTo</OPTION>
+<OPTION VALUE="ReferredToBy">ReferredToBy</OPTION>
+<OPTION VALUE="LinkedTo">LinkedTo</OPTION>
+</SELECT>
+
+
+</td><td>
+<SELECT NAME ="LinksOp">
+<OPTION VALUE="=" SELECTED>is</OPTION>
+<OPTION VALUE="!=" >isn&#39;t</OPTION>
+</SELECT>
+
+
+  
+</td><td>
+<INPUT Name="ValueOfLinks" value="" SIZE=5>
+</td></tr>
+<tr><td align=right>
+Id
+</td><td>
+<SELECT NAME ="idOp">
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="="
+>equal to</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+<OPTION VALUE="!="
+>not equal to</OPTION>
+</SELECT>
+
+
+</td><td>
+<INPUT Name="ValueOfid" SIZE=5>
+</td></tr>
+
+
+  <tr><td class=label>
+
+NoteSelection 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteSelection&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteSelection&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+NoteDomPath 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteDomPath&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteDomPath&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+NoteUrl 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteUrl&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteUrl&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+NoteStartNodeId 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteStartNodeId&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteStartNodeId&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+NoteEndNodeId 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteEndNodeId&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteEndNodeId&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+NoteText 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.NoteText&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.NoteText&#39;" size="20">
+
+</td></tr>
+<tr><td class=label>
+
+Agreeers 
+</td>
+<td>
+<SELECT NAME ="&#39;CF.Agreeers&#39;Op">
+<OPTION VALUE="LIKE"
+>contains</OPTION>
+<OPTION VALUE="NOT LIKE"
+>doesn&#39;t contain</OPTION>
+<OPTION VALUE="="
+>is</OPTION>
+<OPTION VALUE="!="
+>isn&#39;t</OPTION>
+<OPTION VALUE="&lt;"
+>less than</OPTION>
+<OPTION VALUE="&gt;"
+>greater than</OPTION>
+</SELECT>
+
+
+</td>
+<td>
+
+<input name="ValueOf&#39;CF.Agreeers&#39;" size="20">
+
+</td></tr>
+
+
+
+  <tr><td>&nbsp;</td></tr>
+</table>
+
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+<TABLE WIDTH=100% BGCOLOR="#336699" CELLSPACING=0 BORDER=0 CELLPADDING=0 >
+<TR>
+<TD>
+&nbsp;
+</TD>
+<TD ALIGN=RIGHT VALIGN=CENTER><FONT COLOR=#ffd800>
+<B>Add additional criteria <INPUT TYPE=SUBMIT
+NAME="AddClause"
+ VALUE='Add'></B></FONT>
+</TD>
+</TR>
+</TABLE>
+
+
+</td>
+<td valign=top class="boxcontainer">
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1345.83661863047')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Query: </b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1345.83661863047">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+
+<select size="10" name="clauses" style="width: 100%">
+
+</select>
+</td></tr><tr><td bgcolor="#dddddd" colspan="2">
+<center>
+<input type=submit name="Up" value="^">
+<input type=submit name="Down" value="v">
+<input type=submit name="Left" value="<">
+<input type=submit name="Right" value=">">
+<input type=submit name="DeleteClause" value="Delete">
+<br />
+<input type=submit name="Clear" value="Clear">
+<input type=submit name="Toggle" value="And/Or">
+</center>
+    </TD>
+  </TR>
+</TABLE>
+
+
+<br>
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('747.51222094735')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Saved searches</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-747.51222094735">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+Privacy:
+<select name="Owner">
+<option value="RT::User-12">My saved searches</option>
+</select>
+<br>
+Description:<br>
+<font size="-1"><input size="25" name="Description" value=""></font>
+<br>
+
+<input type="submit" name="Save" value="Save">
+<hr>
+Load saved search:<br>
+<select name="LoadSavedSearch">
+<option value="">My saved searches</option>
+</select>
+
+<input value="Load" type="submit">
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+
+</td>
+</tr>
+<tr>
+<td colspan=2 class="boxcontainer">
+
+<TABLE CLASS="box " 
+        BGCOLOR="#336699" 
+        CELLSPACING=0
+        BORDER=0
+        WIDTH="100%"
+        CELLPADDING="0">
+
+  <TR>
+    <TH 
+        style="color: #336699;"
+        class="titlebox">
+      <span class="titleboxclose">
+        <a href="#" onClick="hideshow('1970.69749440369')">X</A></span>&nbsp;
+      <span class="titleboxtitle">
+        <b>Display Columns</b>
+      </span>
+    </TH>
+    <TH  
+         style="color: #336699;"
+         class="titleboxright">
+      <span class="titleboxright">&nbsp;</span>
+    </TH>
+  </TR>
+  <tr id="element-1970.69749440369">
+    <td bgcolor="#dddddd" colspan="3" class="">
+
+<table>
+<tr>
+<td>
+<table>
+<tr>
+<td>
+Available Columns:
+</td>
+<td>
+Format:
+</td>
+<td></td>
+<td>
+Show Columns:
+</td>
+<tr>
+<td valign=top>
+<select size="6" name="SelectDisplayColumns" multiple>
+<option value=0
+>QueueName</option>
+<option value=1
+>OwnerName</option>
+<option value=2
+>id</option>
+<option value=3
+>Status</option>
+<option value=4
+>Subject</option>
+<option value=5
+>ExtendedStatus</option>
+<option value=6
+>Priority</option>
+<option value=7
+>InitialPriority</option>
+<option value=8
+>FinalPriority</option>
+<option value=9
+>EffectiveId</option>
+<option value=10
+>Type</option>
+<option value=11
+>TimeWorked</option>
+<option value=12
+>TimeLeft</option>
+<option value=13
+>TimeEstimated</option>
+<option value=14
+>Requestors</option>
+<option value=15
+>Cc</option>
+<option value=16
+>AdminCc</option>
+<option value=17
+>StartsRelative</option>
+<option value=18
+>StartedRelative</option>
+<option value=19
+>CreatedRelative</option>
+<option value=20
+>LastUpdatedRelative</option>
+<option value=21
+>ToldRelative</option>
+<option value=22
+>DueRelative</option>
+<option value=23
+>ResolvedRelative</option>
+<option value=24
+>Starts</option>
+<option value=25
+>Started</option>
+<option value=26
+>Created</option>
+<option value=27
+>CreatedBy</option>
+<option value=28
+>LastUpdated</option>
+<option value=29
+>LastUpdatedBy</option>
+<option value=30
+>Told</option>
+<option value=31
+>Due</option>
+<option value=32
+>Resolved</option>
+<option value=33
+>NEWLINE</option>
+<option value=34
+>RefersTo</option>
+<option value=35
+>ReferredToBy</option>
+<option value=36
+>DependsOn</option>
+<option value=37
+>DependedOnBy</option>
+<option value=38
+>MemberOf</option>
+<option value=39
+>Members</option>
+<option value=40
+>Parents</option>
+<option value=41
+>Children</option>
+<option value=42
+>-</option>
+<option value=43
+>CustomField.{NoteSelection}</option>
+<option value=44
+>CustomField.{NoteDomPath}</option>
+<option value=45
+>CustomField.{NoteUrl}</option>
+<option value=46
+>CustomField.{NoteStartNodeId}</option>
+<option value=47
+>CustomField.{NoteEndNodeId}</option>
+<option value=48
+>CustomField.{NoteText}</option>
+<option value=49
+>CustomField.{Agreeers}</option>
+</select>
+</td>
+<td>
+Link:
+<select name=Link>
+<option value="None">-</option>
+<option value="Display">Display</option>
+<option value="Take">Take</option>
+</select>
+<br>Title: <input name="Title" size=10>
+<br>Size:
+<select name=Size>
+<option value="">-</option>
+<option value="Small">Small</option>
+<option value="Large">Large</option>
+</select>
+<br>Face:
+<select name=Face>
+<option value="">-</option>
+<option value="Bold">Bold</option>
+<option value="Italic">Italic</option>
+</select>
+</td>
+<td>
+<input type=submit name="AddCol" value="->">
+</td>
+<td valign=top>
+<select size=4 name="CurrentDisplayColumns" style="width : 100%">
+<option value=0>id</option>
+<option value=1>Subject</option>
+<option value=2>Status</option>
+<option value=3>QueueName</option>
+<option value=4>OwnerName</option>
+<option value=5>Priority</option>
+<option value=6>NEWLINE</option>
+<option value=7>&lt;blank&gt;</option>
+<option value=8>Requestors</option>
+<option value=9>CreatedRelative</option>
+<option value=10>ToldRelative</option>
+<option value=11>LastUpdatedRelative</option>
+<option value=12>TimeLeft</option>
+</select>
+<br>
+<center>
+<input type="submit" name="ColUp" value="^">
+<input type="submit" name="ColDown" value="v">
+<input type="submit" name="RemoveCol" value="Delete">
+</center>
+</td>
+<td colspan=3 align=center>
+</td>
+</tr>
+</table>
+
+
+</td>
+<td valign=top>
+<table valign=top>
+<tr>
+<td class=label>
+Order by:
+</td><td class=label>
+<select name="OrderBy">
+<option value=Status
+>Status</option>
+<option value=Type
+>Type</option>
+<option value=InitialPriority
+>InitialPriority</option>
+<option value=Starts
+>Starts</option>
+<option value=TimeWorked
+>TimeWorked</option>
+<option value=id
+SELECTED
+>id</option>
+<option value=LastUpdated
+>LastUpdated</option>
+<option value=Told
+>Told</option>
+<option value=Subject
+>Subject</option>
+<option value=Creator
+>Creator</option>
+<option value=Owner
+>Owner</option>
+<option value=LastUpdatedBy
+>LastUpdatedBy</option>
+<option value=EffectiveId
+>EffectiveId</option>
+<option value=Resolved
+>Resolved</option>
+<option value=Created
+>Created</option>
+<option value=Priority
+>Priority</option>
+<option value=Due
+>Due</option>
+<option value=Queue
+>Queue</option>
+<option value=Started
+>Started</option>
+<option value=FinalPriority
+>FinalPriority</option>
+<option value=TimeLeft
+>TimeLeft</option>
+</select>
+<select name="Order">
+<option value="ASC"
+SELECTED
+>Ascending</option>
+<option value="DESC"
+>Descending</option>
+</select>
+</td>
+</tr>
+<td class=label>
+Rows per page:
+</td><td>
+
+<SELECT NAME ="RowsPerPage">
+<OPTION VALUE="0" >
+Unlimited
+</OPTION>
+<OPTION VALUE="10" >
+10
+</OPTION>
+<OPTION VALUE="25" >
+25
+</OPTION>
+<OPTION VALUE="50" SELECTED>
+50
+</OPTION>
+<OPTION VALUE="100" >
+100
+</OPTION>
+</SELECT>
+
+
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<TABLE WIDTH=100% BGCOLOR="#336699" CELLSPACING=0 BORDER=0 CELLPADDING=0 >
+<TR>
+<TD>
+&nbsp;
+</TD>
+<TD ALIGN=RIGHT VALIGN=CENTER><FONT COLOR=#ffd800>
+<B>Do the Search <INPUT TYPE=SUBMIT
+NAME="DoSearch"
+ VALUE='Search'></B></FONT>
+</TD>
+</TR>
+</TABLE>
+
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+
+</td>
+</tr>
+</table>
+</FORM>
+
+
+</td>
+</tr>
+<tr>
+<td>
+
+<div class="bpscredits">
+&#187;&#124;&#171; RT 3.2.2 Copyright 1996-2004 <a href="http://www.bestpractical.com?rt=3.2.2">Best Practical Solutions, LLC</a>.<br>
+</div>
+</TD>
+</TR>
+</TABLE>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

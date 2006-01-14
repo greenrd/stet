@@ -1,0 +1,24 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+default to using the static xml file, parsing the revision number from
+the $Id$
+
+* allow comment only on the static xml
+
+when a comment applies to an earlier revision and cannot be applied to
+the current revision, place it (formatted discernibly) at the best
+place you can find, stepping up the xpath until you find a place you
+can hang it.  i.e.:
+
+ - if sect3.p1.s4 exists, put the note at the end of sect3.p1.s4
+ - else if sect3.p1 exists, put the note at the end of sect3.p1
+ - else if sect3 exists, etc.
+
+the link will say something like: "see N comments on earlier revisions"
+
+then you'll see the previous revision, with the comments that had been
+made at that point (if you want to see newer comments, look at the
+newer revision)
+

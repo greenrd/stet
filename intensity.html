@@ -1,0 +1,123 @@
+<!-- Copyright (C) 2006   Software Freedom Law Center, Inc.
+--   Author: Orion Montoya <orion@mdcclv.com>
+--
+-- This software gives you freedom; it is licensed to you under version
+-- 3 of the GNU Affero General Public License, along with the
+-- additional permission in the following paragraph.
+--
+-- This notice constitutes a grant of such permission as is necessary
+-- to combine or link this software, or a modified version of it, with
+-- Request Tracker (RT), published by Jesse Vincent and Best Practical
+-- Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+-- distribute the resulting work.  RT is licensed under version 2 of
+-- the GNU General Public License.
+-- 
+-- This software is distributed WITHOUT ANY WARRANTY, without even the
+-- implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+-- PURPOSE.  See the GNU Affero General Public License for further
+-- details.
+--  
+-- You should have received a copy of the GNU Affero General Public
+-- License, version 3, and the GNU General Public License, version 2,
+-- along with this software.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+<title>Test intensity</title>
+<script type="text/javascript">
+
+var sentence_arr = ('<em>Mary</em> had a little <a href="http://laimb.com">lamb</a> whose fleece was white as snow');
+var substrings_arr = new Array('Mary had a little lamb','a little lamb','lamb whose fleece'); 
+
+window.onload = document.write(intense_annot(sentence_arr,substrings_arr,''));
+
+function intense_annot(root,selections,comments) {
+var selecObj = new Array;
+var rootObj = new Array;
+
+// couple lines of html-ignoring help from
+// http://www.notestips.com/80256B3A007F2692/1/NAMO5RNV2S 
+// by Mike Golding, 9/24/2003
+//Extract HTML Tags
+ regexp=/<[^<>]*>/ig;
+ rootHTMLArray = root.match(regexp);
+ //Replace HTML tags
+ rootStrippedHTML = root.replace(regexp,"$!$");
+
+root_words = rootStrippedHTML.split(" ");
+for (i=0; i<root_words.length; i++) {
+    rootObj[i] = new Object;
+    rootObj[i].word = root_words[i];
+    rootObj[i].intensity = 0;
+    rootObj[i].annotations = new Array;
+
+}
+for (i=0; i<selections.length; i++) {
+   selecObj[i] = new Object;
+   selecObj[i].selection = selections[i];
+   selecObj[i].words = new Array(selections[i].split(" "));
+//   selecObj[i].comment = comments[i];
+   selecObj[i].comment = 'this would be a comment';
+}
+
+
+   for (j=0; j<selecObj.length; j++) { 
+     for (i=0; i<rootObj.length; i++) {
+      for (k=0; k<selecObj[j].words.length; k++) {
+	for (m=0; m<selecObj[j].words[k].length; m++) {
+	  matched = '';
+	  //document.write('word is '+selecObj[j].words[k][m]+'<br/>');
+         re = new RegExp('\\b'+selecObj[j].words[k][m]+'\\b');
+         if (rootObj[i].word.match(re)) {
+	   //document.write('matched '+re+'<br/>');
+	   rootObj[i].intensity++;
+	   matched = 'true';
+	 }
+	 if (matched && ((m+1) == selecObj[j].words[k].length)) {
+	    rootObj[i].annotations.push(selecObj[j].comment);
+	 }
+	}
+      }
+   }
+}
+
+   returnstring = '';
+
+for (i=0; i<rootObj.length; i++) {
+  if(rootObj[i].intensity > 0) {
+    returnstring += '<span style="font-size: 1'+rootObj[i].intensity+'0%">';
+  }
+  returnstring += ' '+rootObj[i].word+' ';
+  if (rootObj[i].annotations.length) {
+    for (j=0; j<rootObj[i].annotations.length; j++) {
+      returnstring += '['+rootObj[i].annotations[j]+']';
+   }
+  }
+  if(rootObj[i].intensity > 0) {
+    returnstring += '</span>';
+  }
+
+}
+
+// thanks again, Mike Golding
+ for(i=0;returnstring.indexOf("$!$") > -1;i++){
+   returnstring = returnstring.replace("$!$", rootHTMLArray[i]);
+ }
+
+ // root.innerHTML = returnstring; 
+ return returnstring;
+
+}
+
+
+
+</script>
+
+</head>
+
+<body>
+
+<div id="theDiv">yo</div>
+
+</body>
+</html>

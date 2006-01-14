@@ -1,0 +1,225 @@
+pre-launch:
+-html filtering (wtf does this mean)(of of input)
+-issue flag customfield; enter id to add to issue
+
+-comments that aren't attached to an issue yet
+is-issue:assignedtomycommitte
+isUnAssigned
+
+drafter comments go to a drafter queue by default
+
+if you have permission for more than one queue, noteifydiv gives you a
+pulldown -- with the private queue selected by default -- to choose
+which queue to put it in
+
+there is a washed and an unwashed queue; public queries show both by
+defuault, but drafters etc. may see only washed+private or whatever.
+
+Fri: Email submission gateway
+
+
+Ticket hierarchy:
+Group > Issue > Comment
+(any can have multiple parents: OK)
+
+Prettify /Ticket/Display.html
+Prettify /Search/Results.html
+Modify   /Search/Results.rdf with stet/gplv3 specific info
+ Below are all just RT queries, need prettifying & features like join-group:
+  User comment summary/rss
+   Self-associate with group(s)
+  Group comment summary/rss
+  Issue == Group/Parent
+ - external media links (multiple possible, ideally clickable links when
+   meaningful)
+ - I wish to expand on this comment
+
+license.xml view things:
+Query to limit display of comments on license
+Show comments on same region before entering
+Show only excerpt of comment; js to expand to full comment.
+
+At least demo-able: 
+ - Define an issue (parent tkt), associate comments (children) with it.
+ - Add child issue to parent(s)
+
+x Long comments (fixed)
+formatting paragraph breaks in multi-para comments (currently inlinesmoosh)
+fix overlapping comments! (worked at first: currently breaking)
+
+Group leaders see raw feed of comments thru RTish
+
+Intensity highlighting
+Multi-colored highlights for visual association of comments with text.
+
+Copyright/licensing notices; any "powered by" ID crap
+
+
+Okay, so it will never be valid xml to have <span1><span2></span2></span1>.
+I need to have a little something that will take
+
+Mary had a little lamb
+Mary had a little
+         a little 
+
+And make it into
+<span1 count="2">Mary had </span1>
+<span2 count="3">a little </span2>
+<span3 count="1">lamb</span3>
+
+
+
+NOT ME:
+------
+Pages that tell people what to do (with Fontana next week)
+
+Volunteers/training
+
+Some RT and HTML::Mason stuff with Jesse & Dave
+
+TO DISCUSS:
+----------
+Annoying Squid caching: sometimes updates can't be seen right away
+because cached (apparently)
+
+Couldn't get Mason scripts to run outside of /rt/: don't know what I'm doing.
+
+RT running in mod_perl rather than fcgid/speedycgi (free) or fastcgi
+(non-free).  Would be nice to get it going with one of the free
+possibilities.
+
+filename branding: I feel we shouldn't have a file called "gpl3.xml"
+until the license exists; gpl3-draft1 or something.
+
+tell me a path to use instead of /stet/:/comment/
+
+gplv3-draft-1.xml
+
+- ask voyer/russ for email submission help?
+
+-------
+
+POSTLAUNCH
+------
+allowing users to specify what their comment is about instead of being
+done by volunteers.
+
+throttling number of comments
+
+figuring out whether a comment is a responsible comment
+
+in addition to upgrading, users may say that something is spam
+
+remember comment window placement?
+
+DONE:
+
+RT ticket permissions/restrict drafter comments to drafters only:
+
+-__ac_name to __ac
+-red box for required
+
+Fri:
+ - agreement/rating/"urgency" (numeric, conceivably limitless)
+	Indicate agreement (but only once per comment!)
+
+
+XML-RPC auth (today with baughj)
+  - I need a "realm".  This may be my only problem really, but I
+couldn't get it back from a GET, POST or DUMP request as I came to
+expect I could.
+  - good progress, using Frontier::Client
+
+x Don't submit comments as root: make submitters users.
+
+Wed: allow "subject/summary" for tickets
+
+HL <novalis> for comment in comments:
+<novalis> for word_index in comment:
+<novalis> intensity[word_index] += 1
+<orion> novalis: that's so easy.  I'm suspicious of it, but I'll implement it
+        :)
+<orion> s/\./,/
+<novalis> orion: Does it do what you want?
+<novalis> orion: I have no idea what your code looks like, so this was just
+          the random thing I came up with off the top of my head
+<orion> I think so.  I also need to insert the annotation <div>, but it seems
+        like I can just do:
+<orion> if word_index == count(word_indexes)
+<orion> insert div
+<orion> so I'll give that a go.  I also need to make sure I'm at the right
+        word index, if I'm highlighting "the comment" in the string "the the
+        the the comment", but no problem.
+<orion> thanks, that's a good solution.
+
+
+
+---
+
+BP Qs:
+
+- get username by user id
+- get username of submitter/creator
+- fix auth
+- why don't my $TicketObj->FromSQL($Query) + LimitFoo work? (or do they?)
+- oh my god is the query really that slow?  this could be a huge problem.
+- https considerations -- don't really want people to crack Eben's password
+  and see his notes
+
+Requestor.EmailAddress LIKERequestor.Name LIKE "%%",
+
+
+
+http://gplv3.fsf.org/stet/gpl3.xml?SearchId=new
+Query=
+AndOr=AND
+AttachmentField=Content
+AttachmentOp=LIKE
+ValueOfAttachment=is
+QueueOp=%3D
+ValueOfQueue=
+StatusOp=%3D
+ValueOfStatus=
+ActorField=Owner
+ActorOp=%3D
+ValueOfActor=
+WatcherField=Requestor.Name
+WatcherOp=LIKE
+ValueOfWatcher=johns
+DateField=Created
+DateOp=%3C
+ValueOfDate=
+TimeField=TimeWorked
+TimeOp=%3C
+ValueOfTime=
+PriorityField=Priority
+PriorityOp=%3C
+ValueOfPriority=
+LinksField=HasMember
+LinksOp=%3D
+ValueOfLinks=
+idOp=%3C
+ValueOfid=
+%27CF.NoteSelection%27Op=LIKE
+ValueOf%27CF.NoteSelection%27=
+%27CF.NoteDomPath%27Op=LIKE
+ValueOf%27CF.NoteDomPath%27=
+%27CF.NoteUrl%27Op=LIKE
+ValueOf%27CF.NoteUrl%27=
+%27CF.NoteStartNodeId%27Op=LIKE
+ValueOf%27CF.NoteStartNodeId%27=
+%27CF.NoteEndNodeId%27Op=LIKE
+ValueOf%27CF.NoteEndNodeId%27=
+%27CF.NoteText%27Op=LIKE
+ValueOf%27CF.NoteText%27=
+%27CF.Agreeers%27Op=LIKE
+ValueOf%27CF.Agreeers%27=
+AddClause=Add
+
+Can't locate object method "LoadByCol" via package "orion" (perhaps
+you forgot to load "orion"?) at
+/usr/share/request-tracker3.2/lib/RT/CurrentUser.pm line 252.
+
+[Mon Jan 09 18:33:21 2006] [error] [client 127.0.0.1] "my" variable $val masks earlier declaration in same scope at /var/www/stet/getnotes.pl line 295.
+[Mon Jan 09 18:33:21 2006] [error] [client 127.0.0.1] "my" variable $value masks earlier declaration in same scope at /var/www/stet/getnotes.pl line 322.
+[Mon Jan 09 18:33:21 2006] [error] [client 127.0.0.1] syntax error at /var/www/stet/getnotes.pl line 62, near "my "

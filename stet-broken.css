@@ -1,0 +1,97 @@
+/* Copyright (C) 2005 Software Freedom Law Center, Inc.                   */
+/* Author: Orion Montoya <orion@mdcclv.com>                               */
+
+/* This software gives you freedom; it is licensed to you under version   */
+/* 3 of the GNU Affero General Public License, along with the             */
+/* additional permission in the following paragraph.                      */
+
+/* This notice constitutes a grant of such permission as is necessary     */
+/* to combine or link this software, or a modified version of it, with    */
+/* Request Tracker (RT), published by Jesse Vincent and Best Practical    */
+/* Solutions, LLC, or a derivative work of RT, and to copy, modify, and   */
+/* distribute the resulting work.  RT is licensed under version 2 of      */
+/* the GNU General Public License.                                        */
+
+/* This software is distributed WITHOUT ANY WARRANTY, without even the    */
+/* implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR     */
+/* PURPOSE.  See the GNU Affero General Public License for further        */
+/* details.                                                               */
+
+em.del { 
+      font-style: normal;
+      text-decoration: line-through;
+      color: #c00;
+      display: inline;
+ }
+
+em.add { 
+      font-style: normal;
+      color: #00b;
+      display: inline;
+ }
+
+em.delhide { 
+      display: none;
+}
+
+em.addhide { 
+      display: none;
+ }
+
+.highlight { 
+
+background: #F0ECB3;
+
+ }
+
+.noteLive { 
+background: #ff99ff;
+ }
+
+#maintext { 
+
+//        position: absolute;
+	margin-left: 4em;
+        margin-top: 2em;
+        float: left;
+        left: 0;
+        top: 0;
+	width: 66%;
+//        border: 1px dotted #666;
+
+ }
+
+
+.noteify { 
+//        display: none;
+//	float: left;
+//	left: 80%;
+//        top: 0;
+        width: 30%;
+float: right;
+font-size: smaller;
+//position: absolute;
+//left: 10%;
+//        border: 1px dotted #666;
+
+background: #f0ecb3;
+ }
+
+.annotation { 
+font-size: smaller;
+position: absolute;
+//float: right;
+right: -200px;
+width: 25%;
+border: 1px dotted #666;
+background: #f0ecb3;
+ }
+
+
+textarea { 
+background: #f0ecb3;
+ }
+
+p { 
+clear:right;
+ }

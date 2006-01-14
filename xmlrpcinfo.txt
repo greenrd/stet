@@ -1,0 +1,25 @@
+There are now two new users in the gplv3-launch zope instance which are
+allowed to use the XMLRPC functions. Here's the specifics:
+
+For pre-launch, the listener is:
+
+http://user:pass@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users
+
+Authenticator info:
+
+stet_auth	PASSWORD
+mw_auth		PASSWORD
+
+In production, the path will most likely be:
+
+http://user:pass@gplv3.fsf.org/acl_users/Users/acl_users
+
+but this depends on what rewriting we do, and if you connect directly to
+Zope or not, yadda yadda.
+
+-Justin
+
+-- 
+Justin Baugh (baughj at gnu dot org)
+Systems Administrator
+Free Software Foundation

@@ -25,51 +25,42 @@
 /* Modified 20021006 to fix query string parsing and add case insensitivity */
 
 function highlightWord(node,word,tooltip,rtid,altClass) {
-  var haveHighlighted = false;
-  dump("doing highlightword of "+word+"\n");
-  if (node.hasChildNodes) {
-    var iCN;
-    dump("this node has "+node.childNodes.length+" childNodes\n");
-    for (iCN=0;iCN<node.childNodes.length;iCN++) {
-      dump("going in to "+node.childNodes[iCN].nodeName+"\nfor "+word+" iCN="+iCN+"\n");
-      highlightWord(node.childNodes[iCN],word,tooltip,rtid);
-    }
-  }
-  if (node.nodeType == 3) { // text node
-      dump("node is "+node.nodeName+"\n");
+    var haveHighlighted = false;
+    // Iterate into this node's childNodes
     if (!haveHighlighted) {
-      dump("haven't highlighted\n");
-    paragraph = node.parentNode.parentNode;
-    paragraphString = (new XMLSerializer).serializeToString(paragraph);
-    paragraphString.replace(/\s+/g,' ');
-    tempNodeVal = paragraphString;
-    tempWordVal = word;
-    tempWordVal = tempWordVal.replace(/\W+/g,'[\\W\\s]+(<[^>]+>)?');
+    if (node.hasChildNodes) {
+      //      dump("iterating into child nodes\n");
+      var hi_cn;
+      for (hi_cn=0;hi_cn<node.childNodes.length;hi_cn++) {
+	//		  dump("going in to "+node.childNodes[hi_cn].nodeName+"\nfor "+word+"\n");
+	highlightWord(node.childNodes[hi_cn],word,tooltip,rtid);
+      }
+      //      dump("done with child nodes\n");
+      }
 
-        var re = new RegExp(tempWordVal, 'mi');
-	//    var re = new RegExp("software", 'mig');
-    dump("re is "+re+"\n");
-	    tooltipString = (new XMLSerializer).serializeToString(tooltip);
-	    var ticketLink = rtid ? '<a href="/rt/Ticket/Display.html?id='+rtid+'">[+]</a>' : '[reload for ticket link]';
-
-    paragraphString = paragraphString.replace(re,'<span class="highlight">$&<span class="annotation">'+tooltipString+ticketLink+' </span></span>');
-    //     dump("replaced on "+$&+"\n");
-    dump("pString is now "+paragraphString+"\n");
-    node.parentNode.parentNode.innerHTML = paragraphString;
-    
-    //    haveHighlighted=true;
     }
-  }
-}
-
-/*      if ((ni = tempNodeVal.search(re)) && (ni != -1)) {
+    
+    // And do this node itself
+    if (node.nodeType == 3) { // text node
+      if (!haveHighlighted) {
+      //tempNodeVal = escape(node.nodeValue.toLowerCase());
+      //tempWordVal = escape(word.toLowerCase());
+      node.nodeValue = node.nodeValue.replace(/\s+/g,' ');
+      
+      tempNodeVal = node.nodeValue;
+      tempWordVal = word;
+      tempWordVal = tempWordVal.replace(/\W+/g,'[\\W\\s]+');
+      //tempWordVal = tempWordVal.replace(/\W+/g,' ');
+      //      dump('trying with\n'+escape(tempWordVal)+'\non\n'+escape(tempNodeVal)+"\n");
+      var re = new RegExp(tempWordVal, 'mi');
+      if ((ni = tempNodeVal.search(re)) && (ni != -1)) {
 	//if (tempNodeVal.indexOf(tempWordVal) != -1) {
-		dump(tempWordVal+' matched!\n');
+	//	dump(tempWordVal+' matched!\n');
 	pn = node.parentNode;
-	//	if (pn.className != "highlight") {
+	if (pn.className != "highlight") {
 	  // word has not already been highlighted!
 	  //				nv = escape(node.nodeValue);
-	  nv = paragraphString;
+	  nv = node.nodeValue;
 	  //ni = tempNodeVal.indexOf(tempWordVal);
 	  // Create a load of replacement nodes
 	  before = document.createTextNode(nv.substr(0,ni));
@@ -92,6 +83,13 @@ function highlightWord(node,word,tooltip,rtid,altClass) {
 	    linkToTkt.href = '/rt/Ticket/Display.html?id='+rtid;
 	    linkToTkt.appendChild(document.createTextNode('[+]'));
 	    annoteText = document.createElement('span');
+	    //	    tooltipString = (new XMLSerializer).serializeToString(tooltip);
+	    //	    while(tooltip.firstChild) {
+	    //  dump("firstchild is "+tooltip.firstChild+"\n");
+	    //  annote.appendChild(tooltip.removeChild(tooltip.firstChild));
+	    //}
+
+//	    alert('tooltip is '+tooltip);
             annoteText.innerHTML = tooltipString;
 //	    annoteText.appendChild(tooltiptext);
 	    annote.appendChild(annoteText);
@@ -99,23 +97,53 @@ function highlightWord(node,word,tooltip,rtid,altClass) {
 	    annote.appendChild(linkToTkt);
 	    hiword.appendChild(annote);
 	  }
-	  dump(before);
-	  //	  pn.innerHTML="";
 	  pn.insertBefore(before,node);
 	  pn.insertBefore(hiword,node);
 	  pn.insertBefore(after,node);
 	  pn.removeChild(node);
-      }
 	  haveHighlighted = true;
-
-	  //	}
-	  //	else if (pn.className == "noteLive") {
-	  //	  pn.setAttribute("class","highlight");
-	  //	}
 	}
-  }
+	else if (pn.className == "noteLive") {
+	  pn.setAttribute("class","highlight");
+	}
+	}
+      }
+      /* 		else { */
+      /* 		  highlightWord(node.parentNode,word,tooltip); */
+      /* 		} */
+      
+    }
+
 }
 
-*/
+function XPointerHighlight() {
+//	if (!document.createElement) return;
+//	ref = document.referrer;
+//	if (ref.indexOf('?') == -1) return;
+//	qs = ref.substr(ref.indexOf('?')+1);
+//	qsa = qs.split('&');
+//	for (i=0;i<qsa.length;i++) {
+//		qsip = qsa[i].split('=');
+//	        if (qsip.length == 1) continue;
+//        	if (qsip[0] == 'q' || qsip[0] == 'p') { // q= for Google, p= for Yahoo
 
+//		hardcoded = 'copying, distribution and modification';
+//		hardid = 'terms.0.p2.s1';
+
+//			words = unescape(qsip[1].replace(/\+/g,' ')).split(/\s+/);
+//	                for (w=0;w<words.length;w++) {
+
+
+//				highlightWord(document.getElementsByTagName("body")[0],words[w]);
+//				highlightWord(document.getElementById(hardid),hardcoded);
+//				highlightWord(document.getElementsByTagName("body")[0],hardcoded);
+
+
+
+ //               	}
+//	        }
+//	}
+}
+
+//window.onload = XPointerHighlight;
 window.onload = loadXMLDoc('http://localhost/cgi-bin/rt-test.pl?NoteUrl='+location.href);

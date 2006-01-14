@@ -1,34 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-%# Copyright 2005 Software Freedom Law Center, Inc.
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
 %#
-%# This program is free software: you may copy, modify, or redistribute it
-%# and/or modify it under either:
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
 %#
-%#  (a) the terms of the GNU Affero General Public License as published by
-%#      the Free Software Foundation, either version 3 of the License, or
-%#      (at your option) any later version.
-%#    or
-%#  (b) the terms of the GNU General Public license, version 2, as
-%#      published by the Free Software Foundation.
-%#
-%# This program is distributed in the hope that it will be useful, but
-%# WITHOUT ANY WARRANTY; without even the implied warranty of
-%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-%# General Public License and/or GNU General Public License for more
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
 %# details.
-%#
-%# You should have received a copy of the GNU Affero General Public License
-%# and the GNU General Public License along with this program. If not, see
-%# <http://www.gnu.org/licenses/>.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
 %
 <response>
-% if ($Tickets) {
-<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> (found <% $Tickets->CountAll()%>)</cs>
-% } else {
-<cs> Showing comment <a href="/rt/NoAuth/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/rt/NoAuth/changeshown.html">change</a> </cs>
-% }
-% while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
+%# <cs>Showing comments where <% humanQuery($ARGS{'Query'} |n %> (<% $Tickets->CountAll() %> found) <a href="<% $rsslink %>">[rss]</a>  <a href="javascript:newQuery()">change</a> </cs>
+<cs>Currently showing <% $printargs %> <a href="<% $rsslink %>">[rss]</a>  <a href="changeshown.html">change</a> </cs>
+% while ( my $item = $Tickets->Next()) {
 <annotation>
 <n><% $item->Transactions->First->Content %></n>
 <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
@@ -41,7 +39,6 @@
 <at><% $agr_count %></at>
 <id><% $item->id %></id>
 </annotation>
-% $Ticket = '';
 % }
 </response>
 %
@@ -66,21 +63,9 @@ my ($name, $resp, $pass, $agr_vals, $CurrentUser);
 ($CurrentUser, $resp) = getUser("foo");
 print STDERR "Currentuser $CurrentUser, $resp\n";
 #my $Tickets = RT::Tickets->new($session{'CurrentUser'});
-
-my ($Tickets, $Ticket);
-
-if ($ARGS{'Query'}) {
-    $Tickets = RT::Tickets->new($CurrentUser);
-    $Tickets->FromSQL($ARGS{'Query'});
-}
-elsif ($ARGS{'id'}) {
-    $Ticket = RT::Ticket->new($CurrentUser);
-    $Ticket = LoadTicket($ARGS{'id'});
-}
-
-#my $Tickets = RT::Tickets->new($CurrentUser);
-#$Tickets->FromSQL($ARGS{'Query'});
-#$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+my $Tickets = RT::Tickets->new($CurrentUser);
+$Tickets->FromSQL($ARGS{'Query'});
+$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 
 $r->content_type('text/xml');
 

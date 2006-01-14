@@ -1,27 +1,31 @@
-// Copyright 2005, Software Freedom Law Center, Inc.
+// Copyright (C) 2005   Software Freedom Law Center, Inc.
+// Author: Orion Montoya <orion@mdcclv.com>
 //
-// This program is free software: you may copy, modify, or redistribute it
-// and/or modify it under the terms of the GNU Affero General Public
-// License as published by the Free Software Foundation, either version 3
-// of the License, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-// General Public License and/or GNU General Public License for more
+// This software gives you freedom; it is licensed to you under version
+// 3 of the GNU Affero General Public License, along with the
+// additional permission in the following paragraph.
+//
+// This notice constitutes a grant of such permission as is necessary
+// to combine or link this software, or a modified version of it, with
+// Request Tracker (RT), published by Jesse Vincent and Best Practical
+// Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+// distribute the resulting work.  RT is licensed under version 2 of
+// the GNU General Public License.
+// 
+// This software is distributed WITHOUT ANY WARRANTY, without even the
+// implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+// PURPOSE.  See the GNU Affero General Public License for further
 // details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// and the GNU General Public License along with this program. If not, see
-// <http://www.gnu.org/licenses/>.
-//
+//  
+// You should have received a copy of the GNU Affero General Public
+// License, version 3, and the GNU General Public License, version 2,
+// along with this software.  If not, see <http://www.gnu.org/licenses/>.
 
 // Based on some work from http://www.quirksmode.org/js/selected.html
 // That work was copyrighted by Peter-Paul Koch.
 //  His license is:
-//     You may copy, tweak, rewrite, sell or lease any code example on this site.
+//   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-/* Copyright (C) 2005 Software Freedom Law Center */
-/* Author: Orion Montoya <orion@mdcclv.com>       */
 
 var ticketObj = new Object;
 ticketObj.rtidsBySn = new Object;
@@ -68,12 +72,6 @@ window.onload = initPage();
 
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
 function XpathSel() {
-
-      if (!readCookie('__ac')) {
-	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
-	return;
-      }
-
 
   var textObj = '';
   var start = '';
@@ -359,7 +357,7 @@ function processAnnotation(response) {
 
 	  ticketObj[rtid] = new Object;
 
-	  ticketObj[rtid].link = rtid ? '<a href="/rt/NoAuth/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+	  ticketObj[rtid].link = rtid ? '<a href="/rt/NoAuth/readsay.html?id='+rtid+'&addcomments=This+doesn%27t+actually+work+yet">read/say more</a> ' : '[problem with ticket link]';
 	  agreechild = uagr_arr[prI].firstChild.data
 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]);
 	  if ((agreechild == "agree") || (agreechild == "unagree")) {

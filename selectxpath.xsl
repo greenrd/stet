@@ -1,20 +1,26 @@
-<!-- Copyright 2005, Software Freedom Law Center, Inc.
-
--- This program is free software: you may copy, modify, or redistribute it
--- and/or modify it under the terms of the GNU Affero General Public
--- License as published by the Free Software Foundation, either version 3
--- of the License, or (at your option) any later version.
--- This program is distributed in the hope that it will be useful, but
--- WITHOUT ANY WARRANTY; without even the implied warranty of
--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
--- General Public License and/or GNU General Public License for more
--- details.
+<!-- Copyright (C) 2005   Software Freedom Law Center, Inc.
+--   Author: Orion Montoya <orion@mdcclv.com>
 --
--- You should have received a copy of the GNU Affero General Public License
--- and the GNU General Public License along with this program. If not, see
--- <http://www.gnu.org/licenses/>.
+-- This software gives you freedom; it is licensed to you under version
+-- 3 of the GNU Affero General Public License, along with the
+-- additional permission in the following paragraph.
+--
+-- This notice constitutes a grant of such permission as is necessary
+-- to combine or link this software, or a modified version of it, with
+-- Request Tracker (RT), published by Jesse Vincent and Best Practical
+-- Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+-- distribute the resulting work.  RT is licensed under version 2 of
+-- the GNU General Public License.
+-- 
+-- This software is distributed WITHOUT ANY WARRANTY, without even the
+-- implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+-- PURPOSE.  See the GNU Affero General Public License for further
+-- details.
+--  
+-- You should have received a copy of the GNU Affero General Public
+-- License, version 3, and the GNU General Public License, version 2,
+-- along with this software.  If not, see <http://www.gnu.org/licenses/>.
 -->
-
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="1.0">
@@ -96,11 +102,11 @@
 
     <xsl:for-each select="section">
       <h3><xsl:value-of select="title"/></h3>
-      <section id="{@id}" name="{@id}">
+      <section id="{@id}">
         <xsl:for-each select="p">
-          <p id="{@id}" name="{@id}">
+          <p id="{@id}">
             <xsl:for-each select="sent">
-              <sent id="{@id}" name="{@id}">
+              <sent id="{@id}">
                 <xsl:apply-templates select='node()|@*' />
                 <xsl:text>  </xsl:text>
               </sent>

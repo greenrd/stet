@@ -1,24 +1,25 @@
-# Copyright 2005 Software Freedom Law Center, Inc.
+# Copyright (C) 2005   Software Freedom Law Center, Inc.
+# Author: Orion Montoya <orion@mdcclv.com>
 #
-# This program is free software: you may copy, modify, or redistribute it
-# and/or modify it under either:
+# This software gives you freedom; it is licensed to you under version
+# 3 of the GNU Affero General Public License, along with the
+# additional permission in the following paragraph.
 #
-#  (a) the terms of the GNU Affero General Public License as published by
-#      the Free Software Foundation, either version 3 of the License, or
-#      (at your option) any later version.
-#    or
-#  (b) the terms of the GNU General Public license, version 2, as
-#      published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-# General Public License and/or GNU General Public License for more
+# This notice constitutes a grant of such permission as is necessary
+# to combine or link this software, or a modified version of it, with
+# Request Tracker (RT), published by Jesse Vincent and Best Practical
+# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+# distribute the resulting work.  RT is licensed under version 2 of
+# the GNU General Public License.
+#  
+# This software is distributed WITHOUT ANY WARRANTY, without even the
+# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+# PURPOSE.  See the GNU Affero General Public License for further
 # details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# and the GNU General Public License along with this program.  If not, see
-# <http://www.gnu.org/licenses/>.
+#  
+# You should have received a copy of the GNU Affero General Public
+# License, version 3, and the GNU General Public License, version 2,
+# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 
 use CGI qw/standard/;
 use MIME::Base64;
@@ -154,23 +155,21 @@ $UserObj->SetPassword($pass);
 }
 
 sub humanQuery {
-    $query = shift;
-    $query =~ s/['%0-9]+CF.NoteUrl'['%0-9]+ +LIKE/in file/g;
-    $query =~ s/'CF.NoteUrl' NOT LIKE/not in file/g;
-#    $query =~ s/'CF.NoteUrl' LIKE//g;
-#    $query =~ s/'CF.NoteUrl' NOT LIKE//g;
+    shift;
+    s/'CF.NoteUrl' LIKE/in file/g;
+    s/'CF.NoteUrl' NOT LIKE/not in file/g;
+#    s/'CF.NoteUrl' LIKE//g;
+#    s/'CF.NoteUrl' NOT LIKE//g;
     
-    $query =~ s/'CF.NoteSelection' LIKE/selected text matches/g;
-    $query =~ s/'CF.NoteSelection' NOT LIKE/selected text does not match/g;
-    $query =~ s/'CF.NoteStartNodeId' LIKE/in section id/g;
-    $query =~ s/'CF.NoteStartNodeId' NOT LIKE/not in section id/g;
-    $query =~ s/'CF.Agreeers' LIKE/agreeers include/g;
-    $query =~ s/'CF.Agreeers' NOT LIKE/agreeers do not include/g;
-
-    $query =~ s/Requestor.Name LIKE/submitter matches/g;
-    $query =~ s/ AND /, and /g;
-    $query =~ s/ OR /, or /g;
-    return $query;
+    s/'CF.NoteSelection' LIKE/selected text matches/g;
+    s/'CF.NoteSelection' NOT LIKE/selected text does not match/g;
+    s/'CF.NoteStartNodeId' LIKE/in section id/g;
+    s/'CF.NoteStartNodeId' NOT LIKE/not in section id/g;
+    s/'CF.Agreeers' LIKE/agreeers include/g;
+    s/'CF.Agreeers' NOT LIKE/agreeers do not include/g;
+    s/ AND /, and /g;
+    s/ OR /, or /g;
+    return;
 }
 
 

@@ -1,0 +1,87 @@
+<!-- Copyright (C) 2006   Software Freedom Law Center, Inc.
+--   Author: Orion Montoya <orion@mdcclv.com>
+--
+-- This software gives you freedom; it is licensed to you under version
+-- 3 of the GNU Affero General Public License, along with the
+-- additional permission in the following paragraph.
+--
+-- This notice constitutes a grant of such permission as is necessary
+-- to combine or link this software, or a modified version of it, with
+-- Request Tracker (RT), published by Jesse Vincent and Best Practical
+-- Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+-- distribute the resulting work.  RT is licensed under version 2 of
+-- the GNU General Public License.
+-- 
+-- This software is distributed WITHOUT ANY WARRANTY, without even the
+-- implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+-- PURPOSE.  See the GNU Affero General Public License for further
+-- details.
+--  
+-- You should have received a copy of the GNU Affero General Public
+-- License, version 3, and the GNU General Public License, version 2,
+-- along with this software.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+<title>set stubby cookie</title>
+<script>
+function createCookie(name,value,days)
+{
+	if (days)
+	{
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+function saveIt(name)
+{
+	var x = document.forms[0].cookievalue.value;
+	if (!x)
+		alert('Please fill in a value in the input box.');
+	else
+		createCookie(name,x,7);
+}
+function readCookie(name)
+{
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i<ca.length;i++)
+	{
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+function eraseCookie(name)
+{
+	createCookie(name,"",-1);
+}
+
+function readIt(name)
+{
+	alert('The value of the cookie is ' + readCookie(name));
+}
+
+function eraseIt(name)
+{
+	eraseCookie(name);
+	alert('Cookie erased');
+}
+
+
+
+
+
+</script>
+</head>
+<body>
+<form>
+My email address for gplv3.fsf.org RT is: <input type="text" name="cookievalue"/> <a href="javascript:saveIt('stetStubCookie')">save</a> <a href="javascript:readIt('stetStubCookie')">read</a> <a href="javascript:eraseIt('stetStubCookie')">clear</a>
+</form>
+</body>
+</html>

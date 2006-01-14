@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
-# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
+#!/usr/bin/perl -wT
+# Copyright (C) 2006   Software Freedom Law Center, Inc.
 # Author: Orion Montoya <orion@mdcclv.com>
 #
 # This software gives you freedom; it is licensed to you under version
@@ -22,6 +22,7 @@
 # License, version 3, and the GNU General Public License, version 2,
 # along with this software.  If not, see <http://www.gnu.org/licenses/>.
 
+
 use CGI qw(:standard);
 use lib '/usr/share/request-tracker3.4/lib/';
 use lib '/etc/request-tracker3.4/';
@@ -32,161 +33,193 @@ use lib '/etc/request-tracker3.2/';
 use MIME::Base64;
 use Frontier::Client;
 
-
-use RT::Interface::CLI qw(CleanEnv GetCurrentUser GetMessageContent);
-use RT::Interface::Web;
-
 use RT;
-RT::LoadConfig();
-RT::Init();
+use RT::Interface::Web;
 use RT::Ticket;
 use RT::Transactions;
 use RT::CurrentUser;
 use RT::CustomField;
 use Data::Dumper;
+use RT::Users;
+use RT::Groups;
+use RT::GroupMembers;
+use RT::Principals;
+
+RT::LoadConfig();
+RT::Init();
 
 sub debug {
     print STDERR @_ . "\n";
-
 }
 
-$printargs = "default (20 most recent comments)";
+
 
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
-
     $name =~ s/\"//g;
     $server = Frontier::Client->new(url => "http://gplv3.fsf.org:8800/launch/acl_users/Users/acl_users",
 				    username => "stet_auth",
 				    password =>  "fai1Iegh");
-    
-    
     $resp = $server->call('authRemoteUser',$name,$pass);
 }
 else {
     ${$resp} = 0;
 }
 
-if (${$resp} == 0) {
-    print STDERR "auth boolean was 0\n";
-}
+my $CurrentUser = RT::CurrentUser->new;
 
+if (${$resp} == 0) {
+    $CurrentUser->LoadByName("Nobody"); 
+}
+elsif (${$resp} == 1) {
+    $CurrentUser->LoadByName($name);
+}
 
 #my $CurrentUser = RT::Interface::CLI::GetCurrentUser();
 #my $CustomFieldObj = RT::CustomField->new($CurrentUser);
 
 #my $Query;
-#if(param()) {
-#    $NoteUrl = param('NoteUrl');
-# }
-my $CurrentUser = $RT::SystemUser;
+if(param()) {
+    $NoteUrl = param('NoteUrl');
+ }
+
+
+
 my $TicketObj = new RT::Tickets( $CurrentUser );
-if (param('WatcherOp') == "LIKE") {
-    $arg = "%".param('ValueOfWatcher')."%";
-}
-else {
-    $arg = param('ValueOfWatcher');
-}
-$Query = param('WatcherField')." ".param('WatcherOp'). 'Requestor.Name LIKE "%'.param('ValueOfWatcher').'%"'
+my ($Query, $ShowQuery) = &BuildQuery;
+
 $TicketObj->FromSQL($Query);
-%session = '';
-# as a result of next line, searches are *not* sticky.
 
-%ARGS = param();
-$TicketObj->Query();
+# %session = '';
+
+ %ARGS = param();
+
 &LimitByArgs;
-
-
-
+$TicketObj->Query();
 
 # $TicketObj->FromSQL($Query);
-
-# $TicketObj->LimitCustomField(
-# 			     CUSTOMFIELD => 3,
-# 			     VALUE => $NoteUrl,
-# 			     OPERATOR => "="
-# 			     );
-
+if($NoteUrl) {
+ $TicketObj->LimitCustomField(
+ 			     CUSTOMFIELD => 3,
+ 			     VALUE => $NoteUrl,
+ 			     OPERATOR => "="
+ 			     );
+}
 
 $count = $TicketObj->CountAll();
-print STDERR $TicketObj->loc("Found [quant,_1,annotation].\n",$count);
+$printargs = "$ShowQuery: (found $count tickets)";
+print header();
+print start_html(-title => 'browse GPLv3 Comments - stet 0.1',
+		 -style =>{-src=>'stet.css'},
+		 );
 
-print header('text/xml');
 my $returnme;
-$returnme .=  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n";
-$returnme .= "<response>\n";
+$returnme .= "<div id=\"maintext\">\n";
+$returnme .= "<h3>Currently showing: $printargs.  <a href=\"javascript:newQuery()\">change</a></h3>\n";
 $TicketObj->GotoFirstItem();
 my $annotation;
+
+## FIXME: I don't know why this (1) is necessary, that's for sure; emacs doesn't tell me anything useful.
+if (1) {
 while (my $item = $TicketObj->Next) {
-    $annotation = "";
+    $allcomments = "";
     my $Transactions = $item->Transactions;
     while (my $Transaction = $Transactions->Next) {
 	next unless ($Transaction->Type =~ /^(Create|Correspond|Comment$)/);
 		     
-	my $attachments = $Transaction->Attachments;
+		     my $attachments = $Transaction->Attachments;
 #    my $CustomFields = $item->QueueObj->TicketCustomFields();
-	my $CustomFields = $item->QueueObj->CustomFields();
-	$attachments->GotoFirstItem;
-	my $message = $attachments->Next;
-	$annotation .= $message->Content;
-    }
-
+		     my $CustomFields = $item->QueueObj->CustomFields();
+		     $attachments->GotoFirstItem;
+		     while (my $message = $attachments->Next) {
+			 $allcomments .= "<blockquote><h4>".$message->Subject."</h4>\n".$message->Content."<br/><span class=\"posted\">noted by user#".$message->CreatorObj->Name."</span>\n";
+		     }
+		     print "</blockquote>" x $attachments->count;
+		 }
+	
 	$showagree = '';	
 	$agr_vals = $item->CustomFieldValues(7);
-	if ($$resp == 1) {
-
-	    while ($value = $agr_vals->Next) {
+	if (${$resp} == 1) {
+	    while (my $value = $agr_vals->Next) {
 		if (($name) && ($value->Content eq $name)) {
-		    print STDERR "the user agrees with ".$item->id."\n";
-#		    $showagree = "<a label=\"you have indicated that you agree with this\" name=\"you have indicated that you agree with this\">unagree</a>";
-		    $showagree = "unagree";
+		    $showagree = "<a href=\"javascript:iAgree('unagree','".$item->id."')\" label=\"you have indicated that you agree with this\" name=\"you have indicated that you agree with this\">unagree</a>";
 		}
 	    }
 	    if (!$showagree) {
-		$showagree = "agree";
+		$showagree = "<a href=\"javascript:iAgree('agree','".$item->id."')\">agree</a>";
 	    }
 	}
 	else {
-	    $showagree = "<a href=\"gplv3.fsf.org:8800/launch/login_form\">login</a> to agree";
-	    
+	    $showagree = "<a href=\"http://gplv3.fsf.org:8800/launch/login_form?came_from=/comments/showcomments.pl\">login</a> to agree";
 	}
 	
-#print "ticket has ".$values->count." customfieldvalues\n";
 
-#
-#    my $Attachs = $item->TransactionObj->Attachments->First;
-#    my $content = $Attachs->Content;
-# while (my $CustomField = $CustomFields->Next()) {
-# my $CustomFieldValues=$Ticket->CustomFieldValues($CustomField->Id);
-	$returnme .= "<cs>Currently showing: $printargs.  <a href=\"javascript:newQuery()\">change</a></cs>\n";
-	  $returnme .= "<annotation>\n";
-#    $returnme .= " <url>" . $item->FirstCustomFieldValue('NoteUrl') . "</url>\n";
-#    $returnme .= " <dompath>" . $item->FirstCustomFieldValue('NoteDomPath') . "</dompath>\n";
-	  $returnme .= " <n>$annotation</n>\n";
-	  $returnme .= " <e>" . $item->FirstCustomFieldValue('NoteEndNodeId') . "</e>\n";
-	  $noteSelection = $item->FirstCustomFieldValue('NoteSelection');
-	  $noteSelection =~ s/</&lt;/g;
-	  $noteSelection =~ s/>/&gt;/g;
-	  $returnme .= " <s>" . $noteSelection . "</s>\n"; 
-	  $returnme .= " <i>" . $item->FirstCustomFieldValue('NoteStartNodeId') . "</i>\n";
-	  $returnme .= " <u>" . $item->Requestors->MemberEmailAddressesAsString . "</u>\n";
-	  $returnme .= " <ua>" . $showagree . "</ua>\n";
-	  $returnme .= " <at>" . $agr_vals->count . "</at>\n";
-	  $returnme .= " <id>" . $item->id . "</id>\n";
-	  $returnme .= "</annotation>\n";
-	  
-#    print STDERR Dumper($item);
-#	  print STDERR $item->requestors;
+	$returnme .= "<div class=\"onecomment\">\n";
+	$returnme .= " <h4><a href=\"showcomments.pl?id=".$item->id."\">" . $item->id . ": ". $item->Subject . "</a></h4>\n";
+	$noteSelection = $item->FirstCustomFieldValue('NoteSelection');
+	$noteSelection =~ s/</&lt;/g;
+	$noteSelection =~ s/>/&gt;/g;
+	$returnme .= "<span class=\"ontextLabel\">Regarding text:</span> <span class=\"ontextText\">" . $noteSelection ."</span><br/>\n"; 
+	$returnme .= "<span class=\"ontextLabel\"> in section:</span> <span class=\"nodelink\">" . $item->FirstCustomFieldValue('NoteStartNodeId') . "</span><br/>\n";
+#	$returnme .= " created by " . $item->Requestors->UserMembersObj->First->Name . "\n";
+	$returnme .= " submitted by:" . $item->Requestors->MemberEmailAddressesAsString . "<br/>\n";
+	$returnme .= " <ua>" . $showagree . "</ua>\n";
+	if ($agr_vals->count > 0) {
+	    $returnme .= "<span class=\"agreecount\">".$agr_vals->count." agree</span>\n";
+	}
+	$returnme .= " $allcomments<br/>\n";
+
+	if (${$resp} == 1) {
+	    $returnme .= "<form action=\"addcomments.pl\" method=\"POST\">
+<textarea name=\"addcomments\" cols=\"50\" rows=\"20\" onfocus=\"if(this.value=='Enter additional comments here') {this.value='';}\" onblur=\"if(this.value==''){this.value='Enter additional comments here';}\">";
+	    if(param('addcomments')) {
+		$returnme .= param('addcomments');
+	    }
+	    else {
+		$returnme .= "Enter additional comments here";
+	    }
+	    $returnme .= "</textarea><br/>
+<input type=\"submit\" value=\"submit\"/></form>";
+	}
+
+	$returnme .= "</div>\n";
+	
     }
-
-$returnme .= "</response>\n";
-#    printf ("%s", $item->CustomField-3);
+}
+$returnme .= "</body></html>\n";
 
 print $returnme;
-#print Dumper($TicketObj);
+
+
+
+sub BuildQuery {
+    my ($Query,$ShowQuery);
+if(param('id')) {  
+    $Query = " id=".param('id');
+    $ShowQuery = " comment id # ".param('id');
+}
+
+    # this uses nearly pure SQL since my attempts at using things like
+    # ->LimitWatcher() have failed
+    if (param('ValueOfWatcher')) {
+	if (param('WatcherOp') == "LIKE") {
+	    $arg = "%".param('ValueOfWatcher')."%";
+	}
+	else {
+	    $arg = param('ValueOfWatcher');
+	}
+	$Query .= " AND ". param('WatcherField')." ".param('WatcherOp'). ' "%'.param('ValueOfWatcher').'%"';
+	$ShowQuery .= '<br/>'.param('WatcherField')." ".param('WatcherOp'). ' "%'.param('ValueOfW\atcher');
+    }
+    return ($Query, $ShowQuery);
+}
+
+
+
+
+
 
 # LimitByArgs adapted from $RT/lib/Interface/Web.pm's ProcessSearchQuery
 # (out of desperation)
-
 sub LimitByArgs {
 
     # {{{ Limit priority
@@ -199,7 +232,7 @@ sub LimitByArgs {
     }
 
     # }}}
-    # {{{ Limit owner
+    # {{{ Limit owner  # this should be changed for actor
     if ( param('ValueOfOwner') ne '' ) {
         $TicketObj->LimitOwner(
             VALUE    => param('ValueOfOwner'),
@@ -289,15 +322,15 @@ sub LimitByArgs {
 
     # }}}    
     # {{{ Limit Content
-    if ( param('ValueOfAttachmentField') ne '' ) {
-        my $val = param('ValueOfAttachmentField');
-        if (param('AttachmentFieldOp') =~ /like/) {
+    if ( param('ValueOfAttachment') ne '' ) {
+        my $val = param('ValueOfAttachment');
+        if (param('AttachmentOp') =~ /like/) {
             $val = "%".$val."%";
         }
         $TicketObj->Limit(
             FIELD   => param('AttachmentField'),
             VALUE    => $val,
-            OPERATOR => param('AttachmentFieldOp'),
+            OPERATOR => param('AttachmentOp'),
         );
     }
 
@@ -337,9 +370,9 @@ sub LimitByArgs {
                                                    VALUE       => $value );
         }
     }
-
-
 }
+
+
 # {{{ sub ParseDateToISO
 
 =head2 ParseDateToISO
@@ -352,7 +385,7 @@ Returns an ISO date and time in GMT
 sub ParseDateToISO {
     my $date = shift;
 
-    my $date_obj = RT::Date->new($session{'CurrentUser'});
+    my $date_obj = RT::Date->new($CurrentUser);
     $date_obj->Set(
         Format => 'unknown',
         Value  => $date
@@ -366,59 +399,3 @@ sub ParseDateToISO {
 
 =cut
 
-# http://gplv3.fsf.org/stet/rt-test.pl?SearchId=new
-Query=
-Format=%27+++%3Cb%3E%3Ca+href%3D%22%2Frt%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__id__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3A%23%27%2C+%0D%0A%27%3Cb%3E%3Ca+href%3D%22%2Frt%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__Subject__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3ASubject%27%2C+%0D%0A%27__Status__%27%2C+%0D%0A%27__QueueName__%27%2C+%0D%0A%27__OwnerName__%27%2C+%0D%0A%27__Priority__%27%2C+%0D%0A%27__NEWLINE__%27%2C+%0D%0A%27%27%2C+%0D%0A%27%3Csmall%3E__Requestors__%3C%2Fsmall%3E%27%2C+%0D%0A%27%3Csmall%3E__CreatedRelative__%3C%2Fsmall%3E%27%2C+%0D%0A%27%3Csmall%3E__ToldRelative__%3C%2Fsmall%3E%27%2C+%0D%0A%27%3Csmall%3E__LastUpdatedRelative__%3C%2Fsmall%3E%27%2C+%0D%0A%27%3Csmall%3E__TimeLeft__%3C%2Fsmall%3E%27
-AndOr=AND
-AttachmentField=Subject
-AttachmentOp=LIKE
-ValueOfAttachment=
-QueueOp=%3D
-ValueOfQueue=
-StatusOp=%3D
-ValueOfStatus=
-ActorField=Owner
-ActorOp=%3D
-ValueOfActor=
-WatcherField=Requestor.Name
-WatcherOp=LIKE
-ValueOfWatcher=orion
-DateField=Created
-DateOp=%3C
-ValueOfDate=
-TimeField=TimeWorked
-TimeOp=%3C
-ValueOfTime=
-PriorityField=Priority
-PriorityOp=%3C
-ValueOfPriority=
-LinksField=HasMember
-LinksOp=%3D
-ValueOfLinks=
-idOp=%3C
-ValueOfid=
-%27CF.NoteSelection%27Op=LIKE
-ValueOf%27CF.NoteSelection%27=
-%27CF.NoteDomPath%27Op=LIKE
-ValueOf%27CF.NoteDomPath%27=
-%27CF.NoteUrl%27Op=LIKE
-ValueOf%27CF.NoteUrl%27=
-%27CF.NoteStartNodeId%27Op=LIKE
-ValueOf%27CF.NoteStartNodeId%27=
-%27CF.NoteEndNodeId%27Op=LIKE
-ValueOf%27CF.NoteEndNodeId%27=
-%27CF.NoteText%27Op=LIKE
-ValueOf%27CF.NoteText%27=
-%27CF.Agreeers%27Op=LIKE
-ValueOf%27CF.Agreeers%27=
-AddClause=Add
-Owner=RT%3A%3AUser-12
-Description=
-LoadSavedSearch=
-Link=None
-Title=
-Size=
-Face=
-OrderBy=id
-Order=ASC
-RowsPerPage=50
