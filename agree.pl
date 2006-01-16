@@ -44,7 +44,7 @@ $opn = param('opn');
 
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
      $name =~ s/\"//g;
-     $server = Frontier::Client->new(url => "http://gplv3.fsf.org:8800/launch/acl_users/Users/acl_users",
+     $server = Frontier::Client->new(url => 'http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
  				    username => "stet_auth",
  				    password =>  "fai1Iegh");
     
@@ -70,17 +70,21 @@ $Ticket->Load($id);
 $values = $Ticket->CustomFieldValues(7);
 #print Dumper($values);
 #print "ticket has ".$values->count." customfieldvalues\n";
-if ($opn =~ /unagree/) {
+# this is trusting the user input, but it really needs to check the values
+if (($opn =~ /unagree/) && ($values->HasEntry($name))) {
     ($bool, $message) = $Ticket->DeleteCustomFieldValue(Field => "7", Value => $name);
     $agreebool = "unagree";
     print STDERR "DeleteCustomFieldValue said $bool, $message\n";
 }
 
 else {
-    ($bool, $message) = $Ticket->AddCustomFieldValue(Field => "7", Value => $name);
-    print STDERR "AddCustomFieldValue said $bool, $message\n";
-    $agreebool = "agree";
+    if  (!$values->HasEntry($name)) {
+	($bool, $message) = $Ticket->AddCustomFieldValue(Field => "7", Value => $name);
+	print STDERR "AddCustomFieldValue said $bool, $message\n";
+	$agreebool = "agree";
+    }
 }
+if (!$agreebool) { $agreebool = "stop it"; }
 # }
 # }
 
@@ -93,18 +97,37 @@ else {
 
 
 # if (${$resp} == 0) {
+if ($agreebool =~ /agree/) {
 print header('text/xml');
 
     print <<"EOF";
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
  <response>
   <agreement>
+    <cs>You now $agreebool with <a href="/comments/rt/readsay.html?id=$id">$id</a>.  <a href=\"/rt/NoAuth/changeshown.html\">change shown comments</a></cs>
     <id>$id</id>
     <b>$agreebool</b>
   </agreement>
  </response>
 
 EOF
+}
+elsif ($agreebool =~ "stop it") {
+print header('text/xml');
+
+    print <<"EOF";
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <response>
+  <agreement>
+    <cs>Hmm, I'm confused about your agreement.  Try again later, or reload to toggle your opinion.  <a href=\"/rt/NoAuth/changeshown.html\">change shown comments</a></cs>
+    <id>$id</id>
+    <b>$agreebool</b>
+  </agreement>
+ </response>
+
+EOF
+}
+
 #}
 
 

@@ -32,13 +32,43 @@
       <head>
         <title><xsl:value-of select="//head/title"/></title>
         <script type="text/javascript" src="stet.js"/>
+	<script type="text/javascript" language="javascript">
+window.onload = initPage();
+</script>
+
         <link rel="stylesheet" type="text/css" href="stet.css"/>
       </head>
       <body onkeypress="checkKeyPressed(event);" bgcolor="#FFFFFF">
 <div id="topbar" class="topbar">
-<span id="statustext" class="statustext">Loading comments.  If you're still reading this, it's a strong indication that we do not properly support your browser.  You may need to email your comments instead, or try another recent Gecko-based browser.</span>	  <span id="querydiv" style="display:none"></span>
+<span id="statustext" class="statustext">Loading comments.  If you're still reading this, it's a strong indication that we do not properly support your browser yet.  You may need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.</span>	  <span id="querydiv" style="display:none"></span>
 	  <span id="login" class="login"></span>
 </div>
+      <div class="portlet" id="portlet-dogear">
+        <div class="portletBody">
+          <img alt="" src="http://gplv3.fsf.org/dogear.png" />
+        </div>
+      </div>
+
+   <h1 id="portal-logo">
+     <a href="http://gplv3.fsf.org" accesskey="1">GPLv3</a>
+</h1>
+
+    <ul id="portal-globalnav">
+        <li class="plain">
+            <a href="http://gplv3.fsf.org">Home</a></li>
+        <li class="selected">
+            <a href="http://gplv3.fsf.org/comments/">Comments</a></li>
+        <li class="plain">
+            <a href="http://gplv3.fsf.org/wiki/">Wiki</a></li>
+        <li class="plain">
+            <a href="http://gplv3.fsf.org/press">Press</a></li>
+    </ul>
+
+<ul id="portal-personaltools">
+</ul>
+          
+
+
         <div id="maintext">
           <xsl:apply-templates/>
         </div>
@@ -57,7 +87,7 @@
 
 
   <xsl:template match="//head">
-    <section id="title"><p id="title.0"><sent id="title.0.0"><h1><xsl:value-of select="title"/></h1></sent></p>
+    <section id="title"><h1><p id="title.0"><sent id="title.0.0"><xsl:value-of select="title"/></sent></p></h1>
     <p id="title.1"><sent id="title.1.0"><xsl:value-of select="pubdate"/></sent></p>
     <p id="status.0"><sent id="status.0.0"><strong><xsl:value-of select="status"/></strong></sent></p>
     <p id="copyright.0"><sent id="copyright.0.0">Copyright (C) <xsl:value-of select="copyright/year"/> 
@@ -83,26 +113,12 @@
   
   <xsl:template match="//body">
     <p><a href="javascript:XpathSel()">select some text and then type "c" to submit comments.</a></p>
-
-<!--	<p><strong>Notes 2006-01-04</strong> I've broken through a few logjams that have been preventing many comments from displaying, and I'm glad to have exposed several other problems with my method for inserting these comments, but also to see all the comments that have been made so far.  The current implementation was already a plan B, and so now I need a plan C.  Also I see many of the &lt;em&gt; are not being closed.</p>
-
-	<p><strong>Notes 2006-01-06</strong>
-	<ul>
-	<li>You can now agree with a comment, or once you've agreed you may revoke your agreement if you change your mind.</li>
-	<li>Comments are now excerpted if they're long.  Toggle them by clicking anywhere on them, or on the [+]</li>
-	<li>agreement/disagreement/ticketlink are all behind the [+] now</li>
-	<li>Comments now ask you to put a subject or summary: a change in presumption, from presuming brevity to presuming lengthiness.</li>
-	</ul>
-	</p>
-
-    <p>Also, you now need to be <a href="http://gplv3.fsf.org:8800/launch/login_form">logged in</a> to the main gplv3.fsf.org site in order to make comments.  Alert box to this effect coming soon.</p>
-
--->
 <!--    <p>Toggle display of <a href="javascript:toggle('add')">additions</a> | <a href="javascript:toggle('del')">deletions</a> [none yet on these documents]</p> -->
 
     <xsl:for-each select="section">
-      <h3><xsl:value-of select="title"/></h3>
       <section id="{@id}" name="{@id}">
+       <p class="sectTitle" id="{@id}.0"><sent id="{@id}.0.0"><xsl:value-of select="title"/></sent></p>
+       <p class="sectTitle sub" id="{@id}.0.0.0"><sent id="{@id}.0.0.0.0"><xsl:value-of select="subtitle"/></sent></p>
         <xsl:for-each select="p">
           <p id="{@id}" name="{@id}">
             <xsl:for-each select="sent">

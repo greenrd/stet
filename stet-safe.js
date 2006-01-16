@@ -26,10 +26,7 @@
 //  His license is:
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-
-if (!dump) {
-function dump() { }
-}
+//function dump() { }
 
 var ticketObj = new Object;
 ticketObj.rtidsBySn = new Object;
@@ -559,14 +556,16 @@ function highlightWord(node,word,tooltip,rtid,user) {
 // as that is a little less buggy.
 // but so far the only thing worse than this function, is everything I've
 // tried to replace it with.
-//if (node) { dump("my node is "+node.id+"\n"); }
   var haveHighlighted = false;
   if ((node) && (node.hasChildNodes)) {
-	paragraph = node;
-
+    highlightWord(node.firstChild,word,tooltip,rtid,user);
+  }
+  if ((node) && (node.nodeType == 3)) { // text node
+    if (!haveHighlighted) {
+      if ((node.parentNode) && (node.parentNode.parentNode) && (paragraph = node.parentNode.parentNode)) {
 	paragraphString = getXMLNodeSerialisation(paragraph);
 	paragraphString.replace(/\s+/g,' ');
-//	dump("pString is "+paragraphString+"\n");
+	tempNodeVal = paragraphString;
 	tempWordVal = word;
 	tempWordVal = tempWordVal.replace(/\W+/g,'\\W[^<>]*(<[^<]+>)*');
 	tempWordVal = tempWordVal.replace(/^\\W/,'');
@@ -582,15 +581,17 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" i
   <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
  </span>\
 </span>');
-//dump("replaced on "+$&+"\n");
-//dump("pString is now "+paragraphString+"\n\n");
- loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
+   //      dump("replaced on "+$&+"\n");
+//dump("pString is now "+paragraphString+"\n");
+ loadHTMLtoDiv(paragraphString,node.parentNode.parentNode.id,"highlightword 742"); 
 
  //    node.parentNode.parentNode.innerHTML = paragraphString;
     
     //    haveHighlighted=true;
     }
   }
+}
+}
 
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);

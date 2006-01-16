@@ -26,13 +26,13 @@
 //  His license is:
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-
-if (!dump) {
-function dump() { }
-}
+//function dump() { }
 
 var ticketObj = new Object;
 ticketObj.rtidsBySn = new Object;
+//var status = new Object;
+//status.msg = new Array;
+//status.last = last;
 
 var base64Chars = new Array(
 			    'A','B','C','D','E','F','G','H',
@@ -57,21 +57,29 @@ function initPage() {
   if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))) {
     filename = 'gplv3-draft-1';
   }
+
 if(window.location.search.length) {
-  // loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
- loadXMLDoc('/comments/rt/xmlresultsnew.html',window.location.search.substring(1));
+  //dump('loadxmldoc /comments/rt/xmlresults?'+window.location.search.substring(1)+'\n');
+  loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
 }
  else {
-   loadXMLDoc('/comments/rt/xmlresultsnew.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+   //dump('loadXMLDoc /comments/rt/xmlresults?Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+   loadXMLDoc('/comments/rt/xmlresults.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
  }
 }
 
+// window.onload = initPage();
+
+
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
 function XpathSel() {
+
   if (!readCookie('__ac')) {
     document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
     return;
   }
+
+
   var textObj = '';
   var start = '';
   var end = '';
@@ -87,12 +95,14 @@ function XpathSel() {
     {
       textObj= document.selection.createRange().text;
     }
-    //   if(!textObj.length) {
+  
+  //   if(!textObj.length) {
   //document.getElementById('selectsome').setAttribute('class','error');
   //  document.getElementById('login').innerHTML(textObj.length);
   //  return;
   //}
-    startNode = textObj.anchorNode.parentNode;
+
+      startNode = textObj.anchorNode.parentNode;
       startid= startNode.id;
       start = startNode.nodeName;
       
@@ -189,6 +199,7 @@ function getElementsByClass(needle)
   var         retvalue = new Array();
   var        i;
   var        j;
+  
   for (i = 0, j = 0; i < my_array.length; i++)
     {
       var c = " " + my_array[i].className + " ";
@@ -277,7 +288,11 @@ function loadURLtoDiv(url,args,targetid) {
   }
   req.open('GET',url,false);
   req.send(args);
+  
   loadHTMLtoDiv(req.responseText,targetid,"loadurltodiv");
+  //  document.getElementById(targetid).innerHTML = req.responseText;
+
+
 }
 
 function processReqChange() 
@@ -287,14 +302,23 @@ function processReqChange()
   if (req.readyState == 4) {
     // only if "OK"
     if (req.status == 200) {
+/* <jag> [Exception... "Component returned failure code: 0x80040111
+      (NS_ERROR_NOT_AVAILABLE) [nsIXMLHttpRequest.status]"  nsresult:
+      "0x80040111 (NS_ERROR_NOT_AVAILABLE)"  location: "JS frame ::
+      http://gplv3.fsf.org/stet/stet.js :: processReqChange :: line 189"
+      data: no]
+ */
       cancelNote("noteify");
       //dump(req.responseText);
       response  = req.responseXML.documentElement;
+      //dump("pre processAnnot\n");
       var resp_arrN;
       var resp_arrA;
       var resp_arrF;
       cs = response.getElementsByTagName("cs");
       statusbox(getXMLNodeSerialisation(cs[0]));
+
+
       resp_arrN = response.getElementsByTagName("annotation");
       if(resp_arrN.length > 0) {
 	//dump("processAnnot starting from "+resp_arrN[0].firstChild.data+"\n")
@@ -330,6 +354,12 @@ function onNoteifyMouseover() {
 }
 
 function processAnnotation(response) {
+  //	document.getElementById("statusbox").innerHTML = getXMLNodeSerialisation(cs[0]);
+  // dump("got an annotation\n");
+  //  dump(req.responseXML+"\n");
+  //	responseStringSer = getXMLNodeSerialisation(req.responseXML);
+  // dump(responseStringSer);
+  // dump(resp_arr + ' ' + resp_arr.length + ' ' + resp_arr.item(1)+"\n");
   
   selections_arr = response.getElementsByTagName("s");
   // dump(selections_arr + ' ' + selections_arr.length + ' ' + selections_arr.item(0)+"\n");
@@ -376,12 +406,31 @@ function processAnnotation(response) {
 	  startNode = startnodes_arr[prI].firstChild.data;
 	  startNode = startNode.replace(/note\.[0-9]+\./,'');
 	  noteSelection = selections_arr[prI].firstChild.data;
+	  //		annoteText = users_arr[prI].firstChild.data+": "+ annotations_arr[prI].firstChild.data;
 	  annoteText = annotations_arr[prI];
+	  //		if (annotations_arr[prI].firstChild.nextSibling) {
+	  //		annoteText += annotations_arr[prI].firstChild.toString();
+	  //		}
+	  
 	  rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
 	  user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
 	  //		dump(users_arr[prI].firstChild.data);
+	  //dump("\nhighlighting "+startNode+' '+noteSelection+' '+annoteText+' rt'+rtid+'\n');
 	  highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
+
+	  // FIXME: couple bugs left in intense_annot, 
+	  // new comments are not getting highlighted upon submission
+	  // and I want to sort out the rtidsBySn thing, so I can
+	  // annote one paragraph at a time.
+	  // also other distressing inconsistencies make the wack-ass
+	  // highlightWord() a better choice for the moment.
+	  
+		  // fixme: currently crashes browser :)
+	  
+	  //intense_annot(document.getElementById(startNode),noteSelection,rtid);
+
 	}
+	//	dump('rtidsBySn for gpl3.preamble.p2.s1 are: '+ticketObj.rtidsBySn['gpl3.preamble.p2.s1']+'\n');
 	unOverlap("annotation",5);
 }
 
@@ -406,6 +455,7 @@ function onNoteifyBlur() {
 //	noteNode = document.getElementById('noteify');
 //	dump(noteNode);
 	submitComment();
+//  window.location = 'http://localhost/cgi-bin/stet-submit.pl?foo=bar';
 }
 
 function checkKeyPressed(keyEvent) {
@@ -525,15 +575,18 @@ var submit = document.createElement('input');
 submit.setAttribute('type','button');
 submit.setAttribute('id','submitNote');
 submit.setAttribute('value','submit');
+//submit.onclick = 'dump("clicked submit")';
 submit.setAttribute('onClick','submitComment()');
 submit.setAttribute('class','annoteButton');
 submit.setAttribute('class','addnote');
 
 noteifyDiv.appendChild(DomPathTxt);
 noteifyDiv.appendChild(DomPath);
+//noteifyDiv.appendChild(theBR);
 noteifyDiv.appendChild(SelectionTxt);
 noteifyDiv.appendChild(theBR1);
 noteifyDiv.appendChild(Selection);
+// noteifyDiv.appendChild(theBR2);
 noteifyDiv.appendChild(NoteSubj);
 noteifyDiv.appendChild(theBR3);
 noteifyDiv.appendChild(NoteText);
@@ -551,6 +604,184 @@ return noteifyDiv;
 
 }
 
+function intense_annot(root,selection,rtid) {
+var selecObj = new Array;
+var rootObj = new Array;
+ //dump('selection is '+selection+'\n');
+ //dump('comment is '+ticketObj[rtid].excerpt+'\n');
+ var selections = new Array(selection);
+// couple lines of html-ignoring help from
+// http://www.notestips.com/80256B3A007F2692/1/NAMO5RNV2S 
+// by Mike Golding, 9/24/2003
+//Extract HTML Tags
+ regexp=/<[^<>]*>/ig;
+ // dump('node text is '+root.innerHTML+'\n');
+ rootHTMLArray = root.innerHTML.match(regexp);
+ //Replace HTML tags
+ // may not work in Safari
+ rootStrippedHTML = root.innerHTML.replace(regexp,"$!$");
+
+root_words = rootStrippedHTML.split(/\s+/);
+
+// there is one rootObj, each word in the root sentence a sub-obj
+for (i=0; i<root_words.length; i++) {
+    rootObj[i] = new Object;
+    rootObj[i].word = root_words[i];
+    rootObj[i].intensity = 0;
+    rootObj[i].annotations = new Array;
+}
+
+// each selecObj[n] refers to a single selection, and then has a .words[] array
+// that holds each word in the selection.
+for (i=0; i<selections.length; i++) {
+   selecObj[i] = new Object;
+   selecObj[i].selection = selections[i];
+   selecObj[i].words = new Array(selections[i].split(/\s+/));
+
+   // we're getting the comment from the ticketObj so don't bother here
+//   selecObj[i].comment = comments[i];
+//   selecObj[i].comment = 'this would be a comment'; // test foo
+
+   // this initializes a handy "matchindex" attribute that tells you 
+   // which array index of rootObj has the first char of the match
+   // (so you can skip the irrelevant indices that precede it)
+   intense_doRoughMatch(selections,selecObj,root_words);
+}
+
+
+ intense_incrWords(selecObj,rootObj);
+ 
+ returnstring = intense_genReturn(rootObj);
+
+ loadHTMLtoDiv(returnstring,root.id);
+ //  root.innerHTML = returnstring; 
+// return returnstring;
+
+}
+
+
+function intense_doRoughMatch(selections,selecObj,root_words) {   
+   // ok, so it's not perfect.  something  weird about the $!$ and stuff.
+
+  var rer = deParen(selections[i]);
+  //dump('rer is '+rer+'\n');
+  
+  foo = rer.replace(/ /g,'[\\s\\$\\!]+');
+  // foo = rer.replace(/\s+/g,"ACKACK");
+  //dump('foo is '+foo+'\n');
+  re = new RegExp(foo);
+  //dump('re is '+re+', rootBlah is '+rootStrippedHTML+'\n');
+  roughMatch = rootStrippedHTML.match(re);
+  if (roughMatch) {
+    //dump('roughmatched at '+roughMatch.index+'\n');
+    selecObj[i].matchindex = roughMatch.index;
+    for (n=0,sum=0; sum<roughMatch.index&&n<root_words.length; n++) {
+      if (root_words[n]) {
+	//dump('word "'+root_words[n]+'" length: '+root_words[n].length+'\n');
+	sum += root_words[n].length + 1;
+      }
+    }
+    n == 0 ? selecObj[i].arrayIndex = 0 : selecObj[i].arrayIndex = n-1;
+    //dump('looks like '+n+' would get us to '+sum+' aka '+roughMatch.index+'\n');
+  }
+}
+
+
+function intense_incrWords(selecObj,rootObj) {
+
+// try: first match the whole selectstring against the whole
+// rootstring, and find the index/offset of the first character of the
+// selectstring in the rootstring.  then split the rootstring... but
+// how do you know which array index corresponds to the offset?  do
+// selecObj[i].length until you get to the offset?
+ 
+// for each selection...
+ for (j=0; j<selecObj.length; j++) { 
+   // for each word in the selection...
+   //dump('starting j loop iteration '+j+'\n');
+   for (k=0; k<selecObj[j].words.length; k++) {
+     //dump('starting k loop iteration '+k+'\n');
+     // start at the object's predetermined arrayindex, and look only until you get to
+     // the arrayindex + the number of words in the selection...
+     //dump('should start at '+selecObj[j].arrayIndex+' looking across '+selecObj[j].words[k].length+' words in a '+rootObj.length+'-word sentence\n');
+     skip = 0;
+     // if we do i<...arrayIndex-1, gpl3 comments work
+     // if we do i<...arrayIndex, lincoln-thanksgiving works
+     // but they are mutually exclusive!
+     for (i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex-1; i++) {
+       //dump('starting i loop iteration '+i+'\n');
+       //dump('limit is '+selecObj[j].words[k].length+' plus '+selecObj[j].arrayIndex+'\n');
+   // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
+   // my desired result
+   
+       //   for (m=skip; ((skip<selecObj[j].words[k].length)); m++) {
+       m=skip;
+     matched = '';
+     //dump('word is '+selecObj[j].words[k][m]+' '+j+' '+k+' '+m+' '+skip+'\n');
+     //         re = new RegExp('\\b'+selecObj[j].words[k][m]+'\\b','m');
+     re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
+     //dump('i here is '+i+'\n');
+     thisMatch = rootObj[i].word.match(re);
+     if (thisMatch) {
+       //dump('matched '+re+': '+thisMatch.index+'\n');
+       rootObj[i].intensity++;
+       matched = 'true';
+       skip++;
+       //       m = selecObj[j].words[k].length+skip;
+     }
+     if (matched && ((m+1) == selecObj[j].words[k].length-1)) {
+       //dump('pushing an annotation\n');
+       var pushed = 1;
+       rootObj[i].annotations.push('foo');
+     }
+     //   }
+     }
+     // this is a hack: I need to find out why some loops are ending early
+     // (sort out the .length vs. maxindex problem)
+     // argh this, too, breaks gpl3 but not lincoln!
+     //if (!pushed) {
+     //rootObj[i].annotations.push('foo');
+     //}
+   }
+ }
+ }
+
+
+function intense_genReturn(rootObj) { 
+ returnstring = '';
+
+for (i=0; i<rootObj.length; i++) {
+  if(rootObj[i].intensity > 0) {
+//    intensereturn += '<span style="font-size: 1'+rootObj[i].intensity+'0%">';
+    intensereturn += '<span class="highlight">';
+  }
+  intensereturn += ' '+rootObj[i].word+' ';
+  if (rootObj[i].annotations.length) {
+    for (j=0; j<rootObj[i].annotations.length; j++) {
+
+      intensereturn += '<span class="annotation" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')">\
+  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
+  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt +'\
+  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
+</span>';
+
+
+
+   }
+  }
+  if(rootObj[i].intensity > 0) {
+    intensereturn += '</span>';
+  }
+
+}
+
+// thanks again, Mike Golding
+ for(i=0;intensereturn.indexOf("$!$") > -1;i++){
+   intensereturn = intensereturn.replace("$!$", rootHTMLArray[i]);
+ }
+ return intensereturn;
+ }
+ 
 function highlightWord(node,word,tooltip,rtid,user) {
 /* this code is basically no longer descended from: */
 /* http://www.kryogenix.org/code/browser/searchhi/  */
@@ -559,19 +790,21 @@ function highlightWord(node,word,tooltip,rtid,user) {
 // as that is a little less buggy.
 // but so far the only thing worse than this function, is everything I've
 // tried to replace it with.
-//if (node) { dump("my node is "+node.id+"\n"); }
   var haveHighlighted = false;
   if ((node) && (node.hasChildNodes)) {
-	paragraph = node;
-
+    highlightWord(node.firstChild,word,tooltip,rtid,user);
+  }
+  if ((node) && (node.nodeType == 3)) { // text node
+    if (!haveHighlighted) {
+      if ((node.parentNode) && (node.parentNode.parentNode) && (paragraph = node.parentNode.parentNode)) {
 	paragraphString = getXMLNodeSerialisation(paragraph);
 	paragraphString.replace(/\s+/g,' ');
-//	dump("pString is "+paragraphString+"\n");
+	tempNodeVal = paragraphString;
 	tempWordVal = word;
 	tempWordVal = tempWordVal.replace(/\W+/g,'\\W[^<>]*(<[^<]+>)*');
 	tempWordVal = tempWordVal.replace(/^\\W/,'');
 	tempWordVal = tempWordVal.replace(/\\W$/,'');
-	var re = new RegExp(tempWordVal, 'm');
+	var re = new RegExp(tempWordVal, 'mi');
 //	dump("re is "+re+"\n");
 
 
@@ -582,15 +815,17 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" i
   <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
  </span>\
 </span>');
-//dump("replaced on "+$&+"\n");
-//dump("pString is now "+paragraphString+"\n\n");
- loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
+   //      dump("replaced on "+$&+"\n");
+//dump("pString is now "+paragraphString+"\n");
+ loadHTMLtoDiv(paragraphString,node.parentNode.parentNode.id,"highlightword 742"); 
 
  //    node.parentNode.parentNode.innerHTML = paragraphString;
     
     //    haveHighlighted=true;
     }
   }
+}
+}
 
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);
@@ -607,36 +842,49 @@ function notemouseout(rtid) {
 
 
 function showFull (rtid) {
+  //dump('showing full for '+rtid+' since you asked\n');
   myCollapsed = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>',myCollapsed.id);
+  //  myCollapsed.innerHTML = ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>';
   myCollapsed.parentNode.setAttribute('onclick','');
   unOverlap("annotation",5);
 }
 
 function showExcerpt (rtid) {
+  //dump('showing excerpt for '+rtid+' since you asked\n');
   myFull = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>',myFull.id);
+  //  myFull.innerHTML = ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>';
   myFull.parentNode.setAttribute('onclick','showFull(\''+rtid+'\')');
   unOverlap("annotation",5);
 }
 
 function iAgree (rtid,opn) {
+// dump('agreeing with '+rtid+'\n');
   myAgr = document.getElementById('agree'+rtid);
   myAgr.setAttribute('href','');
   loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
   loadXMLDoc('agree.pl','rtid='+rtid+'&amp;opn='+opn);
+    
 }
 
 function unOverlap(cls,gapDesired) {
 items = getElementsByClass(cls);
 
  for (i = 0; i< (items.length - 1); i++) {
+   //dump("doing item "+i+", a "+items[i]+"\n");
    iheight =parseInt(document.defaultView.getComputedStyle(items[i], '').getPropertyValue("height"));
    ibottom = parseInt(parseInt(items[i].offsetTop) + parseInt(iheight));
+   //dump("iheight is "+iheight+" ibottom is "+ibottom+"\n");
    items[i+1].style.top = items[i+1].offsetTop+"px";
+   //dump("next offsetTop is "+items[i+1].offsetTop+" ibootom is "+ibottom+"\n");
+
    diff = parseInt(ibottom) - parseInt(items[i+1].style.top);
+   //dump("diff is "+diff+"\n");
    if (diff >= 0) {
      items[i+1].style.top = parseInt(parseInt(items[i+1].style.top)+parseInt(diff)+parseInt(gapDesired))+"px";
+     //     dump("items[i+1].style.top = "+parseInt(items[i+1].style.top)+"+"+diff+"+"+gapDesired+"\n");
+     //     dump("top is now "+items[i+1].style.top+"\n");
    }
  }
 }
@@ -647,13 +895,16 @@ function last(obj) {
 
 function statusbox(text) {
   //  status.push(msg)
+  //  document.getElementById("statustext").innerHTML = text+readCookie('__ac');
   loadHTMLtoDiv(text,'statustext');
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
+	//        document.getElementById("login").innerHTML = 'you are logged in as '+name+'. <a href="http://gplv3.fsf.org/logout">logout</a>';
 	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a>','login');
   }
   else {
+    //    document.getElementById("login").innerHTML = 'You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.';
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
   }
 }
@@ -665,7 +916,9 @@ function deParen(str) {
 }
 
 function newQuery() {
-  loadURLtoDiv('/comments/rt/changeshown.html','came_from='+document.location,'statustext');
+  loadURLtoDiv('/comments/rt/changeshown.html','NewQuery=1&came_from='+document.location,'statustext');
+//	document.getElementById("querydiv").style.display = "block";
+
 }
 
 function cancelNewQuery() {

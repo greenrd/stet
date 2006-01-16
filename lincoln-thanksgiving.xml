@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="selectxpath.xsl" type="text/xsl" ?>
-<!DOCTYPE annot SYSTEM "annot.dtd">
+<!DOCTYPE annot SYSTEM "gpl3.dtd">
 
 <!-- $Id: lincoln-thanksgiving.xml 41 2005-12-13 21:35:10Z orion $ -->
 

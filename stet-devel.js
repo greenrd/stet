@@ -26,7 +26,6 @@
 //  His license is:
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-
 if (!dump) {
 function dump() { }
 }

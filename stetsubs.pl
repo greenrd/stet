@@ -26,6 +26,13 @@ use MIME::Base64;
 use Frontier::Client;
 use URI::Escape;
 
+sub stripCrap($) {
+    my $crappy = shift;
+    $crappy =~ s/(.*)\?.*/$1/;
+    $crappy =~ s/.*\/([^\/]+)/$1/;
+    return $crappy;
+}
+
 sub cleanNoteSel($) {
     my $item = shift;
     my $noteSelection = $$item->FirstCustomFieldValue('NoteSelection');
@@ -52,9 +59,9 @@ sub showAgree($) {
 	}
     }
     else {
-	$showagree = "<a href=\"http://gplv3.fsf.org:8800/launch/login_form?came_from=/comments/\">login</a> to agree";
+	$showagree = "<a href=\"http://gplv3.fsf.org/login_form?came_from=/comments/\">login</a> to agree";
     }
-    print STDERR "showagree is $showagree\n";
+#    print STDERR "showagree is $showagree\n";
     return $showagree, $agr_vals->Count;
 }
 
@@ -86,44 +93,48 @@ sub showAgreeStr($) {
 
 
 sub getUser($) {
+
     my $CurrentUser = RT::CurrentUser->new;
-	print STDERR "entering getUser\n";
-#    if((!$session) || (!$session->CurrentUser)) {
-
-	our ($name,$pass,$resp);
-	if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
-	    $name =~ s/\"//g;
-	    my $server = Frontier::Client->new(url => "http://gplv3.fsf.org:8800/launch/acl_users/Users/acl_users",
-					       username => "stet_auth",
-					       password =>  "fai1Iegh");
-	    my $respref = $server->call('authRemoteUser',$name,$pass);
-	    $resp = $$respref;
-	}
-	else {
-	    $resp = 0;
-	}
-	print STDERR "resp to getUser was $resp\n";
-
+    print STDERR "entering getUser\n";
+    
+    my $name;
+    our ($pass,$resp);
+    if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
+	$name =~ s/\"//g;
+	my $server = Frontier::Client->new(url => 'http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
+					   username => "stet_auth",
+					   password =>  "fai1Iegh");
+	my $respref = $server->call('authRemoteUser',$name,$pass);
+	$resp = $$respref;
+    }
+    else {
+	$resp = 0;
+    }
+    print STDERR "resp to getUser was $resp\n";
+    
 # mangle name for testing:
 #	$name = $name."createtest2"; # have used 1, 45
-	print STDERR "name is $name and currentuser hash is ".$CurrentUser."\n";
+    print STDERR "name is $name and currentuser hash is ".$CurrentUser."\n";
 # authorized users get privileges
-	if ($resp == 1) {
-	    $CurrentUser->LoadByName($name);
-	    print STDERR "current $resp a user is ".$CurrentUser->id."\n";
-	}
-	if (($resp ==1) && (!$CurrentUser->id)) {
-	    my ($val, $msg) = createUser($name,$pass);
-	    print STDERR "trying to create a user $name, got \"$val : $msg\"\n";
-	    $CurrentUser->LoadByName($name);
-	}
-	elsif (!$CurrentUser->id) {
-# unauthorized users get to see the public queues
-	    $CurrentUser->LoadByName("public"); 
-	    print STDERR "current $resp c user is ".$CurrentUser->id."\n";
-	}
-    return ($CurrentUser, $resp);
+    if ($resp == 1) {
+	$CurrentUser->LoadByName($name);
+	print STDERR "current $resp a user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
     }
+    if (($resp ==1) && (!$CurrentUser->id)) {
+	my ($val, $msg) = createUser($name,$pass);
+	print STDERR "trying to create a user $name, got \"$val : $msg\"\n";
+	$CurrentUser->LoadByName($name);
+	print STDERR "created current $resp b user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
+    }
+    elsif (!$CurrentUser->id) {
+# unauthorized users get to see the public queues
+	$CurrentUser->LoadByName("public"); 
+	print STDERR "current $resp c user is ".$CurrentUser->id."(".$CurrentUser->Name."\n";
+    }
+    $session->{'CurrentUser'} = $CurrentUser;
+    return ($CurrentUser, $resp, $name);
+}
+
 #}
 
 sub createUser($$) {
@@ -139,7 +150,7 @@ my ($val, $msg) = $UserObj->Create(
         ExternalContactInfoId => $name,
         EmailAddress          => $name,
         ContactInfoSystem     => "gnuxmlrpc",
- #       Privileged           => $ARGS{'Privileged'},
+        Privileged           => 1,
         Disabled            => 0,
 				      );
 
@@ -156,7 +167,7 @@ $UserObj->SetPassword($pass);
 
 sub humanQuery {
     $query = shift;
-    $query =~ s/['%0-9]+CF.NoteUrl'['%0-9]+ +LIKE/in file/g;
+    $query =~ s/'CF.NoteUrl' LIKE/in file/g;
     $query =~ s/'CF.NoteUrl' NOT LIKE/not in file/g;
 #    $query =~ s/'CF.NoteUrl' LIKE//g;
 #    $query =~ s/'CF.NoteUrl' NOT LIKE//g;
@@ -173,6 +184,152 @@ sub humanQuery {
     $query =~ s/ OR /, or /g;
     return $query;
 }
+
+# {{{ sub myCFValueUpdater 
+
+sub myCFValueUpdater {
+	    print STDERR "stetsubs.pl 157\n";
+    my %args = (
+        ARGSRef => undef,
+        @_
+    );
+
+    my @results;
+
+    my $ARGSRef = $args{'ARGSRef'};
+
+    # Build up a list of tickets that we want to work with
+    my %tickets_to_mod;
+    my %custom_fields_to_mod;
+    foreach my $arg ( keys %{$ARGSRef} ) {
+        if ( $arg =~ /^Ticket-(\d+)-CustomField-(\d+)-/ ) {
+
+            # For each of those tickets, find out what custom fields we want to work with.
+            $custom_fields_to_mod{$1}{$2} = 1;
+	    print STDERR "Web.pm 1059 ticket $1 field $2\n";
+        }
+    }
+
+    # For each of those tickets
+    foreach my $tick ( keys %custom_fields_to_mod ) {
+        my $Ticket = $args{'TicketObj'};
+	if (!$Ticket or $Ticket->id != $tick) {
+	    $Ticket = RT::Ticket->new( $session{'CurrentUser'} );
+	    $Ticket->Load($tick);
+	}
+
+        # For each custom field  
+        foreach my $cf ( keys %{ $custom_fields_to_mod{$tick} } ) {
+
+	    my $CustomFieldObj = RT::CustomField->new($session{'CurrentUser'});
+	    $CustomFieldObj->LoadById($cf);
+
+            foreach my $arg ( keys %{$ARGSRef} ) {
+                # since http won't pass in a form element with a null value, we need
+                # to fake it
+                if ($arg =~ /^(.*?)-Values-Magic$/ ) {
+                    # We don't care about the magic, if there's really a values element;
+                    next if (exists $ARGSRef->{$1.'-Values'}) ;
+
+                    $arg = $1."-Values";
+                    $ARGSRef->{$1."-Values"} = undef;
+                
+                }
+                next unless ( $arg =~ /^Ticket-$tick-CustomField-$cf-/ );
+                my @values =
+                  ( ref( $ARGSRef->{$arg} ) eq 'ARRAY' ) 
+                  ? @{ $ARGSRef->{$arg} }
+                  : split /\n/, $ARGSRef->{$arg} ;
+
+		#for poor windows boxen that pass in "\r\n"
+		local $/ = "\r";
+		chomp @values;
+
+                if ( ( $arg =~ /-AddValue$/ ) || ( $arg =~ /-Value$/ ) ) {
+                    foreach my $value (@values) {
+                        next unless length($value);
+                        my ( $val, $msg ) = $Ticket->AddCustomFieldValue(
+                            Field => $cf,
+                            Value => $value
+                        );
+                        push ( @results, $msg );
+                    }
+                }
+                elsif ( $arg =~ /-DeleteValues$/ ) {
+                    foreach my $value (@values) {
+                        next unless length($value);
+                        my ( $val, $msg ) = $Ticket->DeleteCustomFieldValue(
+                            Field => $cf,
+                            Value => $value
+                        );
+                        push ( @results, $msg );
+                    }
+                }
+                elsif ( $arg =~ /-Values$/ and $CustomFieldObj->Type !~ /Entry/) {
+                    my $cf_values = $Ticket->CustomFieldValues($cf);
+
+                    my %values_hash;
+                    foreach my $value (@values) {
+                        next unless length($value);
+
+                        # build up a hash of values that the new set has
+                        $values_hash{$value} = 1;
+
+                        unless ( $cf_values->HasEntry($value) ) {
+                            my ( $val, $msg ) = $Ticket->AddCustomFieldValue(
+                                Field => $cf,
+                                Value => $value
+                            );
+                            push ( @results, $msg );
+                        }
+
+                    }
+                    while ( my $cf_value = $cf_values->Next ) {
+                        unless ( $values_hash{ $cf_value->Content } == 1 ) {
+                            my ( $val, $msg ) = $Ticket->DeleteCustomFieldValue(
+                                Field => $cf,
+                                Value => $cf_value->Content
+                            );
+                            push ( @results, $msg);
+
+                        }
+
+                    }
+                }
+                elsif ( $arg =~ /-Values$/ ) {
+                    my $cf_values = $Ticket->CustomFieldValues($cf);
+
+		    # keep everything up to the point of difference, delete the rest
+		    my $delete_flag;
+		    foreach my $old_cf (@{$cf_values->ItemsArrayRef}) {
+			if (!$delete_flag and @values and $old_cf->Content eq $values[0]) {
+			    shift @values;
+			    next;
+			}
+
+			$delete_flag ||= 1;
+			$old_cf->Delete;
+		    }
+
+		    # now add/replace extra things, if any
+		    foreach my $value (@values) {
+			my ( $val, $msg ) = $Ticket->AddCustomFieldValue(
+			    Field => $cf,
+			    Value => $value
+			);
+			push ( @results, $msg );
+		    }
+		}
+                else {
+                    push ( @results, "User asked for an unknown update type for custom field " . $cf->Name . " for ticket " . $Ticket->id );
+                }
+            }
+        }
+        return (@results);
+    }
+}
+
+# }}}
 
 
 1;
