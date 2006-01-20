@@ -26,20 +26,21 @@
 <response>
 % if ($Tickets) {
 %#    my $tick = $Tickets->Next;
-<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> ( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>: 
+<cs>Showing comments: <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> <a href="http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80">[rationale]</a> <br/> 
+( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>:
 %   if ($Tickets->CountAll() > $Rows) {
 %       if ($StartAt > 1 ) {
              <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev</a>
 %       }
-%   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() > $StartAt + $Rows)) {
+%   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() < $StartAt + $Rows)) {
 |
 % }
 %       if ($Tickets->CountAll() > $StartAt + $Rows) {
              <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next</a>
 %       }
 %   }
-%# ) <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>">change</a> 
-) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> 
+%# ) [some rendering problems noted] <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>">search</a> 
+) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search</a> 
 </cs>
 % 
 <%perl> 
@@ -51,7 +52,7 @@
     }
 </%perl>
 % } elsif ($Ticket) {
-<cs>Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a href="<% $listlink %>">[see thread]</a> <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> </cs>
+<cs>Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a href="<% $listlink %>">[see thread]</a> <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search</a> </cs>
 % }
 % if ($Ticket || $Tickets) {
 % my $i = 0;
@@ -75,7 +76,7 @@
 % }
 % }
 % else {
-<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change query</a> </cs>
+<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search again</a> </cs>
 % }
 </response>
 %
@@ -110,7 +111,8 @@ my ($Tickets, $Ticket);
 
 if ($ARGS{'Query'}) {
     $Tickets = RT::Tickets->new($CurrentUser);
-    $Tickets->FromSQL($ARGS{'Query'});
+# exclude, from this view, comments whose selection got messed up:
+    $Tickets->FromSQL($ARGS{'Query'}." AND 'CF.NoteStartNodeId' NOT LIKE 'login'");
     $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 }
 elsif ($ARGS{'id'}) {
