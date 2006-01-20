@@ -42,11 +42,13 @@ use MIME::Base64;
 $id = param('rtid');
 $opn = param('opn');
 
+do "xmlpass.pl";
+
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
      $name =~ s/\"//g;
      $server = Frontier::Client->new(url => 'http://',
- 				    username => "",
- 				    password =>  "");
+ 				    username => $username,
+ 				    password =>  $password);
     
     
      $resp = $server->call('authRemoteUser',$name,$pass);

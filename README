@@ -1,0 +1,19 @@
+This is an entirely preliminary, undocumented, unsupported release of
+stet.  Files may be missing.  Scatology may be unexpurgated.  I don't
+have much time to help you with this right now.  You need RT; we're
+using version 3.2.  There are perl dependencies.  There are unstated
+assumptions.  And the whole thing is made of dry spaghetti.
+
+But you asked for it.  You got it.
+
+(The name of this package should always be written all-lowercase.)
+
+The system is named "stet", after the proofreader's mark meaning "let
+it stand as it is".  Stet is collaborative document revision system,
+getting its users and commenters to the point where they can say "let
+it stand as it is" about the whole document.
+
+Authors: 
+Orion Montoya <orion@mdcclv.com>
+And the people acknowledged in the javascript...
+
