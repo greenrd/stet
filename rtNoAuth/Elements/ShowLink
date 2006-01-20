@@ -43,12 +43,13 @@
 %# those contributions and any derivatives thereof.
 %# 
 %# }}} END BPS TAGGED BLOCK
+% if (!$StetId) {
 <A href="<% $URI->Resolver->HREF %>">
 % if ($URI->IsLocal) {
 % my $member = $URI->Object;
 % if (UNIVERSAL::isa($member, "RT::Ticket")) {
 %# <%$member->Id%>: (<%$member->OwnerObj->Name%>) <%$member->Subject%> [<% loc($member->Status) %>]
-<%$member->Id%>: (<%$member->OwnerObj->Name%>) <%$member->Subject%>
+<%$member->Id%>: (<%$member->CreatorObj->Name%>) <%$member->Subject%>
 % } elsif ( UNIVERSAL::can($member, 'Name')) {
 <%$URI->Resolver->AsString%>: <%$member->Name%>
 % } else {
@@ -58,6 +59,11 @@
 <%$URI->Resolver->AsString%>
 % }
 </a>
+% } else {
+% my $member = $URI->Object;
+<a href="/rt/NoAuth/readsay.html?id=<% $member->Id %>"><%$member->Id%>: (<%$member->CreatorObj->Name%>) <%$member->Subject%></a>
+% }
 <%ARGS>
 $URI => undef
+$StetId => undef
 </%ARGS>

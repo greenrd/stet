@@ -49,8 +49,8 @@
  <META HTTP-EQUIV="Refresh" CONTENT="0;URL=<%$URL%>">
 </HEAD>
 <BODY>
-<p><&|/l&>You have been logged out of RT.</&>
-
+<p><&|/l&>You have been logged out of RT.</&></p>
+<p>You have not, however, been logged out of the rest of the gplv3 site; you probably should <a href="/logout">logout of GPLv3 site too</a>.
 <br>
 <br>
 <A HREF="<%$URL%>"><&|/l&>You're welcome to login again</&></a>
@@ -60,7 +60,7 @@
 if (defined %session) {
 	tied(%session)->delete;
 }
-$m->abort();
+# $m->abort();
 </%PERL>
 
 <%ARGS>

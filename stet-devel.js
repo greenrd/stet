@@ -26,9 +26,11 @@
 //  His license is:
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-if (!dump) {
-function dump() { }
+  
+  function dump(text) {
+  //window.console.log(text);
 }
+
 
 var ticketObj = new Object;
 ticketObj.rtidsBySn = new Object;
@@ -51,18 +53,19 @@ for (var i=0; i < base64Chars.length; i++){
 
 
 function initPage() {
-  statusbox("Please wait while we load some comments.");
+  //  if (Sarissa) { alert("sarissified"); }
+  statusbox(document.createTextNode("Please wait while we load some comments."));
   var filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
   if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))) {
     filename = 'gplv3-draft-1';
   }
-if(window.location.search.length) {
-  // loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
- loadXMLDoc('/comments/rt/xmlresultsnew.html',window.location.search.substring(1));
-}
- else {
-   loadXMLDoc('/comments/rt/xmlresultsnew.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
- }
+  if(window.location.search.length) {
+    // loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
+    loadXMLDoc('/comments/rt/xmlresultsnew.html',window.location.search.substring(1));
+  }
+  else {
+    loadXMLDoc('/comments/rt/xmlresultsnew.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+  }
 }
 
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
@@ -111,7 +114,7 @@ function XpathSel() {
 	
 	thisNode = document.getElementById(startid);
     
-    if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
+	if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
       thisNode.previousSibling.previousSibling.appendChild(myNoteIfy);
     }
     else 
@@ -203,13 +206,9 @@ function getElementsByClass(needle)
 var req;
 function loadXMLDoc(url,theData) 
 {
-   dump('loading '+url+'?'+theData+'\n');
+  dump('loading '+url+'?'+theData+'\n');
   // branch for native XMLHttpRequest object
-  if (window.XMLHttpRequest) {
-    req = new XMLHttpRequest();
-  } else if (window.ActiveXObject) {
-    req = new ActiveXObject('Microsoft.XMLHTTP');
-  }
+  req = new XMLHttpRequest();
   req.onreadystatechange = processReqChange;
   
   req.open("POST", url, true);
@@ -222,12 +221,7 @@ function loadXMLDoc(url,theData)
 
 function loadHTMLtoDiv(text,targetid,caller) {
   // this won't work in Safari so we need a Safari case:
-  if(targetid) {
-    //  dump('targetid is '+targetid);
-  //  if(caller) { dump(', caller is '+caller);}
-    //  dump('\n');
-  if (myElement = document.getElementById(targetid)) {
-	//	dump(e);
+    if (myElement = document.getElementById(targetid)) {
 	try {	
 	  myElement.innerHTML = text;
 	}
@@ -236,7 +230,6 @@ function loadHTMLtoDiv(text,targetid,caller) {
 	  newDiv.innerHTML = text;
 	  myElement.appendChild(newDiv);
 	}
-  }
   }
 }
 
@@ -268,12 +261,7 @@ function getXMLNodeSerialisation(xmlNode) {
 }
 
 function loadURLtoDiv(url,args,targetid) {
-  // branch for native XMLHttpRequest object
-  if (window.XMLHttpRequest) {
-    req = new XMLHttpRequest();
-  } else if (window.ActiveXObject) {
-    req = new ActiveXObject('Microsoft.XMLHTTP');
-  }
+  var req = new XMLHttpRequest();
   req.open('GET',url,false);
   req.send(args);
   loadHTMLtoDiv(req.responseText,targetid,"loadurltodiv");
@@ -293,6 +281,7 @@ function processReqChange()
       var resp_arrA;
       var resp_arrF;
       cs = response.getElementsByTagName("cs");
+      dump(cs[0].nodeValue);
       statusbox(getXMLNodeSerialisation(cs[0]));
       resp_arrN = response.getElementsByTagName("annotation");
       if(resp_arrN.length > 0) {
@@ -316,7 +305,7 @@ function processReqChange()
 /*       } */
 
       else {
-	statusbox("There was a problem or parsing the XML data (maybe there are no comments):\n" + req.statusText+" <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n"); //debug
+	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
       }
     }
   }
@@ -339,49 +328,51 @@ function processAnnotation(response) {
   uagr_arr = response.getElementsByTagName("ua");
   agrtot_arr = response.getElementsByTagName("at");
 	for (prI = 0; prI < selections_arr.length; prI++) {
-	  rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
-	  tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
-	  tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
-
-	  ticketObj[rtid] = new Object;
-
-	  ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
-
-/* 	  agreechild = uagr_arr[prI].firstChild.data */
-/* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
-/* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
-/* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
-/* 	    //ticketObj[rtid].agree = agreechild; */
-/* 	  } */
-/* 	  else { */
-/* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
-/* 	    //ticketObj[rtid].agree = agreestr; */
-/* 	  } */
-/* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
-/* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
-/* 	  } */
-
-	  ticketObj[rtid].full = tooltipString;
-	  ticketObj[rtid].excerpt = tooltipSubString;
-	  ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
-	  if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	  if (selections_arr[prI].firstChild) {
+	    noteSelection = selections_arr[prI].firstChild.data;
+	    
+	    rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
+	    tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
+	    //	    tooltipString = tooltipString.replace(/&lt;n&gt;/g,'');
+	    tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
+	    ticketObj[rtid] = new Object;
+	    ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+	    
+	    /* 	  agreechild = uagr_arr[prI].firstChild.data */
+	    /* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
+	    /* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
+	    /* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
+	    /* 	    //ticketObj[rtid].agree = agreechild; */
+	    /* 	  } */
+	    /* 	  else { */
+	    /* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
+	    /* 	    //ticketObj[rtid].agree = agreestr; */
+	    /* 	  } */
+	    /* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
+	    /* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
+	    /* 	  } */
+	    
+	    ticketObj[rtid].full = tooltipString;
+	    ticketObj[rtid].excerpt = tooltipSubString;
+	    ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	    ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
+	    if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
+	      ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	    }
+	    else {
+	      ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+	    }
+	    ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
+	    startNode = startnodes_arr[prI].firstChild.data;
+	    startNode = startNode.replace(/note\.[0-9]+\./,'');
+	    annoteText = annotations_arr[prI].firstChild.data;
+	    rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
+	    user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	    //		dump(users_arr[prI].firstChild.data);
+	    highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
 	  }
-	  else {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
-	  }
-	  ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
-	  startNode = startnodes_arr[prI].firstChild.data;
-	  startNode = startNode.replace(/note\.[0-9]+\./,'');
-	  noteSelection = selections_arr[prI].firstChild.data;
-	  annoteText = annotations_arr[prI];
-	  rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
-	  user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  //		dump(users_arr[prI].firstChild.data);
-	  highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
+	  unOverlap("annotation",5);
 	}
-	unOverlap("annotation",5);
 }
 
 function processAgreement(response) {
@@ -565,29 +556,54 @@ function highlightWord(node,word,tooltip,rtid,user) {
 
 	paragraphString = getXMLNodeSerialisation(paragraph);
 	paragraphString.replace(/\s+/g,' ');
-//	dump("pString is "+paragraphString+"\n");
+	//dump("pString is "+paragraphString+"\n");
 	tempWordVal = word;
-	tempWordVal = tempWordVal.replace(/\W+/g,'\\W[^<>]*(<[^<]+>)*');
-	tempWordVal = tempWordVal.replace(/^\\W/,'');
-	tempWordVal = tempWordVal.replace(/\\W$/,'');
-	var re = new RegExp(tempWordVal, 'm');
-//	dump("re is "+re+"\n");
+	tempWordVal = tempWordVal.replace(/\(/g,'\\(');
+	tempWordVal = tempWordVal.replace(/\)/g,'\\)');
+	tempWordVal = tempWordVal.replace(/\b\W+\b/g,'\\W[^<>]*(<[^<]+>)*');
+	//tempWordVal = tempWordVal.replace(/^\\W/,'');
+	//tempWordVal = tempWordVal.replace(/\\W$/,'');
+	//tempWordVal = tempWordVal.replace(/\\W[<>^*()+\]]+$/,'');
+	var re = new RegExp('('+tempWordVal+')', 'm');
+	//dump("re is "+re+"\n");
+
+	
+	paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.id+'">$1</span>');
+
+	var annoteBox = document.createElement('span');
+	annoteBox.setAttribute('class','annotation '+rtid);
+	annoteBox.setAttribute('id','rt'+rtid);
+	annoteBox.setAttribute('onmousedown','dragStart(event,\'rt'+rtid+'\')');
+	annoteBox.setAttribute('onclick','showFull(\''+rtid+'\')');
+	annoteBox.setAttribute('onmouseover','notemouseover('+rtid+')');
+	annoteBox.setAttribute('onmouseout','notemouseout('+rtid+')');
+
+	var noteBody = document.createElement('span');
+	noteBody.setAttribute('id','rt'+rtid+'txt');
+	var noteText = document.createTextNode(ticketObj[rtid].excerpt.replace(/<[\/]?n>/g,'')+' ');
+	//	noteText = noteText.replace(/<n>/g,'');
+	//noteBody.appendChild(ticketObj[rtid].excerpt);
+	noteBody.appendChild(noteText);
+
+	var user = document.createElement('span');
+	user.setAttribute('class','noteUser');
+	user.setAttribute('id','rt'+rtid+'user');
+	var userName = document.createTextNode(ticketObj[rtid].user+': ');
+	user.appendChild(userName);
 
 
-paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.parentNode.id+'">$&\
-<span class="annotation '+rtid+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
-  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
-  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt+'\
-  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
- </span>\
-</span>');
-//dump("replaced on "+$&+"\n");
-//dump("pString is now "+paragraphString+"\n\n");
- loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
+	var plus = document.createElement('a');
+	plus.setAttribute('href','javascript:showFull(\''+rtid+'\')');
+	plus.appendChild(document.createTextNode('[+]'));
 
- //    node.parentNode.parentNode.innerHTML = paragraphString;
-    
-    //    haveHighlighted=true;
+	noteBody.appendChild(plus);
+	
+	annoteBox.appendChild(user);
+	annoteBox.appendChild(noteBody);
+
+	loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
+	node.appendChild(annoteBox);
+
     }
   }
 
@@ -645,17 +661,17 @@ function last(obj) {
 }
 
 function statusbox(text) {
-  //  status.push(msg)
   loadHTMLtoDiv(text,'statustext');
   if((!name) && (readCookie('__ac'))) {
-	namepass = decodeBase64(readCookie('__ac'));
-	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a>','login');
+    namepass = decodeBase64(readCookie('__ac'));
+    var name = namepass.substr(0,namepass.indexOf(':'));
+    loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a>','login');
   }
   else {
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
   }
 }
+
 
 function deParen(str) {
   str = str.replace(/\(/g,'\\(');

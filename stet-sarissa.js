@@ -20,6 +20,12 @@
 // You should have received a copy of the GNU Affero General Public
 // License, version 3, and the GNU General Public License, version 2,
 // along with this software.  If not, see <http://www.gnu.org/licenses/>.
+/*
+# This program is free software; you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation; either version 2 of the License, or
+#(at your option) any later version. 
+ */
 
 // Based on some work from http://www.quirksmode.org/js/selected.html
 // That work was copyrighted by Peter-Paul Koch.

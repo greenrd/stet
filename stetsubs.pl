@@ -95,26 +95,26 @@ sub showAgreeStr($) {
 sub getUser($) {
 
     my $CurrentUser = RT::CurrentUser->new;
-    print STDERR "entering getUser\n";
-    
+    print STDERR "entering getUser with external passwords\n";
+    do "xmlpass.pl";
     my $name;
     our ($pass,$resp);
     if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
 	$name =~ s/\"//g;
 	my $server = Frontier::Client->new(url => 'http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
-					   username => "stet_auth",
-					   password =>  "fai1Iegh");
+					   username => $username,
+					   password =>  $password);
 	my $respref = $server->call('authRemoteUser',$name,$pass);
 	$resp = $$respref;
     }
     else {
 	$resp = 0;
     }
-    print STDERR "resp to getUser was $resp\n";
+#    print STDERR "resp to getUser was $resp\n";
     
 # mangle name for testing:
 #	$name = $name."createtest2"; # have used 1, 45
-    print STDERR "name is $name and currentuser hash is ".$CurrentUser."\n";
+#    print STDERR "name is $name and currentuser hash is ".$CurrentUser."\n";
 # authorized users get privileges
     if ($resp == 1) {
 	$CurrentUser->LoadByName($name);
@@ -129,7 +129,7 @@ sub getUser($) {
     elsif (!$CurrentUser->id) {
 # unauthorized users get to see the public queues
 	$CurrentUser->LoadByName("public"); 
-	print STDERR "current $resp c user is ".$CurrentUser->id."(".$CurrentUser->Name."\n";
+	print STDERR "current $resp c user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
     }
     $session->{'CurrentUser'} = $CurrentUser;
     return ($CurrentUser, $resp, $name);

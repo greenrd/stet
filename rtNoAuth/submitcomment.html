@@ -31,7 +31,7 @@
   <u>Authentication error</u>
   <i><% $startid %></i>
   <e><% $endid %></e>
-  <n>Your comment was not saved.  You need to <a href="http://gplv3.fsf.org:8800/launch/login_form?came_from=<% $urlpath %>">login</a> in order to make comments.  The text of your comment was:<br/> <strong>Subject:</strong><% $notesubj %><br/><% $notetext %></n>
+  <n>Your comment was not saved.  You need to <a href="http://gplv3.fsf.org/login_form?came_from=<% $urlpath %>">login</a> in order to make comments.  The text of your comment was:<br/> <strong>Subject:</strong><% $notesubj %><br/><% $notetext %></n>
   <s><% $selectedtext %></s>
   <id>x</id>
   <ua>x</ua>
@@ -41,14 +41,14 @@
 % } elsif ($resp == 1) {
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
-<cs>Your comment "$notesubj" was submitted.  <a href="changeshown.html">change query</a></cs>
+<cs>Your comment <em><% $scrubber->scrub($notesubj) %></em> was submitted.  <a href="/comments/rt/changeshown.html">change query</a></cs>
 <annotation>
-<n><% $notetext %></n>
-<e><% $endid %></e>
-<s><% $selectedtext %></s> 
-<i><% $startid %></i>
+<n><% $scrubber->scrub($notetext) %></n>
+<e><% $scrubber->scrub($endid) %></e>
+<s><% $scrubber->scrub($selectedtext) %></s> 
+<i><% $scrubber->scrub($startid) %></i>
 <id><% $id %></id>
-<u><% $name %></u>
+<u><% $scrubber->scrub($name) %></u>
 <ua>unagree</ua>
 <at>1</at>
 </annotation>
@@ -66,27 +66,34 @@ use Frontier::Client;
 
 require "/var/www/stet/stetsubs.pl";
 
-our $name;
-my ($CurrentUser, $resp) = getUser();
+use HTML::Scrubber;
+my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
 
+
+
+my ($CurrentUser, $resp, $name) = getUser("x");
+my ($dompath, $url, $urlpath, $selectedtext, $notesubj, $start, $startid, $end, $endid, $notetext, $queue, $realqueue, $id);
 
 if(%ARGS) {
 
-$url = $ARGS{'NoteUrl'};
+ $url = $ARGS{'NoteUrl'};
+ if ($url =~ m!^http://gplv3.fsf.org/comments/$!) {
+     $url = "gplv3-draft-1";
+ }
 
-$urlpath = $url;
-$urlpath =~ s/http:\/\/([^\/]+)(\/.*)\?/$2/;
+ $urlpath = $url;
+$urlpath =~ s/http:\/\/([^\/]+)(\/.*)\?.*/$2/;
 
-$url =~ s/.*\/([^\/]+)\.(html|xml)/$1/;
-
-$dompath = $ARGS{'DomPath'};
-$selectedtext = URI::Escape::uri_unescape($ARGS{'Selection'});
-$notesubj = URI::Escape::uri_unescape($ARGS{'NoteSubj'});
-# $start = $ARGS{'StartNode'};
-$startid = $ARGS{'StartNodeId'};
-# $end = $ARGS{'EndNode'};
-$endid = $ARGS{'EndNodeId'};
-$notetext = URI::Escape::uri_unescape($ARGS{'NoteText'});
+$url =~ s/.*\/([^\/]+)\.(html|xml).*/$1/;
+ print STDERR "url $url\nurlpath $urlpath\n\n";
+ $dompath = $ARGS{'DomPath'};
+ $selectedtext = URI::Escape::uri_unescape($ARGS{'Selection'});
+ $notesubj = URI::Escape::uri_unescape($ARGS{'NoteSubj'});
+# my $start = $ARGS{'StartNode'};
+ $startid = $ARGS{'StartNodeId'};
+# my $end = $ARGS{'EndNode'};
+ $endid = $ARGS{'EndNodeId'};
+ $notetext = URI::Escape::uri_unescape($ARGS{'NoteText'});
 
 $ARGS{'queue'} ? $queue = $ARGS{'queue'} : $queue = "Inbox";
 
@@ -119,11 +126,11 @@ my %ticket_vals = ( Queue => $realqueue,
 		      'CustomField-6' => $notetext,
 		      'CustomField-7' => $name,
 		      );
-  my ($id, $transaction_object, $err) = $ticket->Create(%ticket_vals);
+  ($id, my $transaction_object, my $err) = $ticket->Create(%ticket_vals);
   print STDERR $err . "\n" if $err;
 
 }
-
+}
 $r->content_type('text/xml');
 </%INIT>
 

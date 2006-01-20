@@ -317,7 +317,7 @@ function processReqChange()
 /*       } */
 
       else {
-	statusbox("There was a problem or parsing the XML data (maybe there are no comments):\n" + req.statusText+" <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n"); //debug
+	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
       }
     }
   }
@@ -340,49 +340,52 @@ function processAnnotation(response) {
   uagr_arr = response.getElementsByTagName("ua");
   agrtot_arr = response.getElementsByTagName("at");
 	for (prI = 0; prI < selections_arr.length; prI++) {
-	  rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
-	  tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
-	  tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
-
-	  ticketObj[rtid] = new Object;
-
-	  ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
-
-/* 	  agreechild = uagr_arr[prI].firstChild.data */
-/* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
-/* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
-/* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
-/* 	    //ticketObj[rtid].agree = agreechild; */
-/* 	  } */
-/* 	  else { */
-/* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
-/* 	    //ticketObj[rtid].agree = agreestr; */
-/* 	  } */
-/* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
-/* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
-/* 	  } */
-
-	  ticketObj[rtid].full = tooltipString;
-	  ticketObj[rtid].excerpt = tooltipSubString;
-	  ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
-	  if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	  if (selections_arr[prI].firstChild) {
+	    noteSelection = selections_arr[prI].firstChild.data;
+	    
+	    rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
+	    tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
+	    tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
+	    
+	    ticketObj[rtid] = new Object;
+	    
+	    ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+	    
+	    /* 	  agreechild = uagr_arr[prI].firstChild.data */
+	    /* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
+	    /* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
+	    /* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
+	    /* 	    //ticketObj[rtid].agree = agreechild; */
+	    /* 	  } */
+	    /* 	  else { */
+	    /* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
+	    /* 	    //ticketObj[rtid].agree = agreestr; */
+	    /* 	  } */
+	    /* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
+	    /* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
+	    /* 	  } */
+	    
+	    ticketObj[rtid].full = tooltipString;
+	    ticketObj[rtid].excerpt = tooltipSubString;
+	    ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	    ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
+	    if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
+	      ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	    }
+	    else {
+	      ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+	    }
+	    ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
+	    startNode = startnodes_arr[prI].firstChild.data;
+	    startNode = startNode.replace(/note\.[0-9]+\./,'');
+	    annoteText = annotations_arr[prI];
+	    rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
+	    user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	    //		dump(users_arr[prI].firstChild.data);
+	    highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
 	  }
-	  else {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
-	  }
-	  ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
-	  startNode = startnodes_arr[prI].firstChild.data;
-	  startNode = startNode.replace(/note\.[0-9]+\./,'');
-	  noteSelection = selections_arr[prI].firstChild.data;
-	  annoteText = annotations_arr[prI];
-	  rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
-	  user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  //		dump(users_arr[prI].firstChild.data);
-	  highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
+	  unOverlap("annotation",5);
 	}
-	unOverlap("annotation",5);
 }
 
 function processAgreement(response) {
@@ -566,16 +569,18 @@ function highlightWord(node,word,tooltip,rtid,user) {
 
 	paragraphString = getXMLNodeSerialisation(paragraph);
 	paragraphString.replace(/\s+/g,' ');
-//	dump("pString is "+paragraphString+"\n");
+	//dump("pString is "+paragraphString+"\n");
 	tempWordVal = word;
-	tempWordVal = tempWordVal.replace(/\W+/g,'\\W[^<>]*(<[^<]+>)*');
-	tempWordVal = tempWordVal.replace(/^\\W/,'');
-	tempWordVal = tempWordVal.replace(/\\W$/,'');
+	tempWordVal = tempWordVal.replace(/\)/g,'\\)');
+	tempWordVal = tempWordVal.replace(/\b\W+\b/g,'\\W[^<>]*(<[^<]+>)*');
+	//tempWordVal = tempWordVal.replace(/^\\W/,'');
+	//tempWordVal = tempWordVal.replace(/\\W$/,'');
+	//tempWordVal = tempWordVal.replace(/\\W[<>^*()+\]]+$/,'');
 	var re = new RegExp(tempWordVal, 'm');
-//	dump("re is "+re+"\n");
+	//dump("re is "+re+"\n");
 
 
-paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.parentNode.id+'">$&\
+paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.id+'">$&\
 <span class="annotation '+rtid+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
   <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
   <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt+'\
@@ -585,10 +590,6 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" i
 //dump("replaced on "+$&+"\n");
 //dump("pString is now "+paragraphString+"\n\n");
  loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
-
- //    node.parentNode.parentNode.innerHTML = paragraphString;
-    
-    //    haveHighlighted=true;
     }
   }
 
@@ -646,7 +647,6 @@ function last(obj) {
 }
 
 function statusbox(text) {
-  //  status.push(msg)
   loadHTMLtoDiv(text,'statustext');
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));

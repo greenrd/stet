@@ -25,17 +25,42 @@
 %
 <response>
 % if ($Tickets) {
-<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> (found <% $Tickets->CountAll()%>)</cs>
-% } else {
-<cs> Showing comment <a href="/rt/NoAuth/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/rt/NoAuth/changeshown.html">change</a> </cs>
+%#    my $tick = $Tickets->Next;
+<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> ( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>: 
+%   if ($Tickets->CountAll() > $Rows) {
+%       if ($StartAt > 1 ) {
+             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev</a>
+%       }
+%   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() > $StartAt + $Rows)) {
+|
 % }
+%       if ($Tickets->CountAll() > $StartAt + $Rows) {
+             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next</a>
+%       }
+%   }
+%# ) <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>">change</a> 
+) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> 
+</cs>
+% 
+<%perl> 
+    $Tickets->GotoFirstItem;
+    if ($StartAt > 1) {
+	for (my $i = 0; $i < $StartAt; $i++) {
+	    $Tickets->Next;
+	}
+    }
+</%perl>
+% } elsif ($Ticket) {
+<cs>Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a href="<% $listlink %>">[see thread]</a> <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> </cs>
+% }
+% if ($Ticket || $Tickets) {
+% my $i = 0;
 % while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
 <annotation>
 <n><% $item->Transactions->First->Content %></n>
 <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
 <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
-<!-- <u><% $item->Requestors->MemberEmailAddressesAsString %></u> -->
 <u><% $item->CreatorObj->Name %></u>
 % my ($agree,$agr_count) = showAgree(\$item);
 <ua><% $agree |n %></ua>
@@ -43,6 +68,14 @@
 <id><% $item->id %></id>
 </annotation>
 % $Ticket = '';
+% $i++;
+% if ($i == (($StartAt + $Rows) - 1)) {
+%    $Tickets = '';
+% }
+% }
+% }
+% else {
+<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change query</a> </cs>
 % }
 </response>
 %
@@ -54,17 +87,22 @@ use CGI qw/standard/;
 use MIME::Base64;
 use Frontier::Client;
 use Data::Dumper;
+
+use HTML::Scrubber;
+my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+
 require "/var/www/stet/stetsubs.pl";
 
 my ($name, $resp, $pass, $agr_vals, $CurrentUser);
 # our $session;
 # print STDERR Dumper(%ARGS);
 
- my $rsslink = "/rt/NoAuth/rssresults.rdf?Query=".$ARGS{'Query'};
+my $rsslink = "/comments/rt/rssresults.rdf?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
+my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
 #  my $printargs = param('Query')." (".$Tickets->CountAll()." found)";
 
 
-($CurrentUser, $resp) = getUser("foo");
+($CurrentUser, $resp, $name) = getUser("foo");
 print STDERR "Currentuser $CurrentUser, $resp\n";
 #my $Tickets = RT::Tickets->new($session{'CurrentUser'});
 
@@ -73,6 +111,7 @@ my ($Tickets, $Ticket);
 if ($ARGS{'Query'}) {
     $Tickets = RT::Tickets->new($CurrentUser);
     $Tickets->FromSQL($ARGS{'Query'});
+    $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 }
 elsif ($ARGS{'id'}) {
     $Ticket = RT::Ticket->new($CurrentUser);
@@ -81,9 +120,14 @@ elsif ($ARGS{'id'}) {
 
 #my $Tickets = RT::Tickets->new($CurrentUser);
 #$Tickets->FromSQL($ARGS{'Query'});
-#$Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+
 
 $r->content_type('text/xml');
 
 
 </%INIT>
+<%ARGS>
+$Rows => 30
+$StartAt => 1
+$Order => 'DESC'
+</%ARGS>

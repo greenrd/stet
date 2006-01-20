@@ -63,12 +63,9 @@ $name =~ s/"//g;
 #$resp = RPC::XML::Parser->new()->parse(STREAM);
 
 #$server = Frontier::Client->new(url => "http://gplv3.fsf.org:8800/launch/acl_users/Users/acl_users",
-#				username => "stet_auth",
-#				password =>  "fai1Iegh");
+#				username => ""
+#				password =>  "");
 
-#			        url => "https://www.fsf.org:443/acl_users/Users/acl_users",
-#				username => "gplv3_xmlrpc",
-#				password => "ooPh2aem");
 
 #$resp = $server->call('getUsers');
 

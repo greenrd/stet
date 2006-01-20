@@ -44,9 +44,9 @@ $opn = param('opn');
 
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
      $name =~ s/\"//g;
-     $server = Frontier::Client->new(url => 'http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
- 				    username => "stet_auth",
- 				    password =>  "fai1Iegh");
+     $server = Frontier::Client->new(url => 'http://',
+ 				    username => "",
+ 				    password =>  "");
     
     
      $resp = $server->call('authRemoteUser',$name,$pass);
