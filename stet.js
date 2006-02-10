@@ -54,7 +54,7 @@ for (var i=0; i < base64Chars.length; i++){
 function initPage() {
   statusbox("Please wait while we load some comments.");
   var filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
-  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))) {
+  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/)) || (filename.match(/debug/))) {
     filename = 'gplv3-draft-1';
   }
 if(window.location.search.length) {
@@ -139,6 +139,13 @@ function XpathSel() {
       document.getElementById('NoteSubj').setAttribute('disabled','disabled');
       //document.getElementById('NoteText').setAttribute('disabled','disabled');
     }
+    if((startid =='login') || (startid == undefined)) {
+      document.getElementById('NoteText').value = 'You\'ve found a browser-compatibility bug that we\'re trying to fix; we would appreciate an email to stet@gplv3.fsf.org saying exactly what browser you\'re using (though we know about Safari).  For the moment the best way to send your comment would be via email: see http://gplv3.fsf.org/comments/email.html';
+      document.getElementById('submitNote').setAttribute('disabled','disabled');
+      document.getElementById('NoteSubj').setAttribute('disabled','disabled');
+
+    }
+
   }
 }
 
@@ -204,7 +211,7 @@ function getElementsByClass(needle)
 var req;
 function loadXMLDoc(url,theData) 
 {
-   dump('loading '+url+'?'+theData+'\n');
+  //   dump('loading '+url+'?'+theData+'\n');
   // branch for native XMLHttpRequest object
   if (window.XMLHttpRequest) {
     req = new XMLHttpRequest();
@@ -317,7 +324,7 @@ function processReqChange()
 /*       } */
 
       else {
-	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
+	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
       }
     }
   }
@@ -596,13 +603,16 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" i
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
-    noteArr[i].style.background="#de7777";
+    noteArr[i].style.background="#f9f";
+    noteArr[i].style.border="1px solid #f0f";
+
   }
 }
 function notemouseout(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
     noteArr[i].style.background="#f0ecb3";
+    noteArr[i].style.border="1px solid #ff0";
   }
 }
 
@@ -651,7 +661,7 @@ function statusbox(text) {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a>','login');
+	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a>','login');
   }
   else {
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');

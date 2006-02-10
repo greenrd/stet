@@ -48,8 +48,12 @@ em.addhide {
 .highlight { 
 
 background: #F0ECB3;
-
+color: #000;
  }
+
+#bottombar {
+font-size: smaller;
+}
 
 .noteUser {
 font-size: smaller;
@@ -63,6 +67,7 @@ padding: 3px 2% 3px 2%;
 /* background: #CCCCCC; */
 /* background: #dee7ec; */
 background: #FFFFFF;
+color: #000;
 /* position: fixed; */
 width: 96%;
 font-size: smaller;
@@ -73,6 +78,7 @@ z-index: 100;
 
 #topbar {
 background-color: #dee7ec;
+color: #000;
 }
 
 #portal-globalnav {
@@ -126,6 +132,7 @@ http://tagsoup.com/-dev/null-/css/fixed/legacy/fixed4all.css
 
 div#topbar
   {
+color: #000;
 background: #dee7ec;
 /*  background: transparent; */
 /* background: #FFFFFF; */
@@ -172,18 +179,21 @@ background: #dee7ec;
 
 .statustext {
 background: #dee7ec;
+color: #000;
 /*  background: transparent; */
 float: left;
 /* width: 70%; */
 }
 .login {
 background: #dee7ec;
+color: #000;
 /*  background: transparent; */
 float: right;
 }
 
 .noteLive { 
 background: #ff99ff;
+color: #000;
  }
 
 #maintext { 
@@ -199,6 +209,7 @@ float:left;
 /* 	margin-right: 33%; */
 /*         border: 1px dotted #666; */
         width: 50%;
+	color: #000;
  }
 
 #readsaymain {
@@ -222,6 +233,7 @@ position: absolute;
 /*         border: 1px dotted #666; */
 z-index: 90;
 background: #f0ecb3;
+color: #000;
  }
 
 .annotation { 
@@ -236,20 +248,33 @@ position: absolute;
 left: 55%;
 /* right: -%; */
 width: 40%;
-border: 1px dotted #666;
-background: #f0ecb3;
+border: 1px solid #FFFF00;
+background: #f0ecb3; 
+/* background: #FFFF99; */
 /* z-index: 10; */
 /* clear: right; */
  }
 
+.Drafter {
+background: #F0F0F0;
+}
+
+.Issues {
+background: #A3F3A0;
+}
 
 textarea { 
 background-color: #f0ecb3;
+color: #000;
  }
 input.addnote { 
 background-color: #f0ecb3;
+color: #000;
  }
-
+select {
+/* background-color: #f0ecb3; */
+color: #000;
+}
 
 p { 
  clear:right;
@@ -271,13 +296,12 @@ font-size: smaller;
 
 .ontextText {
 font-style: italic;
-font-size: smaller;
+/* font-size: smaller; */
 }
 
 .onecomment {
-border: 1px dotted #666;
-padding: 3em;
-padding-left: 3em;
+border: 1px dotted #ccc; 
+padding: 1.5em .5em .5em 2em;
 /* background: #ffffcc; */
 }
 
@@ -419,3 +443,52 @@ color: #777;
     text-transform: none;
     list-style: none;
 }
+
+.formHelpIsh {
+font-size: 90%; 
+/* color: red; */
+font-weight: bold;
+/* text-decoration: blink; */
+margin: 0 0 0.2em 0;
+}
+
+.date {
+font-size: 90%;
+font-weight: normal;
+color: #5F5F5c;
+}
+
+/* .formHelpIsh:hover {
+     color: #000;
+     cursor: default;
+} */
+#portal-personaltools .portalUser {
+    background: transparent url(http://gplv3.fsf.org/user.gif) center left no-repeat;
+    padding-left: 15px;
+}
+
+#portal-personaltools .portalNotLoggedIn {
+    /* Used on all descriptions relevant to those not logged in */
+    color: Black;
+    padding: 0;
+    background: transparent;
+    background-image: none;
+}
+
+#portal-personaltools li {
+    background: transparent url(http://gplv3.fsf.org/linkOpaque.gif) center left no-repeat;
+    padding-left: 8px;
+    color: #436976;
+    margin-left: 1em;
+    display: inline;
+}
+
+#portal-personaltools li a {
+    text-decoration: none;
+    color: #436976;
+}
+
+#portal-personaltools .visualIconPadding {
+    padding-left: 10px;
+}
+

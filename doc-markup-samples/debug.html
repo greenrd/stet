@@ -2,16 +2,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>GNU GENERAL PUBLIC LICENSE</title>
-<script type="text/javascript" src="sarissa.js"></script>
-<script type="text/javascript" src="stet-devel.js"></script>
-
-<script type="text/javascript" language="javascript">
+<script type="text/javascript" src="stet-drafter.js"></script><script type="text/javascript" language="javascript">
 window.onload = initPage();
 </script><link rel="stylesheet" type="text/css" href="stet.css">
 </head>
 <body onkeypress="checkKeyPressed(event);" bgcolor="#FFFFFF">
 <div id="topbar" class="topbar">
-<span id="statustext" class="statustext">Loading comments, but we're having serious server load problems so this may just fail.  But there's also a chance that we do not properly support your browser yet.  You may need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.</span><span id="querydiv" style="display:none"></span><span id="login" class="login"></span>
+<span id="statustext" class="statustext">Loading comments.  If you're still reading this, it's a strong indication that we do not properly support your browser yet.  You may need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.  You can, however, <a href="http://gplv3.fsf.org/comments/rt/readsay.html?Query=%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC">browse comments</a> on any browser.</span><span id="querydiv" style="display:none"></span><span id="login" class="login"></span>
 </div>
 <div class="portlet" id="portlet-dogear"><div class="portletBody"><img alt="" src="http://gplv3.fsf.org/dogear.png"></div></div>
 <h1 id="portal-logo"><a href="http://gplv3.fsf.org" accesskey="1">GPLv3</a></h1>
@@ -20,6 +17,7 @@ window.onload = initPage();
 <li class="selected"><a href="http://gplv3.fsf.org/comments/">Comments</a></li>
 <li class="plain"><a href="http://gplv3.fsf.org/wiki/">Wiki</a></li>
 <li class="plain"><a href="http://gplv3.fsf.org/press">Press</a></li>
+<li id="portaltab-support" class="plain"><a href="http://gplv3.fsf.org/support">Support</a></li>
 </ul>
 <ul id="portal-personaltools"></ul>
 <div id="maintext">
@@ -59,7 +57,7 @@ get the source code.  </sent><sent id="gpl3.preamble.p3.s3" name="gpl3.preamble.
 show them these terms so they know their rights.  </sent></p>
 <p id="gpl3.preamble.p4" name="gpl3.preamble.p4"><sent id="gpl3.preamble.p4.s1" name="gpl3.preamble.p4.s1">Developers that use the GNU GPL protect
 your rights with two steps: (1) assert copyright on the software, and
-(2) offer you this license which gives you legal permission to copy,
+(2) offer you this License which gives you legal permission to copy,
 distribute and/or modify the software.  </sent></p>
 <p id="gpl3.preamble.p5" name="gpl3.preamble.p5"><sent id="gpl3.preamble.p5.s1" name="gpl3.preamble.p5.s1">For the developers' and author's
 protection, the GPL clearly explains that there is no warranty for
@@ -87,7 +85,7 @@ modification follow.  </sent></p></section><section id="gpl3.termsheader" name="
 this License.  </sent><sent id="gpl3.definitions.p0.s2" name="gpl3.definitions.p0.s2">The "Program" refers to any such program or work, and a
 "work based on the Program" means either the Program or any derivative work
 under copyright law: that is to say, a work containing the Program or a
-portion of it, either modified or unmodified.  </sent><sent id="gpl3.definitions.p0.s3" name="gpl3.definitions.p0.s3">Throughout this license, the
+portion of it, either modified or unmodified.  </sent><sent id="gpl3.definitions.p0.s3" name="gpl3.definitions.p0.s3">Throughout this License, the
 term "modification" includes, without limitation, translation and
 extension.  </sent><sent id="gpl3.definitions.p0.s4" name="gpl3.definitions.p0.s4">A "covered work" means either the Program or any work based on
 the Program.  </sent><sent id="gpl3.definitions.p0.s5" name="gpl3.definitions.p0.s5">Each licensee is addressed as "you".  </sent></p>
@@ -119,7 +117,7 @@ work normally implies the user already has it.  </sent></p>
 <p id="gpl3.sourcecode.p3" name="gpl3.sourcecode.p3"><sent id="gpl3.sourcecode.p3.s1" name="gpl3.sourcecode.p3.s1">Complete Corresponding Source Code need not include anything that users
 can regenerate automatically from other parts of the Complete Corresponding
 Source Code.  </sent></p>
-<p id="gpl3.sourcecode.p4" name="gpl3.sourcecode.p4"><sent id="gpl3.sourcecode.p4.s1" name="gpl3.sourcecode.p4.s1">As a special exception, the source code distributed need not include a
+<p id="gpl3.sourcecode.p4" name="gpl3.sourcecode.p4"><sent id="gpl3.sourcecode.p4.s1" name="gpl3.sourcecode.p4.s1">As a special exception, the Complete Corresponding Source Code need not include a
 particular subunit if (a) the identical subunit is normally included
 as an adjunct in the distribution of either a major essential component
 (kernel, window system, and so on) of the operating system on which the
@@ -161,8 +159,7 @@ software capable of accessing the same data.  </sent></p></section><section id="
 <p class="sectTitle sub" id="verbatimcopying.0.0.0"><sent id="verbatimcopying.0.0.0.0"></sent></p>
 <p id="gpl3.verbatimcopying.p0" name="gpl3.verbatimcopying.p0"><sent id="gpl3.verbatimcopying.p0.s1" name="gpl3.verbatimcopying.p0.s1">You may copy and distribute verbatim copies of the Program's source code
 as you receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy an appropriate copyright notice and
-disclaimer of warranty; keep intact all license notices and notices of the
+appropriately publish on each copy an appropriate copyright notice; keep intact all license notices and notices of the
 absence of any warranty; give all recipients of the Program a copy of this
 License along with the Program; and obey any additional terms present on
 parts of the Program in accord with section 7.  </sent></p>
@@ -175,20 +172,19 @@ such modifications or work in the form of source code under the terms of
 Section 4 above, provided that you also meet all of these conditions:  </sent></p>
 <p id="gpl3.distribmod.p1" name="gpl3.distribmod.p1"><sent id="gpl3.distribmod.p1.s1" name="gpl3.distribmod.p1.s1">a) The modified work must carry prominent notices stating that you
     changed the work and the date of any change.  </sent></p>
-<p id="gpl3.distribmod.p2" name="gpl3.distribmod.p2"><sent id="gpl3.distribmod.p2.s1" name="gpl3.distribmod.p2.s1">b) You must license the entire work based on the Program, as a whole,
+<p id="gpl3.distribmod.p2" name="gpl3.distribmod.p2"><sent id="gpl3.distribmod.p2.s1" name="gpl3.distribmod.p2.s1">b) You must license the entire modified work, as a whole,
     under this License to anyone who comes into possession of a copy.  </sent><sent id="gpl3.distribmod.p2.s2" name="gpl3.distribmod.p2.s2">This
     License must apply, unmodified except as permitted by section 7 below,
     to the whole of the work.  </sent><sent id="gpl3.distribmod.p2.s3" name="gpl3.distribmod.p2.s3">This License gives no permission to license
     the work in any other way, but it does not invalidate such permission
     if you have separately received it.  </sent></p>
-<p id="gpl3.distribmod.p3" name="gpl3.distribmod.p3"><sent id="gpl3.distribmod.p3.s1" name="gpl3.distribmod.p3.s1">c) If the modified program has interactive user interfaces, each must
+<p id="gpl3.distribmod.p3" name="gpl3.distribmod.p3"><sent id="gpl3.distribmod.p3.s1" name="gpl3.distribmod.p3.s1">c) If the modified work has interactive user interfaces, each must
     include a convenient feature that displays an appropriate copyright
     notice, and tells the user that there is no warranty for the program
     (or that you provide a warranty), that users may redistribute the
-    program under these conditions, and how to view a copy of this License,
-    plus the central list (if any) of other terms in accord with section 7.  </sent><sent id="gpl3.distribmod.p3.s2" name="gpl3.distribmod.p3.s2">If the interface presents a list of user commands or options, such as a
+    program under these conditions, and how to view a copy of this License together with the central list (if any) of other terms in accord with section 7.  </sent><sent id="gpl3.distribmod.p3.s2" name="gpl3.distribmod.p3.s2">If the interface presents a list of user commands or options, such as a
     menu, a command to display this information must be prominent in the
-    list.  </sent><sent id="gpl3.distribmod.p3.s3" name="gpl3.distribmod.p3.s3">Otherwise, the modified program must display this information at
+    list.  </sent><sent id="gpl3.distribmod.p3.s3" name="gpl3.distribmod.p3.s3">Otherwise, the modified work must display this information at
     startup--except in the case that the Program has such interactive
     modes and does not display this information at startup.  </sent></p>
 <p id="gpl3.distribmod.p4" name="gpl3.distribmod.p4"><sent id="gpl3.distribmod.p4.s1" name="gpl3.distribmod.p4.s1">These requirements apply to the modified work as a whole.  </sent><sent id="gpl3.distribmod.p4.s2" name="gpl3.distribmod.p4.s2">If identifiable
@@ -206,8 +202,7 @@ of this combination in limited ways, described in section 7.  </sent></p>
 your rights to work written entirely by you; rather, the intent is to
 exercise the right to control the distribution of derivative or
 collective works based on the Program.  </sent></p>
-<p id="gpl3.distribmod.p6" name="gpl3.distribmod.p6"><sent id="gpl3.distribmod.p6.s1" name="gpl3.distribmod.p6.s1">A compilation of a covered work with other separate and independent
-documents or works, which are not by their nature extensions of the covered
+<p id="gpl3.distribmod.p6" name="gpl3.distribmod.p6"><sent id="gpl3.distribmod.p6.s1" name="gpl3.distribmod.p6.s1">A compilation of a covered work with other separate and independent works, which are not by their nature extensions of the covered
 work, in or on a volume of a storage or distribution medium, is called an
 "aggregate" if the copyright resulting from the compilation is not used to
 limit the legal rights of the compilation's users beyond what the
@@ -268,20 +263,20 @@ the work, or works based on it, must preserve your terms just as they
 must preserve this License, as long as any substantial portion of the parts
 they apply to are present.  </sent></p>
 <p id="gpl3.licensecompat.p1" name="gpl3.licensecompat.p1"><sent id="gpl3.licensecompat.p1.s1" name="gpl3.licensecompat.p1.s1">Aside from additional permissions, your terms may add limited kinds of
-additional requirements on your code, as follows:  </sent></p>
+additional requirements on your added parts, as follows:  </sent></p>
 <p id="gpl3.licensecompat.p2" name="gpl3.licensecompat.p2"><sent id="gpl3.licensecompat.p2.s1" name="gpl3.licensecompat.p2.s1">a) They may require the preservation of certain copyright notices, other
     legal notices, and/or author attributions, and may require that the
-    origin of the parts it covers not be misrepresented, and/or that
+    origin of the parts they cover not be misrepresented, and/or that
     altered versions of them be marked in the source code, or marked there
     in specific reasonable ways, as different from the original version.  </sent></p>
 <p id="gpl3.licensecompat.p3" name="gpl3.licensecompat.p3"><sent id="gpl3.licensecompat.p3.s1" name="gpl3.licensecompat.p3.s1">b) They may state a disclaimer of warranty and liability in terms
     different from those used in this License.  </sent></p>
 <p id="gpl3.licensecompat.p4" name="gpl3.licensecompat.p4"><sent id="gpl3.licensecompat.p4.s1" name="gpl3.licensecompat.p4.s1">c) They may prohibit or limit the use for publicity purposes of specified
-    names of contributors, and it may require that certain specified
+    names of contributors, and they may require that certain specified
     trademarks be used for publicity purposes only in the ways that are
     fair use under trademark law except with express permission.  </sent></p>
-<p id="gpl3.licensecompat.p5" name="gpl3.licensecompat.p5"><sent id="gpl3.licensecompat.p5.s1" name="gpl3.licensecompat.p5.s1">d) They may require that the program contain functioning facilities that
-    allow users to obtain copies of the program's Complete Corresponding
+<p id="gpl3.licensecompat.p5" name="gpl3.licensecompat.p5"><sent id="gpl3.licensecompat.p5.s1" name="gpl3.licensecompat.p5.s1">d) They may require that the work contain functioning facilities that
+    allow users to immediately obtain copies of its Complete Corresponding
     Source Code.  </sent></p>
 <p id="gpl3.licensecompat.p6" name="gpl3.licensecompat.p6"><sent id="gpl3.licensecompat.p6.s1" name="gpl3.licensecompat.p6.s1">e) They may impose software patent retaliation, which means permission
     for use of your added parts terminates or may be terminated, wholly or
@@ -325,7 +320,7 @@ the Program.  </sent><sent id="gpl3.notacontract.p0.s3" name="gpl3.notacontract.
 modify the Program or any covered works.  </sent><sent id="gpl3.notacontract.p0.s4" name="gpl3.notacontract.p0.s4">These actions infringe copyright
 if you do not accept this License.  </sent><sent id="gpl3.notacontract.p0.s5" name="gpl3.notacontract.p0.s5">Therefore, by modifying or propagating
 the Program (or any covered work), you indicate your acceptance of this
-License to do so, and all its terms and conditions.  </sent></p></section><section id="autolicense" name="autolicense"><p class="sectTitle" id="autolicense.0"><sent id="autolicense.0.0">10.[7] Automatic Licensing of Downstream Users</sent></p>
+License to do so, and all its terms and conditions.  </sent></p></section><section id="autolicense" name="autolicense"><p class="sectTitle" id="autolicense.0"><sent id="autolicense.0.0">10.[6] Automatic Licensing of Downstream Users</sent></p>
 <p class="sectTitle sub" id="autolicense.0.0.0"><sent id="autolicense.0.0.0.0"></sent></p>
 <p id="gpl3.autolicense.p0" name="gpl3.autolicense.p0"><sent id="gpl3.autolicense.p0.s1" name="gpl3.autolicense.p0.s1">Each time you redistribute a covered work, the recipient automatically
 receives a license from the original licensors, to propagate and modify
@@ -339,7 +334,7 @@ License.  </sent></p></section><section id="licensingpatents" name="licensingpat
 <p id="gpl3.licensingpatents.p0" name="gpl3.licensingpatents.p0"><sent id="gpl3.licensingpatents.p0.s1" name="gpl3.licensingpatents.p0.s1">When you distribute a covered work, you grant a patent license to
 the recipient, and to anyone that receives any version of the work,
 permitting, for any and all versions of the covered work, all
-activities allowed or contemplated by this license, such as
+activities allowed or contemplated by this License, such as
 installing, running and distributing versions of the work, and using
 their output.  </sent><sent id="gpl3.licensingpatents.p0.s2" name="gpl3.licensingpatents.p0.s2">This patent license is nonexclusive, royalty-free and
 worldwide, and covers all patent claims you control or have the right
@@ -416,8 +411,9 @@ you or third parties or a failure of the Program to operate with any other
 programs), even if such holder or other party has been advised of the
 possibility of such damages.  </sent></p></section><section id="nottested" name="nottested"><p class="sectTitle" id="nottested.0"><sent id="nottested.0.0">18</sent></p>
 <p class="sectTitle sub" id="nottested.0.0.0"><sent id="nottested.0.0.0.0"></sent></p>
-<p id="nottested.p0" name="nottested.p0"><sent id="nottested.p0.s0" name="nottested.p0.s0">Unless specifically stated, this software has not been tested for use
-in safety critical systems.  </sent><sent id="nottested.p0.s1" name="nottested.p0.s1">END OF TERMS AND CONDITIONS  </sent></p></section><section id="howtoapply" name="howtoapply"><p class="sectTitle" id="howtoapply.0"><sent id="howtoapply.0.0">How to Apply These Terms to Your New Programs</sent></p>
+<p id="nottested.p0" name="nottested.p0"><sent id="nottested.p0.s0" name="nottested.p0.s0">Unless specifically stated, the Program has not been tested for use
+in safety critical systems.  </sent></p>
+<p id="nottested.p1" name="nottested.p1"><sent id="nottested.p1.s0" name="nottested.p1.s0"><strong>END OF TERMS AND CONDITIONS</strong>  </sent></p></section><section id="howtoapply" name="howtoapply"><p class="sectTitle" id="howtoapply.0"><sent id="howtoapply.0.0">How to Apply These Terms to Your New Programs</sent></p>
 <p class="sectTitle sub" id="howtoapply.0.0.0"><sent id="howtoapply.0.0.0.0"></sent></p>
 <p id="gpl3.howtoapply.p0" name="gpl3.howtoapply.p0"><sent id="gpl3.howtoapply.p0.s1" name="gpl3.howtoapply.p0.s1">If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it

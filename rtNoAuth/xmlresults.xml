@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (C) 2006   Software Freedom Law Center, Inc.
+--   Author: Orion Montoya <orion@mdcclv.com>
+--
+-- This software gives you freedom; it is licensed to you under version
+-- 3 of the GNU Affero General Public License, along with the
+-- additional permission in the following paragraph.
+--
+-- This notice constitutes a grant of such permission as is necessary
+-- to combine or link this software, or a modified version of it, with
+-- Request Tracker (RT), published by Jesse Vincent and Best Practical
+-- Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+-- distribute the resulting work.  RT is licensed under version 2 of
+-- the GNU General Public License.
+-- 
+-- This software is distributed WITHOUT ANY WARRANTY, without even the
+-- implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+-- PURPOSE.  See the GNU Affero General Public License for further
+-- details.
+--  
+-- You should have received a copy of the GNU Affero General Public
+-- License, version 3, and the GNU General Public License, version 2,
+-- along with this software.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<response>
+<cs><strong>This is a static page, cached occasionally, while we bolster our server.</strong> Showing comments where  in file 'gplv3-draft-1'  <a class="rsslink" href="/comments/rt/rssresults.rdf?Query= &#39;CF.NoteUrl&#39; LIKE &#39;gplv3-draft-1&#39; ">[rss]</a> <a href="/comments/rt/readsay.html?Query= &#39;CF.NoteUrl&#39; LIKE &#39;gplv3-draft-1&#39; ">[list]</a> ( found 48, showing 1-30:
+) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> 
+</cs>
+<annotation>
+<n>Use normal human numbering, starting at 1.</n>
+<e>gpl3.definitions.0.0</e>
+<s>0. Definitions</s>
+<i>gpl3.definitions.0.0</i>
+<u>angustia</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>210</id>
+</annotation>
+<annotation>
+<n>Restricting functionality should not the purpose of a license, full stop. Maybe it is time to be done away with that stupid restriction from GPLv2.</n>
+<e>gpl3.distribmod.p3.s1</e>
+<s>c&#41; If the modified program has interactive user interfaces, each must include a convenient feature that displays an appropriate copyright notice</s>
+<i>gpl3.distribmod.p3.s1</i>
+<u>joss</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>209</id>
+</annotation>
+<annotation>
+<n>If the original copyright holder dies and new laws are created, should the current maintainer be allowed to add limitations?</n>
+<e>gpl3.libertyordeath.p0.s1</e>
+<s>the original copyright holder who places the Program under this License may add an explicit geographical distribution limitation excluding those countries, so that distribution is permitted only in or among countries not thus excluded.</s>
+<i>gpl3.libertyordeath.p0.s1</i>
+<u>tcort</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>207</id>
+</annotation>
+<annotation>
+<n>It should be possible for the person making a derivative work to remove the geographical restriction if the work no longer infringes on the patents and/or uses the copyrighted interfaces. Otherwise this clause, if widely used, could prevent bits of GPLed programs from being reused in other bits without the geographical limitation accompanying the copied code and tainting the target software.</n>
+<e>gpl3.libertyordeath.p0.s1</e>
+<s>may add an explicit geographical distribution limitation</s>
+<i>gpl3.libertyordeath.p0.s1</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>206</id>
+</annotation>
+<annotation>
+<n>This statement effectively blocks all GPL&#39;d mp3, DVD, wmv, ??? media players from being distributed under GPLv3.</n>
+<e>gpl3.libertyordeath.p0.s3</e>
+<s>if a patent license would not permit royalty-free redistribution by all those who receive copies directly or indirectly through you, then the only way you could satisfy both it and this License would be to refrain entirely from distribution.</s>
+<i>gpl3.libertyordeath.p0.s3</i>
+<u>tcort</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>205</id>
+</annotation>
+<annotation>
+<n>This is concerning because it permits a sort of &#34;invariant section&#34; for programs. How about phrasing it as an extension of your distribution obligation? E.g.
+
+&#34;They may require that you make source code available to people remotely interacting with the program, just as if you had distributed the object code to them.&#34;
+
+This way, it&#39;s an extension of your distribution obligations and not a restriction on the functioning of the program. So, I could say &#34;fill in my web form and I&#39;ll mail you a copy of the source code&#34;, and that would be OK. My suggested clause specifies results, not methods. It&#39;s also still backwardly-compatible with the &#40;flawed, in my view&#41; provisions of the Affero GPL.</n>
+<e>gpl3.licensecompat.p5.s1</e>
+<s>They may require that the program contain functioning facilities</s>
+<i>gpl3.licensecompat.p5.s1</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>204</id>
+</annotation>
+<annotation>
+<n>Isn&#39;t this a very large change - requiring runtime notification of rights, when it previously used to be optional? In many circumstances, it&#39;s not practical nor useful to the user to display all this information at each startup.
+
+Does this prevent programs from implementing a --quiet switch which turns off all extraneous output?</n>
+<e>gpl3.distribmod.p3.s3</e>
+<s>the modified program must display this information at startup</s>
+<i>gpl3.distribmod.p3.s3</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>203</id>
+</annotation>
+<annotation>
+<n>this could be reworded &#39;propogation of covered works that does not enable parties other than you to make or receive copies is permitted without limitation&#39; as that makes it more specific.
+An example of such propagation would be helpful here as well, especially as this comes at a point in the license where examples of distribution have not been given.</n>
+<e>gpl3.basicperms.p2.s1</e>
+<s>provided it does not enable parties other than you to make or receive copies</s>
+<i>gpl3.basicperms.p2.s1</i>
+<u>davidf</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>202</id>
+</annotation>
+<annotation>
+<n>If I am giving someone a CD set of e.g. a GNU/Linux distribution, it should be possible to offer them, at the same time and for no additional charge, a source CD set. If they decline that offer, that should &#40;in line with the &#34;access to copy&#34; principle&#41; fulfil my obligations to that person regarding source distribution.
+
+Of course, I would need to have to make it clear to them that source is available.</n>
+<e>gpl3.nonsource.p4.s1</e>
+<s>access to copy</s>
+<i>gpl3.nonsource.p4.s1</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>201</id>
+</annotation>
+<annotation>
+<n>What happens if the copyright holder only learns about the violation more than 60 days after it occured ? Shouldn&#39;t this be &#34;within 60 days after the copyright holder has noticed the violation&#34; ?
+
+thx.</n>
+<e>gpl3.termination.p0.s2</e>
+<s>any copyright holder may terminate your rights under this License at any time after having notified you of the violation by any reasonable means within 60 days ratiodoc: Automatic termination can be too harsh for those who have committed an inadvertent vi</s>
+<i>gpl3.termination.p0.s2</i>
+<u>jalet</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>200</id>
+</annotation>
+<annotation>
+<n>What if GPL version 17 will tell every user of my software that I&#39;ll gladly serve them lunch if they stop by, or give them my car. You know, unlike most significant software, not all things in the world are free as in lunch. In particular, most lunches aren&#39;t.</n>
+<e>gpl3.revisedversions.p1.s2</e>
+<s>any later version</s>
+<i>gpl3.revisedversions.p1.s2</i>
+<u>jolson</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>199</id>
+</annotation>
+<annotation>
+<n>IMHO It would be better to refer to components shipped with the operating system... rather then this vagueish sum up.</n>
+<e>gpl3.sourcecode.p4.s1</e>
+<s>and so on</s>
+<i>gpl3.sourcecode.p4.s1</i>
+<u>pvg</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>198</id>
+</annotation>
+<annotation>
+<n>It could be ambiguous whether &#39;copies&#39; refers to &#39;copies of the Program&#39; or &#39;copies of covered works&#39;.</n>
+<e>gpl3.basicperms.p2.s1</e>
+<s>copies</s>
+<i>gpl3.basicperms.p2.s1</i>
+<u>sopwith</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>197</id>
+</annotation>
+<annotation>
+<n>Preferably and</n>
+<e>gpl3.sourcecode.p2.s1</e>
+<s>and/or</s>
+<i>gpl3.sourcecode.p2.s1</i>
+<u>pvg</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>196</id>
+</annotation>
+<annotation>
+<n>Clearly, the author has more rights then a mere distributor. Those rights should not be transferred at all by this license.</n>
+<e>gpl3.preamble.p3.s1</e>
+<s>if you distribute copies of such a program, whether gratis or for a fee, you must give the recipients all the rights that you have.</s>
+<i>gpl3.preamble.p3.s1</i>
+<u>pvg</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>195</id>
+</annotation>
+<annotation>
+<n>Odious though privacy-invaders are, is it consistent with the principles of free software to use the copyright licence to restrict the types of modifications one can make to the program?</n>
+<e>gpl3.drm.p0.s3</e>
+<s>illegally invade users&#39; privacy</s>
+<i>gpl3.drm.p0.s3</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>193</id>
+</annotation>
+<annotation>
+<n>Is this too specific? Imagine an embedded device where, in order to replace the firmware, you had to pass a particular complex pattern over an optical sensor. Is that an &#34;authorisation code&#34;?
+
+How about &#34;any information or data necessary&#34;?</n>
+<e>gpl3.sourcecode.p2.s1</e>
+<s>encryption or authorization codes</s>
+<i>gpl3.sourcecode.p2.s1</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>192</id>
+</annotation>
+<annotation>
+<n>The licence should specify that the tools should be publically available. A tool can be a &#34;general-purpose&#34; compiler, yet still owned by a single company and not released.</n>
+<e>gpl3.sourcecode.p1.s1</e>
+<s>general-purpose tools</s>
+<i>gpl3.sourcecode.p1.s1</i>
+<u>gerv</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>191</id>
+</annotation>
+<annotation>
+<n>One may not know in advance whether one&#39;s actions may permit others to make or receive copies. One may take reasonable care, but that is no guarantee.
+
+Surely &#34;provided no parties other than you make or receive copies&#34; is better, as it is clear and unambiguous.</n>
+<e>gpl3.basicperms.p2.s1</e>
+<s>does not enable parties other than you to make or receive copies</s>
+<i>gpl3.basicperms.p2.s1</i>
+<u>quasi</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>190</id>
+</annotation>
+<annotation>
+<n>One may not know in advance whether one&#39;s actions may permit others to make or receive copies. One may take reasonable care, but that is no guarantee.
+
+Surely &#34;provided no parties other than you make or receive copies&#34; is better, as it is clear and unambiguous.</n>
+<e>gpl3.basicperms.p2.s1</e>
+<s>does not enable parties other than you to make or receive copies</s>
+<i>gpl3.basicperms.p2.s1</i>
+<u>quasi</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>189</id>
+</annotation>
+<annotation>
+<n>In cases where GPLv3 code is running on a platform where DRM is built in to hardware, this is not necessarily a promise the FSF can make. Consider being more explicit.</n>
+<e>gpl3.preamble.p6.s2</e>
+<s>therefore, the GPL ensures that the software it covers will neither be subject to, nor subject other works to, digital restrictions from which escape is forbidden.</s>
+<i>gpl3.preamble.p6.s2</i>
+<u>quasi</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>188</id>
+</annotation>
+<annotation>
+<n>The central copyleft provision of the license. The words ``at no charge&#39;&#39;[are removed].  [They were] often misinterpreted by commentators.</n>
+<e>gpl3.distribmod.p2.s1</e>
+<s>b&#41;</s>
+<i>gpl3.distribmod.p2.s1</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>187</id>
+</annotation>
+<annotation>
+<n>Explicitly recognizes the validity of disjunctive dual-licensing.</n>
+<e>gpl3.distribmod.p2.s3</e>
+<s>This License gives no permission to license the work in any other way, but it does not invalidate such permission if you have separately received it</s>
+<i>gpl3.distribmod.p2.s3</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>186</id>
+</annotation>
+<annotation>
+<n>The license must be unmodified, except as permitted by section 7, which allows GPL&#39;d code to be combined with parts covered by certain other kinds of free software licensing terms. </n>
+<e>gpl3.distribmod.p2.s2</e>
+<s>unmodified except as permitted by section 7 below</s>
+<i>gpl3.distribmod.p2.s2</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>185</id>
+</annotation>
+<annotation>
+<n>Now states that the GPL applies to the whole of the work.</n>
+<e>gpl3.distribmod.p2.s2</e>
+<s>whole of the work</s>
+<i>gpl3.distribmod.p2.s2</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>184</id>
+</annotation>
+<annotation>
+<n>We interpret [this] to mean the date of one or more of the licensee&#39;s changes. The best practice would be to include the date of the latest change. However, in order to avoid requiring revision of programs distributed under ``GPL version 2 or later,&#39;&#39; we have retained the existing wording.
+
+</n>
+<e>gpl3.distribmod.p1.s1</e>
+<s>date of any change</s>
+<i>gpl3.distribmod.p1.s1</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>183</id>
+</annotation>
+<annotation>
+<n>Slightly relaxes the requirements regarding notice of changes to the program. In particular, the modified files themselves need no longer be marked. This reduces administrative burdens for developers of modified versions of GPL&#39;d software.
+
+</n>
+<e>gpl3.distribmod.p1.s1</e>
+<s>a&#41; The modified work must</s>
+<i>gpl3.distribmod.p1.s1</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>182</id>
+</annotation>
+<annotation>
+<n>The distributor is required to keep intact all license notices, including notices of such additional terms.
+</n>
+<e>gpl3.verbatimcopying.p0.s1</e>
+<s>keep intact all license notices</s>
+<i>gpl3.verbatimcopying.p0.s1</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>181</id>
+</annotation>
+<annotation>
+<n>Revised from its corresponding section in GPLv2 in light of the new section 7 on license compatibility. A distributor of verbatim copies of the program&#39;s source code must obey any existing additional terms that apply to parts of the program.</n>
+<e>gpl3.verbatimcopying.p0.s1</e>
+<s>obey any additional terms present on parts of the Program in accord with section 7</s>
+<i>gpl3.verbatimcopying.p0.s1</i>
+<u>ratiodoc</u>
+<ua><a href="http://gplv3.fsf.org/login_form?came_from=/comments/">login</a> to agree</ua>
+<at>1</at>
+<id>180</id>
+</annotation>
+</response>

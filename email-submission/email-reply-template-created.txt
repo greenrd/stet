@@ -1,0 +1,28 @@
+To: {$msg->header->{'from'}}
+From: GPLv3 Comment Submission <tech@gplv3.fsf.org>
+Subject: Comment #{$item->id} created [Re: {$msg->header->{'subject'}}]
+X-Precedence: bulk
+
+Your comment regarding:
+"{$item->Subject}" 
+in the current draft of the GPLv3 has been added as 
+comment #{$item->id}.  You may track the status of this comment at
+http://gplv3.fsf.org/comments/rt/readsay.html?id={$item->id}
+{$newacct}
+If you did not submit this comment, please let us (tech@gplv3.fsf.org)
+know: there is only so much we can do to verify the identity of the
+sender, so there's a chance someone emailed it pretending to be you.
+
+Messages sent to <comments@gplv3.fsf.org> are processed automatically
+and are not seen by human eyes until they are entered in the comment
+system.
+
+If you have found a bug in the web or email interfaces, please send
+all useful information to <tech@gplv3.fsf.org>, where they will be
+entered in our bug tracker.
+
+(This is an early, batch run of the email interface, which will soon
+be entirely automatic.  So now would be a particularly good time to
+point out bugs.)
+
+

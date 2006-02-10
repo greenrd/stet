@@ -17,7 +17,25 @@
             <a href="http://gplv3.fsf.org/wiki/">Wiki</a></li>
         <li class="plain">
             <a href="http://gplv3.fsf.org/press/">Press</a></li>
+        <li id="portaltab-support" class="plain">
+            <a href="http://gplv3.fsf.org/support">Support</a></li>
     </ul>
 
 <ul id="portal-personaltools">
+<li class="portalUser">
+% if ($name) {
+    <% $name %>    </li>
+        <li> <a href="http://gplv3.fsf.org/plone_memberprefs_panel">
+               Preferences</a> </li>
+        <li> <a href="http://gplv3.fsf.org/undo_form"> Undo </a> </li>
+        <li> <a href="http://gplv3.fsf.org/logout"> Log out </a> </li>
+% } else {
+         <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/stats/2006-02-02.html">Log in</a></li>
+        <li>
+            <a href="https://www.fsf.org/register_form?came_from=/comments/rt/stats/2006-02-02.html">Register</a></li>
+%} 
+
 </ul>
+<%ARGS>
+$name => undef
+</%ARGS>

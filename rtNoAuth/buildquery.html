@@ -1,4 +1,27 @@
 %# {{{ BEGIN BPS TAGGED BLOCK
+%#
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %# 
 %# COPYRIGHT:
 %#  
@@ -43,36 +66,31 @@
 %# those contributions and any derivatives thereof.
 %# 
 %# }}} END BPS TAGGED BLOCK
-%
+
+%# <& /Elements/Header, Title => $title &>
+%# <& /Ticket/Elements/Tabs, 
+%#     current_tab => "Search/Build.html".$QueryString, 
+%#     Title => $title,
+%#     Format => $Format,
+%#     Query => $Query,
+%#     Order => $Order,
+%#     OrderBy => $OrderBy,
+%#     Rows => $RowsPerPage
+%# &>
 <html>
 <head>
 <title>stet query builder</title>
-%# <link rel="stylesheet" href="/rt/NoAuth/webrt.css" type="text/css">
-<script type="text/javascript" src="/comments/stet.js"></script>
+<link rel="stylesheet" href="/rt/NoAuth/webrt.css" type="text/css">
 </head>
 <body>
-<FORM METHOD="GET" ACTION="/rt/NoAuth/stet-build-query.html" NAME="BuildQuery">
+<FORM METHOD="GET" ACTION="/comments/getnotes.pl" NAME="BuildQuery">
 <input type=hidden name=SearchId value="<%$SearchId%>">
 <input type=hidden name=Query value="<%$Query%>">
-%# <input type=hidden name=Format value="<%$Format%>">
-% my $qs;
-% if (!$came_from) {
-% $qs = $ENV{'HTTP_REFERER'};
-% $qs =~ s/(.*)\?.*/$1/;
-% print STDERR "s-b-q qs $qs\n";
-% print STDERR "s-b-q H_R ".$ENV{'HTTP_REFERER'}."\n";
-% print STDERR "s-b-q Q_S ".$ENV{'QUERY_STRING'}."\n";
-% }
-% else {
-% $qs = $came_from;
-% }
-<input type=hidden name="came_from" value="<% $qs %>">
-<% $qs %>
+<input type=hidden name=Format value="<%$Format%>">
 <table>
 <tr>
 <td valign=top class="boxcontainer">
 <& Elements/PickCriteria, query => $Query, cfqueues => \%queues &>
-<& /Elements/Submit, Caption => "Do the Search", Label => loc('Search'), Name => 'DoSearch'&>
 <& /Elements/Submit, Caption => loc('Add additional criteria'), Label => loc('Add'), Name => 'AddClause'&>
 
 </td>
@@ -777,12 +795,9 @@ $session{'CurrentSearchHash'} = $search_hash;
 
 # {{{ Show the results, if we were asked.
 if ( $ARGS{"DoSearch"} ) {
-#    $m->comp("stetwrap.html" , Query => $Query, Format => $Format, Order => $Order, OrderBy => $OrderBy, Rows => $RowsPerPage);
-my $redirurl = "$came_from?Query=$Query&Order=$Order&OrderBy=$OrderBy&Rows=$RowsPerPage";
-   $m->redirect($redirurl);
+    $m->comp("Results.html" , Query => $Query, Format => $Format, Order => $Order, OrderBy => $OrderBy, Rows => $RowsPerPage);
     $m->abort();
 }
-
 # }}}
 
 # {{{ Build a querystring for the tabs
@@ -812,5 +827,4 @@ $Order => undef
 $OrderBy => undef
 $RowsPerPage => undef
 $HideResults => 0
-$came_from => 'http://gplv3.fsf.org/comments/gplv3-draft-1.xml'
 </%ARGS>

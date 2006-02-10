@@ -1,4 +1,3 @@
-%# {{{ BEGIN BPS TAGGED BLOCK
 %# 
 %# Copyright (C) 2006   Software Freedom Law Center, Inc.
 %# Modified-By: Orion Montoya <orion@mdcclv.com>
@@ -22,34 +21,6 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-%#  
-%# COPYRIGHT:
-%#
-%# This software is Copyright (c) 1996-2004 Best Practical Solutions, LLC 
-%#                                          <jesse@bestpractical.com>
-%# 
-%# (Except where explicitly superseded by other copyright notices)
-%# 
-%# 
-%# LICENSE:
-%# 
-%# This work is made available to you under the terms of Version 2 of
-%# the GNU General Public License. A copy of that license should have
-%# been provided with this software, but in any event can be snarfed
-%# from www.gnu.org.
-%# 
-%# This work is distributed in the hope that it will be useful, but
-%# WITHOUT ANY WARRANTY; without even the implied warranty of
-%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-%# General Public License for more details.
-%# 
-%# You should have received a copy of the GNU General Public License
-%# along with this program; if not, write to the Free Software
-%# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-%# 
-%# 
-%# }}} END BPS TAGGED BLOCK
-%
 <html>
 <head>
 <title>gpl comment system - query builder</title>
@@ -67,7 +38,7 @@
 % }
 <& header.html &>
 <div id="maintext">
-<FORM METHOD="GET" ACTION="/comments/rt/changeshown.html" NAME="BuildQuery">
+<FORM METHOD="GET" ACTION="/rt/NoAuth/changeshown.html" NAME="BuildQuery">
 <input type=hidden name=SearchId value="new">
 <input type=hidden name=Query value="">
 % my $qs;
@@ -200,12 +171,12 @@ Text selected for comment
 </td></tr>
 
 <tr><td class=label align="right">
-Filename commented on
+File commented on
 </td>
 <td>
 <SELECT disabled NAME ="&#39;CF.NoteUrl&#39;Op">
 <OPTION VALUE="LIKE"
->matches</OPTION>
+>contains</OPTION>
 <OPTION VALUE="NOT LIKE"
 >doesn&#39;t contain</OPTION>
 <OPTION VALUE="="
@@ -338,7 +309,7 @@ Unlimited
 &nbsp;
 </TD>
 <TD ALIGN=RIGHT VALIGN=CENTER>
-<B>Find comments</b> <INPUT TYPE=SUBMIT
+<!-- <B>Do the Search</B> --> <INPUT TYPE=SUBMIT
 NAME="DoSearch"
  VALUE='Search'>
 </TD>

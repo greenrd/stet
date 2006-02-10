@@ -1,28 +1,26 @@
-%# Copyright 2005 Software Freedom Law Center, Inc.
-%#
-%# This program is free software: you may copy, modify, or redistribute it
-%# and/or modify it under either:
-%#
-%#  (a) the terms of the GNU Affero General Public License as published by
-%#      the Free Software Foundation, either version 3 of the License, or
-%#      (at your option) any later version.
-%#    or
-%#  (b) the terms of the GNU General Public license, version 2, as
-%#      published by the Free Software Foundation.
-%#
-%# This program is distributed in the hope that it will be useful, but
-%# WITHOUT ANY WARRANTY; without even the implied warranty of
-%# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-%# General Public License and/or GNU General Public License for more
-%# details.
-%#
-%# You should have received a copy of the GNU Affero General Public License
-%# and the GNU General Public License along with this program. If not, see
-%# <http://www.gnu.org/licenses/>.
-%
-
-%# Copyright (c) 2005 Software Freedom Law Center
+%# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
 %# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+
 % if ($resp == 0) {
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
@@ -41,6 +39,7 @@
 % } elsif ($resp == 1) {
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
+<d><% $drafter %></d>
 <cs>Your comment <em><% $scrubber->scrub($notesubj) %></em> was submitted.  <a href="/comments/rt/changeshown.html">change query</a></cs>
 <annotation>
 <n><% $scrubber->scrub($notetext) %></n>
@@ -51,6 +50,7 @@
 <u><% $scrubber->scrub($name) %></u>
 <ua>unagree</ua>
 <at>1</at>
+<qn><% $queue %></qn>
 </annotation>
 </response>
 % }
@@ -69,10 +69,8 @@ require "/var/www/stet/stetsubs.pl";
 use HTML::Scrubber;
 my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
 
-
-
 my ($CurrentUser, $resp, $name) = getUser("x");
-my ($dompath, $url, $urlpath, $selectedtext, $notesubj, $start, $startid, $end, $endid, $notetext, $queue, $realqueue, $id);
+my ($dompath, $url, $urlpath, $selectedtext, $notesubj, $start, $startid, $end, $endid, $notetext, $realqueue, $id, $drafter);
 
 if(%ARGS) {
 
@@ -95,17 +93,20 @@ $url =~ s/.*\/([^\/]+)\.(html|xml).*/$1/;
  $endid = $ARGS{'EndNodeId'};
  $notetext = URI::Escape::uri_unescape($ARGS{'NoteText'});
 
-$ARGS{'queue'} ? $queue = $ARGS{'queue'} : $queue = "Inbox";
-
+print STDERR "q arg is ".$queue."\n";
+# $queue ? $queue = $queue : $queue = "Inbox";
+# print STDERR "wq is $queue\n";
 my $ThisQueue = RT::Queue->new($CurrentUser);
   $ThisQueue->Load($queue);
-  if ($CurrentUser->HasRight( Right => 'CreateTicket', Object => $ThisQueue )) {
+
+  if ($ThisQueue->CurrentUserHasRight('CreateTicket')) {
       $realqueue = $queue;
+      $drafter = $queue;
   }
   else {
       $realqueue = "Inbox";
   }
-
+print STDERR "rq is $realqueue\n";
 
 if ($resp == 1) {
 my $ticket = new RT::Ticket($CurrentUser);
@@ -133,4 +134,6 @@ my %ticket_vals = ( Queue => $realqueue,
 }
 $r->content_type('text/xml');
 </%INIT>
-
+<%ARGS>
+$queue => "Inbox"
+</%ARGS>

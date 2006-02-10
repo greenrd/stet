@@ -1,0 +1,43 @@
+To: {$msg->header->{'from'}}
+From: GPLv3 Comment Submission <tech@gplv3.fsf.org>
+Subject: Re: {$msg->header->{'subject'}}
+X-Precedence: bulk
+
+
+Thank you for sending your comments on the GPLv3 draft.
+Unfortunately, we were unable to find the text:
+"{$msg->header->{'subject'}}"
+in the license draft.  Messages sent to <comments@gplv3.fsf.org> are
+processed automatically and are not seen by human eyes until they are
+entered in the comment system.  All comments in the commenting system
+must be attached to a specific string of text (within a single
+sentence) from the current draft under discussion.
+
+Please note that, as described at
+http://gplv3.fsf.org/comments/email.html, 
+
+- Your should have registered at https://www.fsf.org/register_form, and
+  sent your message from the address you gave when registering;
+
+- the Subject: line of your message should be the specific draft text
+  that your comment is addressing;
+
+- the first line of your message should be a brief, one-line
+  subject/summary of your comment, followed by a blank line;
+
+- the rest of your message will be entered as the text of your
+  comment.
+
+Multiple comments on separate sections of the text should be sent in
+separate emails.
+
+If you have found a bug in the web or email interfaces, please send
+all useful information to tech@gplv3.fsf.org, where they will be
+entered in our bug tracker.
+
+(This is the first run of the email interface, which will soon be
+automated, so now would be a particularly good time to point out bugs.)
+
+Here is the message you sent us:
+---------
+{$bodyobj->as_string()}

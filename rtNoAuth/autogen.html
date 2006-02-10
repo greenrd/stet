@@ -1,0 +1,69 @@
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+<%INIT>
+    my $CurrentUser = RT::CurrentUser->new;
+print STDERR "=====================================================\nentering autogen\n";
+
+my $name;
+our ($pass,$resp);
+if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
+    $CurrentUser->LoadByName($name);
+    print STDERR "current $resp a user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
+}
+if (!$CurrentUser->id) {
+    my ($val, $msg, $gval, $gmsg) = createUser($name,$pass);
+    print STDERR "trying to create a user $name, got \"$val : $msg\" group $gval $gmsg\n";
+    $CurrentUser->LoadByName($name);
+    print STDERR "created current $resp b user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
+}
+
+sub createUser($$) {
+    my $name = shift;
+    my $pass = shift;
+#    our %ARGS;
+    my $UserObj = RT::User->new(RT::CurrentUser->new('RT_System'));
+    my $Group = new RT::Group(RT::CurrentUser->new('RT_System'));
+    $Group->Load(500) || Abort(loc('Could not load group'));
+    
+    my ($val, $msg) = $UserObj->Create(
+				       
+				       
+				       Name                  => $name,
+				       RealName              => $name,
+				       ExternalContactInfoId => $name,
+#				       EmailAddress          => $ARGS{'email'},
+				       ContactInfoSystem     => "gnuxmlrpc",
+				       Privileged           => 1,
+				       Disabled            => 0,
+				       );
+    
+    
+    my ($ret, $pw) = $UserObj->SetRandomPassword;
+    print STDERR "user $name got password $pw\n";
+    my ($gval, $gmsg) = $Group->AddMember($UserObj->id);
+    
+    return ($val, $msg, $gval, $gmsg);
+}
+
+
+</%INIT>

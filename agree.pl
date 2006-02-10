@@ -46,7 +46,7 @@ do "xmlpass.pl";
 
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
      $name =~ s/\"//g;
-     $server = Frontier::Client->new(url => 'http://',
+     $server = Frontier::Client->new(url => 'http://cs_auth:eeSahp1n@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
  				    username => $username,
  				    password =>  $password);
     

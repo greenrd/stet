@@ -1,30 +1,7 @@
 %# {{{ BEGIN BPS TAGGED BLOCK
 %# 
-%# Copyright (C) 2006   Software Freedom Law Center, Inc.
-%# Modified-By: Orion Montoya <orion@mdcclv.com>
-%#
-%# This software gives you freedom; it is licensed to you under version
-%# 3 of the GNU Affero General Public License, along with the
-%# additional permission in the following paragraph.
-%#
-%# This notice constitutes a grant of such permission as is necessary
-%# to combine or link this software, or a modified version of it, with
-%# Request Tracker (RT), published by Jesse Vincent and Best Practical
-%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
-%# distribute the resulting work.  RT is licensed under version 2 of
-%# the GNU General Public License.
-%# 
-%# This software is distributed WITHOUT ANY WARRANTY, without even the
-%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
-%# PURPOSE.  See the GNU Affero General Public License for further
-%# details.
-%#  
-%# You should have received a copy of the GNU Affero General Public
-%# License, version 3, and the GNU General Public License, version 2,
-%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-%#  
 %# COPYRIGHT:
-%#
+%#  
 %# This software is Copyright (c) 1996-2004 Best Practical Solutions, LLC 
 %#                                          <jesse@bestpractical.com>
 %# 
@@ -48,316 +25,81 @@
 %# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 %# 
 %# 
+%# CONTRIBUTION SUBMISSION POLICY:
+%# 
+%# (The following paragraph is not intended to limit the rights granted
+%# to you to modify and distribute this software under the terms of
+%# the GNU General Public License and is only of importance to you if
+%# you choose to contribute your changes and enhancements to the
+%# community by submitting them to Best Practical Solutions, LLC.)
+%# 
+%# By intentionally submitting any modifications, corrections or
+%# derivatives to this work, or any other work intended for use with
+%# Request Tracker, to Best Practical Solutions, LLC, you confirm that
+%# you are the copyright holder for those contributions and you grant
+%# Best Practical Solutions,  LLC a nonexclusive, worldwide, irrevocable,
+%# royalty-free, perpetual, license to use, copy, create derivative
+%# works based on those contributions, and sublicense and distribute
+%# those contributions and any derivatives thereof.
+%# 
 %# }}} END BPS TAGGED BLOCK
-%
-<html>
-<head>
-<title>gpl comment system - query builder</title>
-<script type="text/javascript" src="/comments/stet.js"></script>
-<link rel="stylesheet" type="text/css" href="/comments/stet.css"/>
-</head>
-<body>
-<div id="topbar" class="topbar">
-<span id="statustext" class="statustext">Select what you want to search for</span>
-% my ($CurrentUser, $resp, $name) = getUser("foo");
-% if ($name) {
-<span id="login" class="login">you are <% $name %>: <a href="http://gplv3.fsf.org/logout">logout</a></span></div>
-% } else {
-</span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/changeshown.html">login</a></span></div>
-% }
-<& header.html, name => $name &>
-<div id="maintext">
-<FORM METHOD="GET" ACTION="/comments/rt/changeshown.html" NAME="BuildQuery">
-<input type=hidden name=SearchId value="new">
-<input type=hidden name=Query value="">
-% my $qs;
-% if (!$ARGS{'came_from'}) {
-% $qs = $ENV{'HTTP_REFERER'};
-% $qs =~ s/(.*)\?.*/$1/;
-% $qs =~ s/.*\/(.*)/$1/;
-% } else {
-% $qs = $ARGS{'came_from'};
-% }
-% $qs =~ s/(.html|.xml)$//;
-<h3 class="searchheader">Search for comments on <% $qs %></h3>
-<input type=hidden name="came_from" value="<% $came_from %>">
-<table>
+<& /Elements/Header, Title => $title &>
+<& /Ticket/Elements/Tabs, 
+    current_tab => "Search/Build.html".$QueryString, 
+    Title => $title,
+    Format => $Format,
+    Query => $Query,
+    Order => $Order,
+    OrderBy => $OrderBy,
+    Rows => $RowsPerPage
+&>
+
+<FORM METHOD="GET" ACTION="Build.html" NAME="BuildQuery">
+<input type=hidden name=SearchId value="<%$SearchId%>">
+<input type=hidden name=Query value="<%$Query%>">
+<input type=hidden name=Format value="<%$Format%>">
+<table width=100%>
 <tr>
 <td valign=top class="boxcontainer">
-<p>Aggregator:<input type=radio NAME="AndOr" CHECKED VALUE="AND">AND</input>
-<input type=radio NAME="AndOr" VALUE="OR">OR</input>
-</p>
-  <tr><td>
-<tr><td align=right>
-<SELECT NAME="AttachmentField">
-<OPTION VALUE="Content">Comment</OPTION>
-<OPTION VALUE="Subject">Subject</OPTION>
-</SELECT>
-</td><td>
-<SELECT NAME ="AttachmentOp">
-<OPTION VALUE="LIKE" SELECTED>contains</OPTION>
-<OPTION VALUE="NOT LIKE" >does not contain</OPTION>
-</SELECT>
-</td><td>
-<Input Name="ValueOfAttachment" Size=20>
-</td></tr>
+<& Elements/PickCriteria, query => $Query, cfqueues => \%queues &>
+<& /Elements/Submit, Caption => loc('Add additional criteria'), Label => loc('Add'), Name => 'AddClause'&>
 
-<tr><td align=right>
-Type
-</td><td>
-<SELECT NAME ="QueueOp">
-<OPTION VALUE="=" SELECTED>is</OPTION>
-<OPTION VALUE="!=" >isn&#39;t</OPTION>
-</SELECT>
-</td><td>
-<SELECT NAME ="ValueOfQueue">
-<OPTION VALUE="">-</OPTION>
-<OPTION VALUE="Inbox" >Inbox
-</OPTION>
-<OPTION VALUE="Issues" >Issues
-</OPTION>
-% my $drafterQ = RT::Queue->new($CurrentUser);
-% $drafterQ->Load('Drafter');
-% if ($drafterQ->CurrentUserHasRight('SeeQueue')) {
-<OPTION VALUE="Drafter">Drafters' comments</OPTION>
-% }
-</SELECT>
-</td></tr>
-
-<tr><td class="label" align="right">
-<SELECT NAME="ActorField">
-<OPTION VALUE="Creator">Submitter</OPTION>
-</SELECT>
-</td><td>
-<SELECT NAME ="ActorOp">
-<OPTION VALUE="=" SELECTED>is</OPTION>
-<OPTION VALUE="!=" >isn&#39;t</OPTION>
-</SELECT>
-</td><td>
-<Input type="text" NAME="ValueOfActor" size=20>
-</td></tr>
-
-<tr><td align=right>
-<SELECT NAME="DateField">
-<OPTION VALUE="Created">Created</OPTION>
-<OPTION VALUE="LastUpdated">Last Updated</OPTION>
-<OPTION VALUE="Updated">Updated</OPTION>
-</SELECT>
-</td><td>
-<SELECT NAME ="DateOp">
-<OPTION VALUE="&lt;">Before</OPTION>
-<OPTION VALUE="=">On</OPTION>
-<OPTION VALUE="&gt;">After</OPTION>
-</SELECT>
-</td><td>
-<INPUT NAME="ValueOfDate" VALUE="" size=16> 
-</td></tr>
-
-<tr><td align=right>
-<SELECT NAME="LinksField">
-<OPTION VALUE="HasMember">Is a parent/Issue of</OPTION>
-<OPTION VALUE="MemberOf">Is a child of/belongs to Issue</OPTION>
-<OPTION VALUE="RefersTo">Links to external object</OPTION>
-</SELECT>
-</td><td>
-<SELECT NAME ="LinksOp">
-<OPTION VALUE="LIKE" SELECTED>contains</OPTION>
-<OPTION VALUE="NOT LIKE" >doesn&#39;t contain</OPTION>
-</SELECT>
-</td><td>
-<INPUT Name="ValueOfLinks" value="" SIZE=5>
-</td></tr>
-<tr><td align=right>
-Id
-</td><td>
-<SELECT NAME ="idOp">
-<OPTION VALUE="&lt;"
->less than</OPTION>
-<OPTION VALUE="="
->equal to</OPTION>
-<OPTION VALUE="&gt;"
->greater than</OPTION>
-<OPTION VALUE="!="
->not equal to</OPTION>
-</SELECT>
-</td><td>
-<INPUT Name="ValueOfid" SIZE=5>
-</td></tr>
-
-
-<tr><td class=label align="right">
-Text selected for comment
 </td>
-<td>
-<SELECT NAME ="&#39;CF.NoteSelection&#39;Op">
-<OPTION VALUE="LIKE"
->contains</OPTION>
-<OPTION VALUE="NOT LIKE"
->doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
->is</OPTION>
-<OPTION VALUE="!="
->isn&#39;t</OPTION>
-</SELECT>
-</td>
-<td>
-<input name="ValueOf&#39;CF.NoteSelection&#39;" size="20">
-</td></tr>
-
-<tr><td class=label align="right">
-Filename commented on
-</td>
-<td>
-<SELECT disabled NAME ="&#39;CF.NoteUrl&#39;Op">
-<OPTION VALUE="LIKE"
->matches</OPTION>
-<OPTION VALUE="NOT LIKE"
->doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
->is</OPTION>
-<OPTION VALUE="!="
->isn&#39;t</OPTION>
-<OPTION VALUE="&lt;"
->less than</OPTION>
-<OPTION VALUE="&gt;"
->greater than</OPTION>
-</SELECT>
-</td>
-<td>
-<input disabled name="ValueOf&#39;CF.NoteUrl&#39;" size="20" value="gplv3-draft-1">
-</td></tr>
-
-<input type="hidden" NAME="&#39;CF.NoteUrl&#39;Op" VALUE="LIKE">
-<input type="hidden" name="ValueOf&#39;CF.NoteUrl&#39;" value="gplv3-draft-1">
-
-
-
-<tr><td class=label align="right">
-Section id
-</td>
-<td>
-<SELECT NAME ="&#39;CF.NoteStartNodeId&#39;Op">
-<OPTION VALUE="LIKE"
->contains</OPTION>
-<OPTION VALUE="NOT LIKE"
->doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
->is</OPTION>
-<OPTION VALUE="!="
->isn&#39;t</OPTION>
-<OPTION VALUE="&lt;"
->less than</OPTION>
-<OPTION VALUE="&gt;"
->greater than</OPTION>
-</SELECT>
-</td>
-<td>
-<input name="ValueOf&#39;CF.NoteStartNodeId&#39;" size="20">
-</td></tr>
-
-<tr><td class=label align="right">
-
-Agreeers 
-</td>
-<td>
-<SELECT NAME ="&#39;CF.Agreeers&#39;Op">
-<OPTION VALUE="LIKE"
->contains</OPTION>
-<OPTION VALUE="NOT LIKE"
->doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
->is</OPTION>
-<OPTION VALUE="!="
->isn&#39;t</OPTION>
-<OPTION VALUE="&lt;"
->less than</OPTION>
-<OPTION VALUE="&gt;"
->greater than</OPTION>
-</SELECT>
-</td>
-<td>
-<input name="ValueOf&#39;CF.Agreeers&#39;" size="20">
-</td></tr>
-
-<tr><td class=label align="right">
-DiscussionGroup 
-</td>
-<td>
-<SELECT NAME ="&#39;CF.DiscussionGroup&#39;Op">
-<OPTION VALUE="LIKE"
->contains</OPTION>
-<OPTION VALUE="NOT LIKE"
->doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
->is</OPTION>
-<OPTION VALUE="!="
->isn&#39;t</OPTION>
-<OPTION VALUE="&lt;"
->less than</OPTION>
-<OPTION VALUE="&gt;"
->greater than</OPTION>
-</SELECT>
-</td>
-<td>
-<select name="ValueOf&#39;CF.DiscussionGroup&#39;">
-<option value="" SELECTED>-</option>
-<option value="NULL">(no value)</option>
-<option value="A">A</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-<option value="E">E</option>
-<option value="F">F</option>
+<td valign=top class="boxcontainer">
+<& /Elements/TitleBoxStart, title => loc("Query") . ": " .$Description &>
+<& Elements/NewListActions, actions => \@actions &>
+<select size="10" name="clauses" style="width: 100%">
+<%$optionlist|n%>
 </select>
-</td></tr>
-<tr>
-<td class=label align="right">
-Rows per page:
-</td><td>
-<SELECT NAME ="RowsPerPage">
-<OPTION VALUE="0" >
-Unlimited
-</OPTION>
-<OPTION VALUE="10" >
-10
-</OPTION>
-<OPTION VALUE="30" SELECTED>
-30
-</OPTION>
-<OPTION VALUE="50" >
-50
-</OPTION>
-<OPTION VALUE="100" >
-100
-</OPTION>
-</SELECT>
+</td></tr><tr><td bgcolor="#dddddd" colspan="2">
+<center>
+<input type=submit name="Up" value="^">
+<input type=submit name="Down" value="v">
+<input type=submit name="Left" value="<">
+<input type=submit name="Right" value=">">
+<input type=submit name="DeleteClause" value="Delete">
+<br />
+<input type=submit name="Clear" value="Clear">
+<input type=submit name="Toggle" value="And/Or">
+%#<input type=submit name="EditQuery" value="Advanced">
+</center>
+<& /Elements/TitleBoxEnd &>
+<br>
+<& Elements/EditSearches, CurrentSearch => $search_hash, Dirty => $dirty, SearchId => $SearchId &>
 </td>
 </tr>
+<tr>
+<td colspan=2 class="boxcontainer">
 
-
+<& Elements/DisplayOptions, %ARGS, Format=> $Format,
+AvailableColumns => $AvailableColumns,  CurrentFormat => $CurrentFormat, RowsPerPage => $RowsPerPage, OrderBy => $OrderBy, Order => $Order &>
+</td>
+</tr>
 </table>
-
-<TABLE WIDTH=100% CELLSPACING=0 BORDER=0 CELLPADDING=0 >
-<TR>
-<TD>
-&nbsp;
-</TD>
-<TD ALIGN=RIGHT VALIGN=CENTER>
-<B>Find comments</b> <INPUT TYPE=SUBMIT
-NAME="DoSearch"
- VALUE='Search'>
-</TD>
-</TR>
-</TABLE>
-
-</div>
-
 </FORM>
-</body>
-</html>
+
 <%INIT>
 use Tree::Simple;
-
 
 my $search_hash = {};
 my $search;
@@ -395,9 +137,9 @@ $Query ||= $search_hash->{'Query'};
 $Format ||= $search_hash->{'Format'};
 $Description ||= $search_hash->{'Description'};
 $SearchId ||= $search_hash->{'SearchId'} || 'new';
-$Order ||= $search_hash->{'Order'} || 'DESC';
+$Order ||= $search_hash->{'Order'} || 'ASC';
 $OrderBy ||= $search_hash->{'OrderBy'} || 'id';
-$RowsPerPage = ($search_hash->{'RowsPerPage'} || 30) unless defined ($RowsPerPage);
+$RowsPerPage = ($search_hash->{'RowsPerPage'} || 50) unless defined ($RowsPerPage);
 $search ||= $search_hash->{'Object'};
 # }}}
 
@@ -1024,11 +766,9 @@ $session{'CurrentSearchHash'} = $search_hash;
 
 # {{{ Show the results, if we were asked.
 if ( $ARGS{"DoSearch"} ) {
-my $redirurl = "/comments/$came_from?Query=$Query&Order=$Order&OrderBy=$OrderBy&Rows=$RowsPerPage";
-   $m->redirect($redirurl);
+    $m->comp("Results.html" , Query => $Query, Format => $Format, Order => $Order, OrderBy => $OrderBy, Rows => $RowsPerPage);
     $m->abort();
 }
-
 # }}}
 
 # {{{ Build a querystring for the tabs
@@ -1049,17 +789,13 @@ if ($NewQuery) {
 </%INIT>
 
 <%ARGS>
+$NewQuery => 0
 $SearchId => undef
 $Query => undef
 $Format => undef 
 $Description => undef
 $Order => undef
 $OrderBy => undef
-$RowsPerPage => 30
+$RowsPerPage => undef
 $HideResults => 0
-$came_from => 'http://gplv3.fsf.org/comments/gplv3-draft-1.xml'
-$Delete => 1
-$NewQuery => 1
 </%ARGS>
-
-

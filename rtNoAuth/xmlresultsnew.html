@@ -99,7 +99,7 @@ my ($name, $resp, $pass, $agr_vals, $CurrentUser);
 # print STDERR Dumper(%ARGS);
 
 my $rsslink = "/comments/rt/rssresults.rdf?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
-my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
+my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'})) . "&Order=DESC";
 #  my $printargs = param('Query')." (".$Tickets->CountAll()." found)";
 
 
@@ -132,4 +132,5 @@ $r->content_type('text/xml');
 $Rows => 30
 $StartAt => 1
 $Order => 'DESC'
+$Query => "'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'";
 </%ARGS>

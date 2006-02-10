@@ -26,6 +26,8 @@ use MIME::Base64;
 use Frontier::Client;
 use URI::Escape;
 
+require "/var/www/stet/xmlpass.pl";
+
 sub stripCrap($) {
     my $crappy = shift;
     $crappy =~ s/(.*)\?.*/$1/;
@@ -91,19 +93,20 @@ sub showAgreeStr($) {
 }
 
 
-
+my $server;
 sub getUser($) {
 
     my $CurrentUser = RT::CurrentUser->new;
-    print STDERR "entering getUser with external passwords\n";
-    do "xmlpass.pl";
+    my ($username, $password) = userpass();
+
+    print STDERR "entering getUser with external passwords.\n";
     my $name;
-    our ($pass,$resp);
+    our ($pass,$resp,$server);
     if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
 	$name =~ s/\"//g;
-	my $server = Frontier::Client->new(url => 'http://stet_auth:fai1Iegh@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
-					   username => $username,
-					   password =>  $password);
+	$server = Frontier::Client->new(url => 'http://'.$username.':'.$password.'@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users'); #,
+#					   username => $username,
+#					   password =>  $password);
 	my $respref = $server->call('authRemoteUser',$name,$pass);
 	$resp = $$respref;
     }
@@ -141,6 +144,13 @@ sub createUser($$) {
 my $name = shift;
 my $pass = shift;
 my $UserObj = RT::User->new(RT::CurrentUser->new('RT_System'));
+our $server;
+my $email = '';
+
+    eval{ $email = $server->call('getEmail',$name) };
+
+if ($email) { print STDERR "got email $email\n"; }
+else { $email = $name; }
 
 my ($val, $msg) = $UserObj->Create(
 
@@ -148,7 +158,7 @@ my ($val, $msg) = $UserObj->Create(
         Name                  => $name,
         RealName              => $name,
         ExternalContactInfoId => $name,
-        EmailAddress          => $name,
+        EmailAddress          => $email,
         ContactInfoSystem     => "gnuxmlrpc",
         Privileged           => 1,
         Disabled            => 0,

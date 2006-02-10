@@ -65,7 +65,7 @@
 % } else {
 </span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/changeshown.html">login</a></span></div>
 % }
-<& header.html &>
+<& header.html, name => $name &>
 <div id="maintext">
 <FORM METHOD="GET" ACTION="/comments/rt/changeshown.html" NAME="BuildQuery">
 <input type=hidden name=SearchId value="new">
@@ -80,7 +80,7 @@
 % }
 % $qs =~ s/(.html|.xml)$//;
 <h3 class="searchheader">Search for comments on <% $qs %></h3>
-<input type=hidden name="came_from" value="<% $qs %>">
+<input type=hidden name="came_from" value="<% $came_from %>">
 <table>
 <tr>
 <td valign=top class="boxcontainer">
@@ -116,6 +116,11 @@ Type
 </OPTION>
 <OPTION VALUE="Issues" >Issues
 </OPTION>
+% my $drafterQ = RT::Queue->new($CurrentUser);
+% $drafterQ->Load('Drafter');
+% if ($drafterQ->CurrentUserHasRight('SeeQueue')) {
+<OPTION VALUE="Drafter">Drafters' comments</OPTION>
+% }
 </SELECT>
 </td></tr>
 
@@ -219,11 +224,11 @@ Filename commented on
 </SELECT>
 </td>
 <td>
-<input disabled name="ValueOf&#39;CF.NoteUrl&#39;" size="20" value="<% $qs %>">
+<input disabled name="ValueOf&#39;CF.NoteUrl&#39;" size="20" value="gplv3-draft-1">
 </td></tr>
 
 <input type="hidden" NAME="&#39;CF.NoteUrl&#39;Op" VALUE="LIKE">
-<input type="hidden" name="ValueOf&#39;CF.NoteUrl&#39;" value="<% $qs %>">
+<input type="hidden" name="ValueOf&#39;CF.NoteUrl&#39;" value="gplv3-draft-1">
 
 
 
@@ -1052,7 +1057,7 @@ $Order => undef
 $OrderBy => undef
 $RowsPerPage => 30
 $HideResults => 0
-$came_from => 'http://gplv3.fsf.org/comments/gplv3-draft-1.xml'
+$came_from => 'http://gplv3.fsf.org/comments/debug'
 $Delete => 1
 $NewQuery => 1
 </%ARGS>
