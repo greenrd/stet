@@ -43,14 +43,15 @@ sub cleanNoteSel($) {
     return $noteSelection;
 }
 
-sub showAgree($) {
+sub showAgree($$) {
     my $item = shift;
+    my $name = shift;
     my $agr_vals;
-    our ($resp,$name);
     my $showagree = '';	
     $agr_vals = $$item->CustomFieldValues(7);
     if ($resp == 1) {
 	while (my $value = $agr_vals->Next) {
+#	    print STDERR $$item->id . " " . $value->Content." ".$name."\n";
 	    if (($name) && ($value->Content eq $name)) {
 #		    $showagree = "<a label=\"you have indicated that you agree with this\" name=\"you have indicated that you agree with this\">unagree</a>";
 		$showagree = "unagree";

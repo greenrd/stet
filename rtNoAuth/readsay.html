@@ -64,7 +64,7 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 % } else {
 </span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/readsay.html?<% $Tickets ? 'Query='.$ARGS{'Query'} : 'id='.$ARGS{'id'} %>">login</a></span></div>
 % }
-<& header-devel.html, name => $name &>
+<& header.html, name => $name &>
 <div id="readsaymain">
 <span id="listactions">
 <& Elements/ListActions, actions => \@results &>
@@ -86,8 +86,16 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 % my $item = $$itemref;
 % my $showactions = shift;
 % my $deletelink = shift;
- <div class="onecomment">
-  <h4><% thingType(\$item) %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
+% if (!$deletelink) {
+%  if ($resp == 1) {
+    <form action="readsay.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
+       <input type="hidden" name="id" value="<% $item->id %>">
+%  }
+% }
+
+% if ($item->QueueObj->CurrentUserHasRight('SeeQueue')) {
+ <div class="onecomment<% ($item->QueueObj->Name =~ /Drafter/) && " Drafter" %>">
+  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
 %      if (($HasIssueRights) && ($showactions) && ($deletelink)) {
             <span class="TktInput">[dissociate: <INPUT TYPE=CHECKBOX NAME="<% $deletelink %>" value="1">]</span>
 %      }
@@ -124,23 +132,19 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
     <span class="TktLabel">Child comment of <% $item->id %>:</span>
 %    my $child = RT::Ticket->new($CurrentUser);
 %    $child->Load($link->BaseURI->Object->id);
-% my $deletelink = "DeleteLink-". $link->Base ."-". $link->Type;
+% my $deletelink = "DeleteLink-". $link->Base ."-". $link->Type."-";
 <% displayTicket(\$child,$showactions,$deletelink) %>
 %   }
-
+<br/>
 %  if (($HasIssueRights) && ($showactions) && (!$deletelink)) {
 <br/>
   <span class="TktLabel">Children:</span><br/>
         <span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
 % if (($showactions) & (!$deletelink)){
-%  if ($resp == 1) {
-    <form action="readsay.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
-       <input type="hidden" name="id" value="<% $item->id %>">
-%  }
-
+<br/>
 %  if ($HasIssueRights) {
-    <span class="TktLabel">Parents:</span>
+    <span class="TktLabel">Parents:</span><br/>
        <span class="TktInput indent">add new: <INPUT NAME="<% $item->id %>-MemberOf"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
     <br/>
@@ -152,7 +156,7 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 %   while (my $link = $item->RefersTo->Next) {
         <A HREF="<% $link->Target %>"><% $link->Target %></A>
 %	if ($HasIssueRights) {
-            <span class="TktInput">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink-<% $link->Base %>-<% $link->Type %>" value="1">]</span>
+            <span class="TktInput">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Base %>-<% $link->Type %>" value="1">]</span>
 %	    }
  <br/>
 %   }
@@ -223,8 +227,13 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
            <INPUT TYPE=SUBMIT NAME="SubmitTicket" VALUE="Add comment"></form>
 %      }
 %  } # should close "if $resp == 1" after picker
-% } 
+% }
  </div>
+% }
+% else {
+<div class="onecomment formHelpIsh">You do not have permission to view comment number <% $item->id %><br/> <br/></div>
+
+% }
 % return '';
 % }
 </body>
@@ -294,10 +303,10 @@ sub thingType($) {
     my $itemref = shift;
     my $item = $$itemref;
 if ($item->Queue == 5) {
-    return "issue";
+    return "Issue";
 }
 else {
-    return "comment";
+    return "Comment";
 }
 }
 
@@ -343,7 +352,7 @@ sub getThread($) {
 	    }
 	}
 	    else {
-		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId")) {
+		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId|Agreeer")) {
 	       
 		    $allcomments .= "<div class=\"formHelpIsh\">".$Transaction->BriefDescription." by ".userlink(\$item,\$Transaction)." <span class=\"date\">on ".doDate(\$Transaction)."</span></div>\n";
 		}

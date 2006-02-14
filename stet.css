@@ -198,16 +198,10 @@ color: #000;
 
 #maintext { 
 
-float:left;
-
-/*        position: absolute; */
+	float:left;
 	margin-left: 3em;
         margin-top: 2em;
         float: left;
-/*         left: 0; */
-/*         top: 0; */
-/* 	margin-right: 33%; */
-/*         border: 1px dotted #666; */
         width: 50%;
 	color: #000;
  }
@@ -218,19 +212,31 @@ float:left;
         float: left;
         width: 80%;
 }
+::-moz-selection{
+        background:#f1efb9;
+        color:#000;
+}
+
+::selection {
+        background:#f1efb9;
+        color:#000;
+}
+
+.highlight::-moz-selection {
+        background: #AF0078;
+        color:#fff;
+}
+
+.highlight::selection {
+        background: #AF0078;
+        color:#fff;
+}
 
 .noteify { 
-/*         display: none; */
-/* 	float: left; */
-/* 	left: 80%; */
-/*         top: 0; */
-           width: 30%;
 font-size: smaller;
 left: 55%;
 float: right;
 position: absolute;
-/* margin-left: 68%; */
-/*         border: 1px dotted #666; */
 z-index: 90;
 background: #f0ecb3;
 color: #000;
@@ -238,29 +244,21 @@ color: #000;
 
 .annotation { 
 font-size: 10pt;
-/* font-size: smaller; */
 color: #000;
 font-weight: normal;
 position: absolute;
-/* position: relative; */
-/* float: right; */
-/* margin-left: 100%; */
 left: 55%;
-/* right: -%; */
 width: 40%;
 border: 1px solid #FFFF00;
 background: #f0ecb3; 
-/* background: #FFFF99; */
-/* z-index: 10; */
-/* clear: right; */
+
  }
 
 .Drafter {
 background: #F0F0F0;
 }
-
 .Issues {
-background: #A3F3A0;
+background: #A3FFD6;
 }
 
 textarea { 

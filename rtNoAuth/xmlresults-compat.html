@@ -23,25 +23,28 @@
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
 %
+%
 <response>
 % if ($Tickets) {
-%#    my $tick = $Tickets->Next;
-<cs>Showing comments where <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> ( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>: 
+<d><% $drafter %></d>
+<cs>
+<say>Showing comments </say>
+<say>Showing comments </say>
+<q><% humanQuery($ARGS{'Query'}) |n %></q>
+<r><% $rsslink %></r>
+<l><% $listlink %></l>
+<ra>http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80</ra>
+<t><% $Tickets->CountAll()%></t>
+<rng><% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %></rng>
 %   if ($Tickets->CountAll() > $Rows) {
 %       if ($StartAt > 1 ) {
-             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev</a>
+<pr>/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%></pr>
 %       }
-%   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() > $StartAt + $Rows)) {
-|
-% }
 %       if ($Tickets->CountAll() > $StartAt + $Rows) {
-             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next</a>
-%       }
-%   }
-%# ) <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>">change</a> 
-) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> 
+<nx>/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %></nx>
+% }
+% }
 </cs>
-% 
 <%perl> 
     $Tickets->GotoFirstItem;
     if ($StartAt > 1) {
@@ -51,7 +54,12 @@
     }
 </%perl>
 % } elsif ($Ticket) {
-<cs>Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a href="<% $listlink %>">[see thread]</a> <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change</a> </cs>
+<d><% $drafter %></d>
+<cs>
+<say>Showing comment </say>
+<ci><% $ARGS{'id'} %></ci>
+<l><% $listlink %></l>
+</cs>
 % }
 % if ($Ticket || $Tickets) {
 % my $i = 0;
@@ -62,10 +70,11 @@
 <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
 <u><% $item->CreatorObj->Name %></u>
-% my ($agree,$agr_count) = showAgree(\$item);
+% my ($agree,$agr_count) = showAgree(\$item,$name);
 <ua><% $agree |n %></ua>
 <at><% $agr_count %></at>
 <id><% $item->id %></id>
+<qn><% $item->QueueObj->Name %></qn>
 </annotation>
 % $Ticket = '';
 % $i++;
@@ -75,7 +84,7 @@
 % }
 % }
 % else {
-<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">change query</a> </cs>
+<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search again</a> </cs>
 % }
 </response>
 %
@@ -98,7 +107,7 @@ my ($name, $resp, $pass, $agr_vals, $CurrentUser);
 # print STDERR Dumper(%ARGS);
 
 my $rsslink = "/comments/rt/rssresults.rdf?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
-my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
+my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'})) . "&Order=DESC";
 #  my $printargs = param('Query')." (".$Tickets->CountAll()." found)";
 
 
@@ -108,18 +117,37 @@ print STDERR "Currentuser $CurrentUser, $resp\n";
 
 my ($Tickets, $Ticket);
 
+my $drafter = '';
+my $DrafterQueue = RT::Queue->new($CurrentUser);
+$DrafterQueue->Load('Drafter');
+if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
+  $drafter = "drafter";
+}
+
 if ($ARGS{'Query'}) {
+my $Qargs = '';
+unless ($ARGS{'Query'} =~ /Queue/) {
+ $Qargs = " AND 'Queue.Name' != 'Drafter'";
+if ($drafter) {
+ $Qargs = '';
+}
+}
+
     $Tickets = RT::Tickets->new($CurrentUser);
-    $Tickets->FromSQL($ARGS{'Query'});
+# exclude, from this view, comments whose selection got messed up:
+    $Tickets->FromSQL($ARGS{'Query'}." AND 'CF.NoteStartNodeId' NOT LIKE 'login' $Qargs");
     $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 }
 elsif ($ARGS{'id'}) {
     $Ticket = RT::Ticket->new($CurrentUser);
-    $Ticket = LoadTicket($ARGS{'id'});
+    print STDERR "loading ticket '".$ARGS{'id'}."'\n";
+    # konqueror does something weird with the arg, and forcing it to an int fixes it
+    my $argh = $ARGS{'id'} + 0;
+    $Ticket = LoadTicket($argh);
+    print STDERR "loaded ticket '".$Ticket->id."'\n";
 }
 
-#my $Tickets = RT::Tickets->new($CurrentUser);
-#$Tickets->FromSQL($ARGS{'Query'});
+
 
 
 $r->content_type('text/xml');
@@ -130,4 +158,5 @@ $r->content_type('text/xml');
 $Rows => 30
 $StartAt => 1
 $Order => 'DESC'
+$Query => "'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'";
 </%ARGS>

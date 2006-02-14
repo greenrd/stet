@@ -33,6 +33,8 @@ function dump() { }
 
 var ticketObj = new Object;
 ticketObj.rtidsBySn = new Object;
+var drafter = '';
+var filename;
 
 var base64Chars = new Array(
 			    'A','B','C','D','E','F','G','H',
@@ -53,16 +55,15 @@ for (var i=0; i < base64Chars.length; i++){
 
 function initPage() {
   statusbox("Please wait while we load some comments.");
-  var filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
+  filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
   if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/)) || (filename.match(/debug/))) {
     filename = 'gplv3-draft-1';
   }
 if(window.location.search.length) {
-  // loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
- loadXMLDoc('/comments/rt/xmlresultsnew.html',window.location.search.substring(1));
+ loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
 }
  else {
-   loadXMLDoc('/comments/rt/xmlresultsnew.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+   loadXMLDoc('/comments/rt/xmlresults.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
  }
 }
 
@@ -131,7 +132,7 @@ function XpathSel() {
     document.getElementById('EndNodeId').value = endid;
     document.getElementById('StartNode').value = start;
     document.getElementById('EndNode').value = end;
-    document.getElementById('NoteUrl').value = location.href;
+    document.getElementById('NoteUrl').value = filename;
 
     if(startid != endid) {
       document.getElementById('NoteText').value = 'Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead';      
@@ -180,11 +181,11 @@ function submitComment() {
   document.getElementById('cancel').setAttribute('disabled','disabled');
   form.style.background = '#aaa';
 
-  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
+  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href+'&map;queue='+form.queue.value);
   
   
 
-  var theUrl = '/comments/rt/submitcomment.html'; 
+  var theUrl = '/comments/rt/submitcomment-devel.html'; 
   //highlightWord(form.StartNode.value,form.Selection.value,noteText,'');   
   loadXMLDoc(theUrl,params);
   }
@@ -300,6 +301,10 @@ function processReqChange()
       var resp_arrN;
       var resp_arrA;
       var resp_arrF;
+	try {
+	      drafter = response.getElementsByTagName("d")[0].firstChild.data;
+	}
+	catch (e) {}
       cs = response.getElementsByTagName("cs");
       statusbox(getXMLNodeSerialisation(cs[0]));
       resp_arrN = response.getElementsByTagName("annotation");
@@ -345,6 +350,7 @@ function processAnnotation(response) {
   rtids_arr = response.getElementsByTagName("id");
   users_arr = response.getElementsByTagName("u");
   uagr_arr = response.getElementsByTagName("ua");
+  queues_arr = response.getElementsByTagName("qn");
   agrtot_arr = response.getElementsByTagName("at");
 	for (prI = 0; prI < selections_arr.length; prI++) {
 	  if (selections_arr[prI].firstChild) {
@@ -376,6 +382,7 @@ function processAnnotation(response) {
 	    ticketObj[rtid].excerpt = tooltipSubString;
 	    ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
 	    ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
+	    ticketObj[rtid].queue = queues_arr[prI].firstChild.data;
 	    if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
 	      ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
 	    }
@@ -444,7 +451,7 @@ function createNoteDiv() {
   // just a string.
 
 var noteifyDiv = document.createElement('form');
-noteifyDiv.setAttribute('action','/comments/rt/submitcomment.html');
+noteifyDiv.setAttribute('action','/comments/rt/submitcomment-devel.html');
 noteifyDiv.setAttribute('class','noteify');
 noteifyDiv.setAttribute('id','noteify');
 noteifyDiv.setAttribute('name','noteify');
@@ -531,6 +538,35 @@ var theBR2 = document.createElement('br');
 var theBR3 = document.createElement('br');
 var theBR4 = document.createElement('br');
 
+var pickQueue;
+if (drafter) {
+pickQueue = document.createElement('select');
+pickQueue.setAttribute('name','queue');
+pickQueue.setAttribute('id','queue');
+
+var optDrafter = document.createElement('option');
+optDrafter.setAttribute('value','Drafter');
+optDrafter.setAttribute('selected','selected');
+optDrafter.appendChild(document.createTextNode('Drafter'));
+
+var optInbox = document.createElement('option');
+optInbox.setAttribute('value','Inbox');
+optInbox.appendChild(document.createTextNode('Inbox'));
+
+var optIssues = document.createElement('option');
+optIssues.setAttribute('value','Issues');
+optIssues.appendChild(document.createTextNode('Issues'));
+
+pickQueue.appendChild(optDrafter);
+pickQueue.appendChild(optInbox);
+pickQueue.appendChild(optIssues);
+}
+else {
+pickQueue = document.createElement('input');
+pickQueue.setAttribute('type','hidden');
+pickQueue.setAttribute('name','queue');
+pickQueue.setAttribute('value','Inbox');
+}
 var submit = document.createElement('input');
 submit.setAttribute('type','button');
 submit.setAttribute('id','submitNote');
@@ -556,6 +592,13 @@ noteifyDiv.appendChild(DocRevision);
 noteifyDiv.appendChild(theBR4);
 noteifyDiv.appendChild(submit);
 noteifyDiv.appendChild(cancel);
+
+if (drafter) {
+pickQueue && noteifyDiv.appendChild(document.createTextNode(' Queue: ')) && noteifyDiv.appendChild(pickQueue);
+}
+else {
+pickQueue && noteifyDiv.appendChild(pickQueue);
+}
 
 return noteifyDiv;
 
@@ -587,8 +630,8 @@ function highlightWord(node,word,tooltip,rtid,user) {
 	//dump("re is "+re+"\n");
 
 
-paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.id+'">$&\
-<span class="annotation '+rtid+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
+paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+' '+ticketObj[rtid].queue+'" id="'+node.id+'">$&\
+<span class="annotation '+rtid+' '+ticketObj[rtid].queue+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
   <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
   <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt+'\
   <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
@@ -599,10 +642,22 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" i
  loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
     }
   }
+function getElementStyle(elem, IEStyleProp, CSSStyleProp) {
+  //  var elem = document.getElementById(elemID);
+  if (elem.currentStyle) {
+    return elem.currentStyle[IEStyleProp];
+  } else if (window.getComputedStyle) {
+    var compStyle = window.getComputedStyle(elem, "");
+    return compStyle.getPropertyValue(CSSStyleProp);
+  }
+  return "";
+}
 
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
+    noteArr[i].style.prevBG=getElementStyle(noteArr[i],'background','background');
+    noteArr[i].style.prevBRD=getElementStyle(noteArr[i],'border','border');
     noteArr[i].style.background="#f9f";
     noteArr[i].style.border="1px solid #f0f";
 
@@ -611,8 +666,8 @@ function notemouseover(rtid) {
 function notemouseout(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
-    noteArr[i].style.background="#f0ecb3";
-    noteArr[i].style.border="1px solid #ff0";
+    noteArr[i].style.background=noteArr[i].style.prevBG;
+    noteArr[i].style.border=noteArr[i].style.prevBRD;
   }
 }
 
@@ -661,7 +716,7 @@ function statusbox(text) {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a>','login');
+	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="#" onmousedown="XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a>','login');
   }
   else {
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');

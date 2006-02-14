@@ -38,15 +38,16 @@ use RT::Record;
 use Frontier::Client;
 use MIME::Entity;
 use MIME::Base64;
-
+print STDERR "entering agree.pl\n";
 $id = param('rtid');
 $opn = param('opn');
 
-do "xmlpass.pl";
-
+require "/var/www/stet/xmlpass.pl";
+my ($username,$password) = userpass();
+print STDERR "$username $password\n";
 if (($name, $pass) = split(/:/, decode_base64(cookie('__ac')))) {
      $name =~ s/\"//g;
-     $server = Frontier::Client->new(url => 'http://cs_auth:eeSahp1n@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users',
+     $server = Frontier::Client->new(url => "http://$username:$password@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users",
  				    username => $username,
  				    password =>  $password);
     

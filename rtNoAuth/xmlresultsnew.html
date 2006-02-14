@@ -25,7 +25,7 @@
 %
 <response>
 % if ($Tickets) {
-%#    my $tick = $Tickets->Next;
+<d><% $drafter %></d>
 <cs>Showing comments: <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> <a href="http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80">[rationale]</a> <br/> 
 ( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>:
 %   if ($Tickets->CountAll() > $Rows) {
@@ -39,7 +39,6 @@
              <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next</a>
 %       }
 %   }
-%# ) [some rendering problems noted] <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>">search</a> 
 ) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search</a> 
 </cs>
 % 
@@ -63,10 +62,11 @@
 <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
 <u><% $item->CreatorObj->Name %></u>
-% my ($agree,$agr_count) = showAgree(\$item);
+% my ($agree,$agr_count) = showAgree(\$item,$name);
 <ua><% $agree |n %></ua>
 <at><% $agr_count %></at>
 <id><% $item->id %></id>
+<qn><% $item->QueueObj->Name %></qn>
 </annotation>
 % $Ticket = '';
 % $i++;
@@ -109,10 +109,25 @@ print STDERR "Currentuser $CurrentUser, $resp\n";
 
 my ($Tickets, $Ticket);
 
+my $drafter = '';
+my $DrafterQueue = RT::Queue->new($CurrentUser);
+$DrafterQueue->Load('Drafter');
+if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
+  $drafter = "drafter";
+}
+
 if ($ARGS{'Query'}) {
+my $Qargs = '';
+unless ($ARGS{'Query'} =~ /Queue/) {
+ $Qargs = " AND 'Queue.Name' != 'Drafter'";
+if ($drafter) {
+ $Qargs = '';
+}
+}
+
     $Tickets = RT::Tickets->new($CurrentUser);
 # exclude, from this view, comments whose selection got messed up:
-    $Tickets->FromSQL($ARGS{'Query'}." AND 'CF.NoteStartNodeId' NOT LIKE 'login'");
+    $Tickets->FromSQL($ARGS{'Query'}." AND 'CF.NoteStartNodeId' NOT LIKE 'login' $Qargs");
     $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
 }
 elsif ($ARGS{'id'}) {
@@ -120,8 +135,7 @@ elsif ($ARGS{'id'}) {
     $Ticket = LoadTicket($ARGS{'id'});
 }
 
-#my $Tickets = RT::Tickets->new($CurrentUser);
-#$Tickets->FromSQL($ARGS{'Query'});
+
 
 
 $r->content_type('text/xml');

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2005   Software Freedom Law Center, Inc.
+<!-- Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
 --   Author: Orion Montoya <orion@mdcclv.com>
 --
 -- This software gives you freedom; it is licensed to you under version
@@ -24,12 +24,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   version="1.0">
-  
+
   <xsl:output method="html"/>
 
-  <xsl:template match="/">
+  <xsl:template match="/gpl">
     <html>
       <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title><xsl:value-of select="//head/title"/></title>
         <script type="text/javascript" src="stet.js"/>
 	<script type="text/javascript" language="javascript">

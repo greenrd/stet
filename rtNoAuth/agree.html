@@ -1,0 +1,84 @@
+%# 
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%#
+% $r->content_type('text/xml');
+% if ($agreebool =~ /agree/) {
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <response>
+  <agreement>
+    <cs>You now <% $agreebool %> with <a href="/comments/rt/readsay.html?id=<% $rtid %>"><% $rtid %></a>.  <a href="/rt/NoAuth/changeshown.html">search</a></cs>
+    <id><% $rtid %></id>
+    <b><% $agreebool %></b>
+    <ct><% $valcount %></ct> 
+  </agreement>
+ </response>
+% } elsif ($agreebool =~ "stop it") {
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <response>
+  <agreement>
+    <cs>Hmm, I'm confused about your agreement.  Try again later, or reload to reset your opinion.  <a href="/rt/NoAuth/changeshown.html">search</a></cs>
+    <id><% $rtid %></id>
+    <b><% $agreebool %></b>
+    <ct><% $valcount %></ct> 
+  </agreement>
+ </response>
+% }
+
+<%INIT>
+use CGI qw/:standard/;
+use Data::Dumper;
+
+require "/var/www/stet/stetsubs.pl";
+
+print STDERR "entering agree.html\n";
+my ($CurrentUser,$resp,$name) = getUser("foo");
+$name .= "\n";
+my $Ticket = new RT::Ticket($CurrentUser);
+$Ticket->Load($rtid);
+my ($agreebool, $valcount);
+my $values = $Ticket->CustomFieldValues(7);
+#print Dumper($values);
+#print "ticket has ".$values->count." customfieldvalues\n";
+# this is trusting the user input, but it really needs to check the values
+if (($opn =~ /unagree/) && ($values->HasEntry($name))) {
+    my ($bool, $message) = $Ticket->DeleteCustomFieldValue(Field => "7", Value => $name);
+    $agreebool = "unagree";
+    print STDERR "DeleteCustomFieldValue said $bool, $message\n";
+    $valcount = $Ticket->CustomFieldValues(7)->Count;
+}
+
+else {
+    if  (!$values->HasEntry($name)) {
+	my ($bool, $message) = $Ticket->AddCustomFieldValue(Field => "7", Value => $name);
+	print STDERR "AddCustomFieldValue said $bool, $message\n";
+	$agreebool = "agree";
+    $valcount = $Ticket->CustomFieldValues(7)->Count;
+    }
+}
+if (!$agreebool) { $agreebool = "stop it"; }
+</%INIT>
+<%ARGS>
+$rtid => undef
+$opn => undef
+</%ARGS>
