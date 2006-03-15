@@ -41,7 +41,7 @@ window.onload = initPage();
       </head>
       <body onkeypress="checkKeyPressed(event);" bgcolor="#FFFFFF">
 <div id="topbar" class="topbar">
-<span id="statustext" class="statustext">Loading comments.  If you're still reading this after about 15 seconds, we do not completely support your browser yet.  You may need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.  But you can <a href="http://gplv3.fsf.org/comments/rt/readsay.html?Query=%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC">browse</a> and <a href="http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=rt/readsay.html">search</a> comments on any browser.</span>	  <span id="querydiv" style="display:none"></span>
+<span id="statustext" class="statustext">Loading comments.  If you're still reading this after about 15 seconds, we do not completely support your browser yet.  We abjectly apologize for not yet supporting Konqueror, and thank you for your continued patience.  If you don't mind clicking through a bunch of javascript alerts, you could <a href="http://gplv3.fsf.org/comments/konqueror">peek at our Konqueror progress</a>.  You'll still need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.  But you can <a href="http://gplv3.fsf.org/comments/rt/readsay.html?Query=%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC">browse</a> and <a href="http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=rt/readsay.html">search</a> comments on any browser.</span>	  <span id="querydiv" style="display:none"></span>
 	  <span id="login" class="login"></span>
 </div>
       <div class="portlet" id="portlet-dogear">

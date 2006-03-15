@@ -1,4 +1,4 @@
-%# Copyright (c) 2005, 2006 Software Freedom Law Center
+%# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
 %# Author: Orion Montoya <orion@mdcclv.com>
 %#
 %# This software gives you freedom; it is licensed to you under version
@@ -20,6 +20,7 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%#  
 %
 % sub displayTicket($$$);
 %
@@ -369,12 +370,7 @@ sub userlink($$) {
     my $item = $$itemref;
     my $msgref = shift;
     my $message = $$msgref;
-    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a></span>";
-}
-
-sub formatTransaction($) {
-## this should handle 
-
+    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a>". longOrg($message->CreatorObj)."</span>";
 }
 
 sub doDate($) {

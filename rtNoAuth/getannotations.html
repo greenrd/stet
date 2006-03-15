@@ -1,0 +1,92 @@
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Modified-By: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%#  
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+%
+<response>
+% @ids = split(/:/,$ARGS{'ids'});
+<d><% $drafter %></d>
+% foreach my $id (@ids) {
+% $id += 0;
+% if ($id > 0) {
+% unless (exists $donehash{$id}) {
+% $donehash{$id} = 1;
+% my $item = LoadTicket($id);
+% if ($item) {
+<anf>
+<n><% $item->Transactions->First->Content %></n>
+%# <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
+%# <s><% cleanNoteSel(\$item) %></s>
+<i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
+<u><% $item->CreatorObj->Name %></u>
+% my ($agree,$agr_count) = showAgree(\$item,$name);
+<ua><% $agree |n %></ua>
+<at><% $agr_count %></at>
+<id><% $item->id %></id>
+%# <qn><% $item->QueueObj->Name %></qn>
+</anf>
+% }
+% }
+% }
+% }
+</response>
+%
+%
+%
+<%INIT>
+
+use CGI qw/standard/;
+use MIME::Base64;
+use Frontier::Client;
+use Data::Dumper;
+
+use HTML::Scrubber;
+my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+
+require "/var/www/stet/stetsubs.pl";
+
+my ($name, $resp, $pass, $CurrentUser, @ids, %donehash);
+
+my $rsslink = "/comments/rt/rssresults.rdf?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'}));
+my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'})) . "&Order=DESC";
+
+($CurrentUser, $resp, $name) = getUser("foo");
+print STDERR "Currentuser $CurrentUser, $resp\n";
+
+my $drafter = '';
+my $DrafterQueue = RT::Queue->new($CurrentUser);
+$DrafterQueue->Load('Drafter');
+if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
+  $drafter = "drafter";
+}
+
+$r->content_type('text/xml');
+
+
+</%INIT>
+<%ARGS>
+$Rows => 30
+$StartAt => 1
+$Order => 'DESC'
+$Query => "'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'";
+</%ARGS>

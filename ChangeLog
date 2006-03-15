@@ -1,0 +1,13 @@
+2006-03-14  Orion Montoya  <orion@mdcclv.com>
+	Major revision, changing highlighting system to color things more
+	intensely if they have more comments.  This release contains both
+	the current version (gplv3-draft-1.html) and the "classic"
+	version (classic.html) the comment system.  Most of the
+	improvements take place in stet-intense-shorter.js, but there is
+	also a bit of action in the revised xmlresults-intense.html, since
+	xmlresults.html has passed some of its functionality to
+	getannotation.html.
+
+	
+2006-01-20  Orion Montoya  <orion@mdcclv.com>
+	Initial release.

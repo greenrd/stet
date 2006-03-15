@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 %# Copyright (C) 2006   Software Freedom Law Center, Inc.
 %# Author: Orion Montoya <orion@mdcclv.com>
 %#
@@ -23,25 +22,29 @@
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
 %
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+%
 <response>
 % if ($Tickets) {
 <d><% $drafter %></d>
-<cs>Showing comments: <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="<% $listlink %>">[list]</a> <a href="http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80">[rationale]</a> <br/> 
-( found <% $Tickets->CountAll()%>, showing <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>:
+<cs>
+<say>Showing comments </say>
+<say>Showing comments </say>
+<q><% humanQuery($ARGS{'Query'}) |n %></q>
+<r><% $rsslink %></r>
+<l><% $listlink %></l>
+<ra>http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80</ra>
+<t><% $Tickets->CountAll()%></t>
+<rng><% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %></rng>
 %   if ($Tickets->CountAll() > $Rows) {
 %       if ($StartAt > 1 ) {
-             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev</a>
+<pr>/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%></pr>
 %       }
-%   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() < $StartAt + $Rows)) {
-|
-% }
 %       if ($Tickets->CountAll() > $StartAt + $Rows) {
-             <a href="/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next</a>
-%       }
-%   }
-) <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search</a> 
+<nx>/comments/<% stripCrap($Tickets->First->FirstCustomFieldValue('NoteUrl')) %>?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %></nx>
+% }
+% }
 </cs>
-% 
 <%perl> 
     $Tickets->GotoFirstItem;
     if ($StartAt > 1) {
@@ -51,23 +54,28 @@
     }
 </%perl>
 % } elsif ($Ticket) {
-<cs>Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a href="<% $listlink %>">[see thread]</a> <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search</a> </cs>
+<d><% $drafter %></d>
+<cs>
+<say>Showing comment </say>
+<ci><% $ARGS{'id'} %></ci>
+<l><% $listlink %></l>
+</cs>
 % }
 % if ($Ticket || $Tickets) {
 % my $i = 0;
 % while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
-<annotation>
-<n><% $item->Transactions->First->Content %></n>
-<e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
+<ant>
+%# <n><% $item->Transactions->First->Content %></n>
+%# <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
 <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
-<u><% $item->CreatorObj->Name %></u>
+%# <u><% $item->CreatorObj->Name %></u>
 % my ($agree,$agr_count) = showAgree(\$item,$name);
-<ua><% $agree |n %></ua>
-<at><% $agr_count %></at>
+%# <ua><% $agree |n %></ua>
+%# <at><% $agr_count %></at>
 <id><% $item->id %></id>
 <qn><% $item->QueueObj->Name %></qn>
-</annotation>
+</ant>
 % $Ticket = '';
 % $i++;
 % if ($i == (($StartAt + $Rows) - 1)) {
@@ -132,7 +140,11 @@ if ($drafter) {
 }
 elsif ($ARGS{'id'}) {
     $Ticket = RT::Ticket->new($CurrentUser);
-    $Ticket = LoadTicket($ARGS{'id'});
+    print STDERR "loading ticket '".$ARGS{'id'}."'\n";
+    # konqueror does something weird with the arg, and forcing it to an int fixes it
+    my $argh = $ARGS{'id'} + 0;
+    $Ticket = LoadTicket($argh);
+    print STDERR "loaded ticket '".$Ticket->id."'\n";
 }
 
 

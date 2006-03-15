@@ -54,13 +54,12 @@ require "/var/www/stet/stetsubs.pl";
 print STDERR "entering agree.html\n";
 my ($CurrentUser,$resp,$name) = getUser("foo");
 $name .= "\n";
-my $Ticket = new RT::Ticket($CurrentUser);
+my $Ticket = new RT::Ticket(RT::CurrentUser->new('RT_System'));
 $Ticket->Load($rtid);
 my ($agreebool, $valcount);
 my $values = $Ticket->CustomFieldValues(7);
 #print Dumper($values);
 #print "ticket has ".$values->count." customfieldvalues\n";
-# this is trusting the user input, but it really needs to check the values
 if (($opn =~ /unagree/) && ($values->HasEntry($name))) {
     my ($bool, $message) = $Ticket->DeleteCustomFieldValue(Field => "7", Value => $name);
     $agreebool = "unagree";

@@ -50,14 +50,10 @@ sub showAgree($$) {
     my $showagree = '';	
     $agr_vals = $$item->CustomFieldValues(7);
     if ($resp == 1) {
-	while (my $value = $agr_vals->Next) {
-#	    print STDERR $$item->id . " " . $value->Content." ".$name."\n";
-	    if (($name) && ($value->Content eq $name)) {
-#		    $showagree = "<a label=\"you have indicated that you agree with this\" name=\"you have indicated that you agree with this\">unagree</a>";
-		$showagree = "unagree";
-	    }
+	if (($name) && ($agr_vals->HasEntry("$name\n"))) {
+	    $showagree = "unagree";
 	}
-	if (!$showagree) {
+	else {
 	    $showagree = "agree";
 	}
     }
@@ -100,7 +96,7 @@ sub getUser($) {
     my $CurrentUser = RT::CurrentUser->new;
     my ($username, $password) = userpass();
 
-    print STDERR "entering getUser with external passwords.\n";
+#    print STDERR "entering getUser with external passwords.\n";
     my $name;
     our ($pass,$resp,$server);
     if (($name, $pass) = split(/:/, decode_base64(CGI::cookie('__ac')))) {
@@ -140,6 +136,30 @@ sub getUser($) {
 }
 
 #}
+
+sub shortOrg ($) {
+    my $user = shift;
+    if ($user->Organization) {
+	if ($user->Organization =~ /[A-Z]/) {
+	    return " (of ".$user->Organization.") ";
+	}
+	else {
+	    return " (".$user->Organization.") ";
+	}
+    }
+}
+sub longOrg ($) {
+    my $user = shift;
+    if ($user->Organization) {
+	if ($user->Organization =~ /[A-Z]/) {
+	    $X = $user->Organization;
+	    return " (of Committee <a href=\"http://gplv3.fsf.org/comments/rt/readsay.html?Query='CF.DiscussionGroup'%20LIKE%20'".$X."'\">".$X."</a>) ";
+	}
+	else {
+	    return " (".$user->Organization.") ";
+	}
+    }
+}
 
 sub createUser($$) {
 my $name = shift;

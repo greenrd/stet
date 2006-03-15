@@ -1,0 +1,150 @@
+%#
+%# Copyright (c) 2006  Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%# 
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/comments/stet.css"/>
+</head>
+<body>
+<& header.html &>
+
+<p>
+You selected <% $selection %>.  Looking for it...
+</p>
+% if ($dompath) {
+<% &offerTicket |n %>
+% } else {
+Sorry, not found, please go back and select more/different text.
+% }
+</body>
+</html>
+<%INIT>
+use XML::Twig;
+require "/var/www/stet/stetsubs.pl";
+
+use Data::Dumper;
+
+my $mastertext = '/var/www/stet/gplv3-draft-1.xml';
+open(XML,$mastertext);
+my $wholefile;
+while (<XML>) {
+    $wholefile .= $_;
+}
+our ($dompath, $startid, $matched, $notesubj, $ticket_body, $form);
+our $selection = $ARGS{'selection'};
+$wholefile =~ s/\s+/ /g;
+my @matchcount = $wholefile =~ m/$selection/g;
+unless ($#matchcount > 1) {
+    my $twig= new XML::Twig(TwigHandlers => { 'sent' => \&sentence, 'title', \&title },
+			    TwigRoots    => {body => 1});
+    $twig->parsefile($mastertext);    # parsing also looks for matches
+}
+else {  $matched = 100; }
+if ($matched < 1) {
+    &noMatch;
+}
+elsif ($matched == 1) {
+    print "notesubj is: $notesubj\ntkt_body is:\n$ticket_body\n\n";
+    &oneMatch;
+}
+elsif ($matched > 1) {
+    &manyMatches; 
+}
+
+sub sentence {
+    if ($selection) {
+	my ($twig, $sent) = @_;
+	my $sent_txt = $sent->text;
+	our $msg;
+	$sent_txt =~ s/\s+/ /g;
+#     $sent_txt =~ s/\(/\\(/g;
+#     $sent_txt =~ s/\)/\\)/g;
+#	print "s: $sent_txt\n";
+#	print "sent_txt is ".$sent_txt."\n";
+	if ($sent_txt =~ /$selection/s) {
+	    $startid = $sent->att('id');
+	    $dompath = $sent->parent->parent->parent->name."/".$sent->parent->parent->name."[id=".$sent->parent->parent->id."]/".$sent->parent->name."[id=".$sent->parent->id."]/".$sent->name."[id=".$sent->id."]"; 
+	    $matched++;
+	    $form = &offerTicket;
+#	    my $CurrentUser = getEmailUser($msg->header->{'from'});
+	} 
+    }
+}
+
+sub title {
+    if ($selection) {
+	my ($twig, $title) = @_;
+	my $title_txt = $title->text;
+	$title_txt =~ s/\n/ /g;
+	if ($title_txt =~ /$selection/s) {
+	    our $startid = $title->parent->att('id');
+	    our $dompath = $title->parent->parent->name."[id=".$title->parent->parent->id."]/".$title->parent->name."[id=".$title->parent->id."]/".$title->name."[id=".$title->id."]";
+	    print "matched \"$selection\" in $startid\n (context: $dompath)\n";
+	    $matched++;
+	    our $form = &offerTicket;
+#	    my $CurrentUser = getEmailUser($msg->header->{'from'});
+	} 
+    }
+}
+
+sub offerTicket {
+    $form = <<"EOT";
+	<form action="submitcomment.html" id="noteify" name="noteify">
+	<input type="hidden" name="DomPath" id="DomPath" class="addnote" value="$dompath">
+	<input type="hidden" name="Selection" id="Selection" value="$selection"><br/>
+	<input id="NoteSubj" name="NoteSubj" type="text" size="40" 
+	value="Subject/summary [required]"
+	onfocus="if(this.value=='Subject/summary [required]') {this.value='';}" 
+	onblur="if(this.value==''){this.value='Subject/summary [required]';}"
+	class="addnote"><br/>
+	<textarea id="NoteText" name="NoteText" rows="24" cols="80" class="addnote"></textarea><br/>
+	<input type="hidden" name="StartNodeId" id="StartNodeId" value="$startid">
+	<input type="hidden" name="NoteUrl" id="NoteUrl" value="gplv3-draft-1">
+	<input type="submit" value="submit">
+	</form>
+EOT
+    return $form;
+}
+sub noMatch {
+#print "no match: $selection\n";
+#    print "sending to $addr";
+#    sendMail("/var/www/stet/email-reply-template-notfound.txt",$addr);
+}
+
+sub oneMatch {
+#    print "matched: $selection\n";
+#    print "sending to $addr";    
+#    sendMail("/var/www/stet/email-reply-template-created.txt",$addr);
+}
+
+sub manyMatches {
+#    print "sending to $addr";
+#    sendMail("/var/www/stet/email-reply-template-toomany.txt",$addr);
+}
+
+
+</%INIT>
+<%ARGS>
+$selection => undef;
+</%ARGS>

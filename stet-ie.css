@@ -46,10 +46,112 @@ em.addhide {
  }
 
 .highlight { 
-
 background: #F0ECB3;
 color: #000;
  }
+
+.fakelink {
+text-decoration: underline;
+color: blue;
+}
+
+.h1 {
+font-size: 200%;
+font-weight: bold;
+}
+
+.a1 {
+background: #FFFFCC;
+}
+.a2 {
+background: #FFFF99;
+
+}
+.a3 {
+background: #FFFF66;
+
+}
+.a4 {
+background: #EEF341;
+
+}
+.a5 {
+background: #F3F02C;
+
+}
+.a6 {
+background: #F8ED17;
+}
+.a7 {
+background: #FFEB0A;
+
+}
+.a8 {
+background: #FFDA11;
+
+}
+.a9 {
+background: #FFC918;
+
+}
+.a10 {
+background: #FFB81F;
+
+}
+.a11 {
+background: #FFA726;
+
+}
+.a12 {
+background: #F88B0B;
+
+}
+.a13 {
+background: #F28309;
+
+}
+.a14 {
+background: #EC7B07;
+}
+.a15 {
+background: #E67305;
+}
+.a16 {
+background: #E06B03;
+}
+.a17 {
+background: #E15202;
+}
+.a18 {
+background: #E74202;
+}
+.a19 {
+background: #ED3202;
+}
+.a20 {
+background: #F32202;
+}
+.a21 {
+background: #F91202;
+color: #FFF;
+}
+.a22 {
+background: #F00;
+color: #FFF;
+}
+.a22 {
+background: #900;
+color: #FFF;
+}
+.a23 {
+background: #600;
+color: #FFF;
+}
+.a24 {
+background: #300;
+color: #FFF;
+}
+
 
 #bottombar {
 font-size: smaller;
@@ -166,7 +268,7 @@ background: #dee7ec;
     {
     overflow-y: auto;
     height: 100%;
-    padding: 0 1em 0 14em;
+    padding: 0 1em 0 1em;
     font-size: 100%;
     }
   * html div#topbar
@@ -181,7 +283,7 @@ background: #dee7ec;
 background: #dee7ec;
 color: #000;
 /*  background: transparent; */
-float: left;
+float: left; 
 /* width: 70%; */
 }
 .login {
@@ -189,6 +291,7 @@ background: #dee7ec;
 color: #000;
 /*  background: transparent; */
 float: right;
+text-align: right;
 }
 
 .noteLive { 
@@ -197,22 +300,17 @@ color: #000;
  }
 
 #maintext { 
-
-	float:left;
-	margin-left: 3em;
+ 	margin-left: 3em; 
         margin-top: 2em;
-        float: left;
         width: 50%;
 	color: #000;
  }
 
 #readsaymain {
-	margin-left: 3em;
         margin-top: 2em;
-        float: left;
         width: 80%;
 }
-::-moz-selection{
+/* ::-moz-selection{
         background:#f1efb9;
         color:#000;
 }
@@ -231,7 +329,7 @@ color: #000;
         background: #AF0078;
         color:#fff;
 }
-
+*/
 .noteify { 
 font-size: smaller;
 left: 55%;
@@ -250,8 +348,39 @@ position: absolute;
 left: 55%;
 width: 40%;
 border: 1px solid #FFFF00;
-background: #f0ecb3; 
+background: #f0ecb3;
+ }
 
+/* .newannotation:hover {
+background: #f0f;
+} */
+.notegroup {
+position: absolute;
+left: 55%;
+width: 90%;
+clear: right;
+}
+body:last-child .notegroup {
+width: 40%;
+}
+.newannotation { 
+font-size: 10pt;
+fontSize: 10pt;
+color: #000;
+width: 100%;
+/* position: inline; */
+font-weight: normal;
+border: 1px dashed #DDD;
+background: #F5F5F5; 
+
+}
+
+.noteClose { 
+font-size: 10pt;
+color: #000;
+font-weight: normal;
+border: 1px solid #FFFF00;
+text-align: right;
  }
 
 .Drafter {
@@ -313,7 +442,7 @@ color: #555;
 }
 
 .indent {
-margin-left: 4em;
+margin-left: 4em; 
 }
 
 .TktLabel {
@@ -337,7 +466,7 @@ color: #777;
 #portlet-dogear {
     position: absolute;
     right: 100%;
-    top: 25px;
+    top: 2.5em;
     overflow: visible;
     height: 120px;
     width: 120px;
@@ -345,7 +474,6 @@ color: #777;
     padding: 0;
     z-index: 1;
     border: none;
-    float: none;
 }
 
 #portlet-dogear .portletBody {
@@ -417,11 +545,11 @@ color: #777;
     color: #436976;
 }
 
-#portal-globalnav li a:hover {
+ #portal-globalnav li a:hover {
     background-color: #dee7ec;
     border-color: #8cacbb;
     color: #436976;
-}
+} 
 
 #portal-personaltools {
     /* Bar with personalized menu (user preferences, favorites etc) */
@@ -462,7 +590,7 @@ color: #5F5F5c;
 } */
 #portal-personaltools .portalUser {
     background: transparent url(http://gplv3.fsf.org/user.gif) center left no-repeat;
-    padding-left: 15px;
+    padding-left: 15px; 
 }
 
 #portal-personaltools .portalNotLoggedIn {
@@ -490,3 +618,13 @@ color: #5F5F5c;
     padding-left: 10px;
 }
 
+#portal-footer {
+    background-color: #dee7ec;
+    border-top: 1px solid #8cacbb;
+    border-bottom: 1px solid #8cacbb;
+    float: none;
+    line-height: 1.2em;
+    margin: 2em 0em 1em 0em;
+    padding: 0.5em 0em 1em 0em;
+    text-align: center;
+}

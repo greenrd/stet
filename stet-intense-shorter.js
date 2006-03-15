@@ -26,60 +26,53 @@
 //  His license is:
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
-//function dump() { }
-
-var ticketObj = new Object;
-ticketObj.rtidsBySn = new Object;
-//var status = new Object;
-//status.msg = new Array;
-//status.last = last;
-
-var base64Chars = new Array(
-			    'A','B','C','D','E','F','G','H',
-			    'I','J','K','L','M','N','O','P',
-			    'Q','R','S','T','U','V','W','X',
-			    'Y','Z','a','b','c','d','e','f',
-			    'g','h','i','j','k','l','m','n',
-			    'o','p','q','r','s','t','u','v',
-			    'w','x','y','z','0','1','2','3',
-			    '4','5','6','7','8','9','+','/'
-			    );
-
-var reverseBase64Chars = new Array();
-for (var i=0; i < base64Chars.length; i++){
-  reverseBase64Chars[base64Chars[i]] = i;
+function printfire(foo) {
+  //  alert(foo);
+  /*   if (document.createEvent) {
+    printfire.args = arguments;
+    var ev = document.createEvent("Events");
+    ev.initEvent("printfire", false, true);
+    dispatchEvent(ev);
+    } */
 }
 
+// a few things need to be global
+var ticketObj = new Object;
+var nodelist = new Object;
+var drafter = '';
+var filename;
+var firstLoad = "1";
 
 function initPage() {
+  // quit if this function has already been called
+  if (arguments.callee.done) return;
+  // flag this function so we don't do the same thing twice
+  arguments.callee.done = true;
   statusbox("Please wait while we load some comments.");
-  var filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
-  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))) {
+  filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
+  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))|| (filename.match(/comments\/\?/)) || (filename.match(/comments\/#/)) || (filename.match(/debug/) || (filename.match(/classic/)))) {
     filename = 'gplv3-draft-1';
   }
-
-if(window.location.search.length) {
-  //dump('loadxmldoc /comments/rt/xmlresults?'+window.location.search.substring(1)+'\n');
-  loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
+  if(window.location.search.length) {
+    loadXMLDoc('/comments/rt/xmlresults-intense.html',window.location.search.substring(1));
+  }
+  else {
+    loadXMLDoc('/comments/cached.xml','');
+  }
 }
- else {
-   //dump('loadXMLDoc /comments/rt/xmlresults?Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
-   loadXMLDoc('/comments/rt/xmlresults.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
- }
+function loadFromHash() { // checks the location hash for bookmarked notes to show
+  if (window.location.hash.length > 0) {
+    getnotes(location.hash.substring(1,location.hash.length));
+  } 
 }
-
-// window.onload = initPage();
-
-
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
-function XpathSel() {
-
+// this is for browsers with a featureful getSelection object; others
+// have to use an XMLHTTPRequest call.
+function XpathSel() { 
   if (!readCookie('__ac')) {
     document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
     return;
   }
-
-
   var textObj = '';
   var start = '';
   var end = '';
@@ -95,86 +88,122 @@ function XpathSel() {
     {
       textObj= document.selection.createRange().text;
     }
-  
-  //   if(!textObj.length) {
-  //document.getElementById('selectsome').setAttribute('class','error');
-  //  document.getElementById('login').innerHTML(textObj.length);
-  //  return;
-  //}
+       if(textObj.length < 1) {
+	 document.getElementById('selectsome').setAttribute('class','error');
+	 document.getElementById('login').innerHTML(textObj.length);
+	 return;
+       }
 
-      startNode = textObj.anchorNode.parentNode;
-      startid= startNode.id;
-      start = startNode.nodeName;
-      
-      endnode = textObj.focusNode.parentNode;
-      endid = endnode.id;
-      end = endnode.nodeName;
+    try { var sn = textObj.anchorNode; } catch(e) {}
+    if (!sn) {  // lame getSelection object has no anchorNode
+       loadXMLDoc('/comments/rt/formxml.html','selection='+encodeURI(textObj.toString()));
+	
 
+    }
+    else {  // good getSelection
+      try { var startNode = textObj.anchorNode; } catch(e) { }
+      if (startNode.parentNode.getAttribute && startNode.parentNode.getAttribute('class') && startNode.parentNode.getAttribute('class').match(/highlight/)) {
+	startNode = startNode.parentNode;
+      }
+      try { var startid = startNode.parentNode.id; } catch(e) { }
+      try { var start = startNode.parentNode.nodeName; } catch(e) { }
+      var endnode = textObj.focusNode.parentNode;
+      if (endnode.getAttribute && endnode.getAttribute('class') && endnode.getAttribute('class').match(/highlight/)) {
+	endnode = endnode.parentNode;
+      }
+      var endid = endnode.id;
+      var end = endnode.nodeName;
       if (!readCookie('__ac')) {
+	// emphasizes that You need to log in to make comments.
 	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
       }
       else {
-
-	oStr = getDomPath(startNode);
-	
-	myNoteIfy = createNoteDiv();
-	textString = textObj.toString();
-	
-	thisNode = document.getElementById(startid);
-    
-    if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
-      thisNode.previousSibling.previousSibling.appendChild(myNoteIfy);
-    }
-    else 
-      if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
-	thisNode.previousSibling.appendChild(myNoteIfy);
+	// create the note form
+	var oStr = getDomPath(startNode);
+	createNoteDiv(startid);
+	var textString = textObj.toString();
+	document.getElementById('DomPath').value = oStr;
+	document.getElementById('Selection').value = textString;
+	loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
+	document.getElementById('NoteSubj').value = 'Subject/summary [required]';
+	document.getElementById('StartNodeId').value = startid;
+	// document.getElementById('EndNodeId').value = endid;
+	document.getElementById('NoteUrl').value = filename;
+	if ((i = navigator.userAgent.indexOf('MSIE')) >= 0) {
+	  document.getElementById('SelectionTxt').innerHTML += "<br/>Comment submission isn't working on the copy of IE 6 we tested [if IE is really the browser you're using] but you're welcome to try.  If this box doesn't turn gray and then disappear when you click 'Submit', it probably didn't work: you can <a href=\"/comments/email.html\">email your comment</a> instead.";
+	}
+	if(startid != endid) {
+	  noteErr('Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead.  startid='+startid+', endid='+endid);
+	}
+	if((startid =='login') || (startid == undefined) || (textString == undefined) || (textString == '')) {
+	  noteErr('You\'ve found a browser-compatibility bug that we\'re trying to fix; we would appreciate an email to stet@gplv3.fsf.org saying exactly what browser you\'re using (though we know about Safari).  For the moment the best way to send your comment would be via email: see http://gplv3.fsf.org/comments/email.html');
+	}
       }
-      else {
-	thisNode.appendChild(myNoteIfy);
-      }
-    document.getElementById('DomPath').value = oStr;
-    document.getElementById('Selection').value = textString;
-    loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
-    //    document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
-    document.getElementById('NoteSubj').value = 'Subject/summary [required]';
-    document.getElementById('StartNodeId').value = startid;
-    document.getElementById('EndNodeId').value = endid;
-    document.getElementById('StartNode').value = start;
-    document.getElementById('EndNode').value = end;
-    document.getElementById('NoteUrl').value = location.href;
-
-    if(startid != endid) {
-      document.getElementById('NoteText').value = 'Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead';      
-      document.getElementById('submitNote').setAttribute('disabled','disabled');
-      document.getElementById('NoteSubj').setAttribute('disabled','disabled');
-      //document.getElementById('NoteText').setAttribute('disabled','disabled');
     }
-  }
 }
 
+function noteErr(msg) {
+  document.getElementById('NoteText').value = msg;
+  document.getElementById('submitNote').setAttribute('disabled','disabled');
+  document.getElementById('NoteSubj').setAttribute('disabled','disabled');
+}
+
+/* // not currently used: could invoke when calling submitComment(); 
+function rmChildNotes(startid) {
+  node = document.getElementById(startid);
+  //  var oldChild;
+  if (node.hasChildNodes()) {
+    for (var nodeCt = 0; nodeCt < node.childNodes.length; nodeCt++) {
+      if (node.childNodes.item(nodeCt).getAttribute('class').match('notegroup')) { 
+	//oldChild.appendChild(
+	node.removeChild(node.childNodes.item(nodeCt));
+	// )
+      }
+    }
+  }
+  } */
+function processDompath(response) {
+  currently('asking server about your selection...');
+  try { var fail = response.getElementsByTagName("nf")[0].firstChild.data; } catch(e) {}
+  if (fail) { alert(fail); } // because we don't otherwise know where to put it, argh
+  else {
+    createNoteDiv(response.getElementsByTagName("si")[0].firstChild.data);
+    document.getElementById('DomPath').value = response.getElementsByTagName("dp")[0].firstChild.data;
+    document.getElementById('Selection').value = response.getElementsByTagName("sl")[0].firstChild.data;
+    loadHTMLtoDiv('comment on: <strong>'+response.getElementsByTagName("sl")[0].firstChild.data+'</strong>','SelectionTxt');
+    document.getElementById('NoteSubj').value = 'Subject/summary [required]';
+    document.getElementById('StartNodeId').value = response.getElementsByTagName("si")[0].firstChild.data;
+
+	if ((i = navigator.userAgent.indexOf('MSIE')) >= 0) {
+	  document.getElementById('SelectionTxt').innerHTML += "<br/>Comment submission isn't working on the copy of IE 6 we tested [if IE is really the browser you're using] but you're welcome to try.  If this box doesn't turn gray and then disappear when you click 'Submit', it probably didn't work: you can <a href=\"/comments/email.html\">email your comment</a> instead.";
+}
+    //    document.getElementById('NoteText').value = "dp: "+document.getElementById('DomPath').value+"\nsl: "+document.getElementById('Selection').value+"\nsi: "+document.getElementById('StartNodeId').value;
+    // document.getElementById('EndNodeId').value = endid;
+    document.getElementById('NoteUrl').value = response.getElementsByTagName("fn")[0].firstChild.data;;
+  }
+}
 
 function getDomPath(startNode) {
   // helped here by http://www.howtocreate.co.uk/emails/FlorianSauvin.html
   for (var oStr='' ; startNode && startNode.nodeName != '#document'; startNode=startNode.parentNode) { 
-    if (startNode.nodeName!='#text') { 
+    if ((startNode.nodeName!='#text') || ((startNode.getAttribute) && (startNode.getAttribute('class').match('highlight')))) { 
       oStr = startNode.nodeName 
 	+ (startNode.id ? ('[id='+startNode.id+']') : '')
 	+ (oStr ? ('/'+oStr) : '');
     }
   }
+  currently('Ready.');
   return oStr;
 }
 
 function submitComment() {
-  
+  // doesn't fire on IE, hmm.
   if ((document.getElementById('NoteSubj').value == 'Subject/summary [required]') || (document.getElementById('NoteSubj').value == ' ')) {
-    //    document.getElementById('SelectionTxt').innerHTML = '<span class="error">Please enter a brief explanatory subject for this comment</span>';
-
     loadHTMLtoDiv('<span class="error">Please enter a brief explanatory subject for this comment</span>','SelectionTxt');
   }
   else {
-  
   var form = document.getElementById('noteify');
+  //rmChildNotes(form.StartNodeId.value);
   var noteText = form.NoteText.value;
   loadHTMLtoDiv('Ok, submitting...','SelectionTxt');
   form.NoteText.style.background = '#aaa';
@@ -183,23 +212,20 @@ function submitComment() {
   document.getElementById('cancel').setAttribute('disabled','disabled');
   form.style.background = '#aaa';
 
-  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href);
-  
-  
+  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;NoteUrl='+location.href+'&map;queue='+form.queue.value);
 
-  var theUrl = '/comments/rt/submitcomment.html'; 
-  //highlightWord(form.StartNode.value,form.Selection.value,noteText,'');   
+  var theUrl = '/comments/rt/submitcomment-cachetoo.html'; 
   loadXMLDoc(theUrl,params);
   }
 }
 
-function getElementsByClass(needle)
+// these are all too too slow, maybe cssQuery
+ function getElementsByClass(needle)
 {
   var         my_array = document.getElementsByTagName('*');
   var         retvalue = new Array();
   var        i;
   var        j;
-  
   for (i = 0, j = 0; i < my_array.length; i++)
     {
       var c = " " + my_array[i].className + " ";
@@ -208,79 +234,102 @@ function getElementsByClass(needle)
       }
     }
   return retvalue;
-}
+} 
+
+/* function getElementsByClass(searchClass,node,tag) {
+  var classElements = new Array();
+  if ( node == null )
+    node = document;
+  if ( tag == null )
+    tag = '*';
+  var els = node.getElementsByTagName(tag);
+  var elsLen = els.length;
+  var pattern = new RegExp("(^|\s)"+searchClass+"(\s|$)");
+  for (i = 0, j = 0; i < elsLen; i++) {
+    if (node != document)
+    if ( pattern.test(els[i].className) ) {
+      classElements[j] = els[i];
+      j++;
+    }
+  }
+  return classElements;
+  } */
 
 
 // help from http://www.xml.com/pub/a/2005/02/09/xml-http-request.html
 var req;
 function loadXMLDoc(url,theData) 
 {
-   dump('loading '+url+'?'+theData+'\n');
-  // branch for native XMLHttpRequest object
   if (window.XMLHttpRequest) {
     req = new XMLHttpRequest();
   } else if (window.ActiveXObject) {
     req = new ActiveXObject('Microsoft.XMLHTTP');
   }
+  var method;
   req.onreadystatechange = processReqChange;
-  
-  req.open("POST", url, true);
-  //  req.open("GET", url, false);
+  if(theData=='') { method="GET"; } 
+  else { method = "POST"; }
+  req.open(method, url, true);
   req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
   req.setRequestHeader('X-Referer',document.location);
-  //  theData = encodeURI(theData);
   req.send(theData);
 }
 
+
 function loadHTMLtoDiv(text,targetid,caller) {
-  // this won't work in Safari so we need a Safari case:
   if(targetid) {
-    //  dump('targetid is '+targetid);
-  //  if(caller) { dump(', caller is '+caller);}
-    //  dump('\n');
-  if (myElement = document.getElementById(targetid)) {
-	//	dump(e);
-	try {	
-	  myElement.innerHTML = text;
-	}
-	catch(e) {
-	  var newDiv = document.createElement('span');
-	  newDiv.innerHTML = text;
-	  myElement.appendChild(newDiv);
-	}
-  }
+    if (myElement = document.getElementById(targetid)) {
+      try {	
+	myElement.innerHTML = text;
+      }
+      catch(e) {
+	var newDiv = document.createElement('span');
+	clearNode(myElement);
+	newDiv.innerHTML = text;
+	myElement.appendChild(newDiv);
+      }
+    }
   }
 }
 
-function glueXMLTogether(xmlToAdd, parentToAddItTo) {
-  childrenOfParent = parentToAddItTo.childNodes;
-  while (childrenOfParent.length > 0) {
-    parentToAddItTo.removeChild(childrenOfParent.item(0));
-  }
-  parentToAddItTo.appendChild(xmlToAdd);
+function clearNode(node) {
+  if (node.hasChildNodes()) {
+    while (node.childNodes.length > 0) {
+      node.removeChild(node.childNodes.item(0));
+    }
+  } 
 }
 
 // thanks to http://www.mercurytide.com/knowledge/white-papers/issues-working-with-ajax
 function getXMLNodeSerialisation(xmlNode) {
+  //  alert(xmlNode);
   var text = false;
+  if (xmlNode.nodeType != 3) {
   try {
     // Gecko-based browsers, Safari, Opera.
-    var serializer = new XMLSerializer();
+    //    var serializer = new XMLSerializer();
     text = serializer.serializeToString(xmlNode);
   }
   catch (e) {
     try {
-      // Internet Explorer.
+      // Internet Explorer?  
       text = xmlNode.xml;
     }
-    catch (e) {
+    catch (e) { // Anybody?  Bueller?
+      text = kSerialize(xmlNode);
     }
   }
+  if (text == undefined) { // maybe someone only pretended to succeed
+    text = kSerialize(xmlNode);
+  }
   return text;
+  }
+  else {
+    return xmlNode;
+  }
 }
 
 function loadURLtoDiv(url,args,targetid) {
-  // branch for native XMLHttpRequest object
   if (window.XMLHttpRequest) {
     req = new XMLHttpRequest();
   } else if (window.ActiveXObject) {
@@ -288,187 +337,265 @@ function loadURLtoDiv(url,args,targetid) {
   }
   req.open('GET',url,false);
   req.send(args);
-  
   loadHTMLtoDiv(req.responseText,targetid,"loadurltodiv");
-  //  document.getElementById(targetid).innerHTML = req.responseText;
-
-
 }
 
-function processReqChange() 
+function processReqChange()
 {
-
-  // only if req shows "complete"
+  var did = 0;
   if (req.readyState == 4) {
-    // only if "OK"
-    if (req.status == 200) {
-/* <jag> [Exception... "Component returned failure code: 0x80040111
-      (NS_ERROR_NOT_AVAILABLE) [nsIXMLHttpRequest.status]"  nsresult:
-      "0x80040111 (NS_ERROR_NOT_AVAILABLE)"  location: "JS frame ::
-      http://gplv3.fsf.org/stet/stet.js :: processReqChange :: line 189"
-      data: no]
- */
+    // only if "OK" or "not modified"
+    if ((req.status == 200) || (req.status == 304)) {
       cancelNote("noteify");
-      //dump(req.responseText);
-      response  = req.responseXML.documentElement;
-      //dump("pre processAnnot\n");
+      cancelNote("loading");
+      var response  = req.responseXML.documentElement;
       var resp_arrN;
       var resp_arrA;
       var resp_arrF;
-      cs = response.getElementsByTagName("cs");
-      statusbox(getXMLNodeSerialisation(cs[0]));
-
-
-      resp_arrN = response.getElementsByTagName("annotation");
-      if(resp_arrN.length > 0) {
-	//dump("processAnnot starting from "+resp_arrN[0].firstChild.data+"\n")
-	  processAnnotation(response);
+      var resp_arrS;
+      try {
+	drafter = response.getElementsByTagName("d")[0].firstChild.data;
       }
-/*       else if (resp_arrF = response.getElementsByTagName("form")) { */
-/* 	dump("pre processNQ\n") */
-/* 	  if(resp_arrF.length > 0) { */
-/* 	    dump("processNQ starting from "+resp_arrF[0].firstChild.data+"\n") */
-/* 	      processNewQuery(response); */
-/* 	  } */
-/*       } */
-
-/*       else if (resp_arrA = response.getElementsByTagName("agreement")) { */
-/* 	//dump("pre processAgree from"+resp_arrA[0].firstChild.data+"\n"); */
-/* 	if(resp_arrA.length > 0) { */
-/* 	  //dump("processAgree\n"); */
-/* 	  processAgreement(response); */
-/* 	} */
-/*       } */
-
-      else {
-	statusbox("There was a problem or parsing the XML data (maybe there are no comments):\n" + req.statusText+" <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">change query</a>\n"); //debug
+      catch (e) {}
+      try {
+	cs = response.getElementsByTagName("cs");
+	if (cs.length > 0) {
+	  cstatusbox(cs[0]);
+	}
+      } catch(e) {}
+      resp_arrN = response.getElementsByTagName("ant");
+      if(resp_arrN.length > 0) {
+	processAnt(response);
+	did++;
+      }
+      resp_arrN = response.getElementsByTagName("anf");
+      if(resp_arrN.length > 0) {
+	processAnf(response);
+	did++;
+      }
+      resp_arrN = response.getElementsByTagName("nant");
+      if(resp_arrN.length > 0) {
+	cacheAntVals(response);
+	processAnf(response,'top');
+	did++;
+      }
+      resp_arrA = response.getElementsByTagName("agreement");
+      if(resp_arrA.length > 0) {
+	processAgreement(response);
+	did++;
+      }
+      resp_arrS = response.getElementsByTagName("sdp");
+      if(resp_arrS.length > 0) {
+	processDompath(response);
+	did++;
+      }
+      
+      if (!did) {
+	statusbox("Your search didn't return anything usable: try a reload, or maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+" "); //debug
       }
     }
+    if (firstLoad == 1) {
+      firstLoad = 0;
+      loadFromHash();
+    }
   }
-  //    else { dump("readyState was "+req.readyState+"\n"); } // debug
 }
   
 function onNoteifyMouseover() {
   //this.onblur = onNoteifyBlur;
-  
 }
 
-function processAnnotation(response) {
-  //	document.getElementById("statusbox").innerHTML = getXMLNodeSerialisation(cs[0]);
-  // dump("got an annotation\n");
-  //  dump(req.responseXML+"\n");
-  //	responseStringSer = getXMLNodeSerialisation(req.responseXML);
-  // dump(responseStringSer);
-  // dump(resp_arr + ' ' + resp_arr.length + ' ' + resp_arr.item(1)+"\n");
-  
-  selections_arr = response.getElementsByTagName("s");
-  // dump(selections_arr + ' ' + selections_arr.length + ' ' + selections_arr.item(0)+"\n");
-  startnodes_arr = response.getElementsByTagName("i");
-  annotations_arr = response.getElementsByTagName("n");
+function processAnf(response,placement) {
+  currently('loading selected annotations...');
+  var newDiv = new Object;
   rtids_arr = response.getElementsByTagName("id");
+  annotations_arr = response.getElementsByTagName("n");
   users_arr = response.getElementsByTagName("u");
   uagr_arr = response.getElementsByTagName("ua");
   agrtot_arr = response.getElementsByTagName("at");
-	for (prI = 0; prI < selections_arr.length; prI++) {
-	  rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
-	  tooltipString = getXMLNodeSerialisation(annotations_arr[prI]);
-	  tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
+  startnodes_arr = response.getElementsByTagName("i");
 
-	  ticketObj[rtid] = new Object;
-
-	  ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
-
-/* 	  agreechild = uagr_arr[prI].firstChild.data */
-/* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
-/* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
-/* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
-/* 	    //ticketObj[rtid].agree = agreechild; */
-/* 	  } */
-/* 	  else { */
-/* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
-/* 	    //ticketObj[rtid].agree = agreestr; */
-/* 	  } */
-/* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
-/* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
-/* 	  } */
-
-	  ticketObj[rtid].full = tooltipString;
-	  ticketObj[rtid].excerpt = tooltipSubString;
-	  ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data;
-	  if(!ticketObj.rtidsBySn[ticketObj[rtid].startnode]) {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
-	  }
-	  else {
-	    ticketObj.rtidsBySn[ticketObj[rtid].startnode].push(rtid);
-	  }
-	  ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
-	  startNode = startnodes_arr[prI].firstChild.data;
-	  startNode = startNode.replace(/note\.[0-9]+\./,'');
-	  noteSelection = selections_arr[prI].firstChild.data;
-	  //		annoteText = users_arr[prI].firstChild.data+": "+ annotations_arr[prI].firstChild.data;
-	  annoteText = annotations_arr[prI];
-	  //		if (annotations_arr[prI].firstChild.nextSibling) {
-	  //		annoteText += annotations_arr[prI].firstChild.toString();
-	  //		}
-	  
-	  rtid = rtids_arr[prI] ? rtids_arr[prI].firstChild.data : "";
-	  user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
-	  //		dump(users_arr[prI].firstChild.data);
-	  //dump("\nhighlighting "+startNode+' '+noteSelection+' '+annoteText+' rt'+rtid+'\n');
-	  highlightWord(document.getElementById(startNode),noteSelection,annoteText,rtid,user);
-
-	  // FIXME: couple bugs left in intense_annot, 
-	  // new comments are not getting highlighted upon submission
-	  // and I want to sort out the rtidsBySn thing, so I can
-	  // annote one paragraph at a time.
-	  // also other distressing inconsistencies make the wack-ass
-	  // highlightWord() a better choice for the moment.
-	  
-		  // fixme: currently crashes browser :)
-	  
-	  //intense_annot(document.getElementById(startNode),noteSelection,rtid);
-
+  var addCount = 0;;
+  
+  for (prI = 0; prI < annotations_arr.length; prI++) {
+    if (annotations_arr[prI].firstChild) {
+      var rtid = rtids_arr[prI].firstChild.data;
+      if (!document.getElementById('rt'+rtid)) {
+	var sn = startnodes_arr[prI].firstChild.data;
+	if (!newDiv[sn]) {
+	  // why doesn't IE see my stylesheets on these?
+	  newDiv[sn] = document.createElement('div');
+	  newDiv[sn].style.left = '55%';
+	  newDiv[sn].style.position = 'absolute';
+	  newDiv[sn].style.fontSize = '10pt';
+	  newDiv[sn].style.fontWeight = 'normal';
+	  if ((i = navigator.userAgent.indexOf('MSIE')) >= 0) {
+	    newDiv[sn].style.width = '90%';
+	  }	
+	  togBtn = document.createElement('div');
+	  togBtn.setAttribute('id','tog'+sn);
+	  togBtn.setAttribute('class','noteClose a'+annotations_arr.length);
+	  togX = document.createElement('span');
+	  togX.setAttribute('id','x'+sn);
+	  togX.setAttribute('onclick','killNoteGroup(\''+newDiv[sn].id+'\')');
+	  togX.innerHTML = "[X]";
+	  togBtn.appendChild(togX);
+	  newDiv[sn].appendChild(togBtn);
+	  newDiv[sn].itemcount = 1;
 	}
-	//	dump('rtidsBySn for gpl3.preamble.p2.s1 are: '+ticketObj.rtidsBySn['gpl3.preamble.p2.s1']+'\n');
-	unOverlap("annotation",5);
+	newDiv[sn].setAttribute('id',newDiv[sn].id+rtid+':');
+	newDiv[sn].itemcount++;
+	newDiv[sn].setAttribute('class','notegroup');
+
+	addCount++;
+	try { var tooltipString = getXMLNodeSerialisation(annotations_arr[prI]); } catch(e) { };
+	if (!tooltipString) { var tooltipString = annotations_arr[prI].firstChild.data; }
+	tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
+	if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; }
+	ticketObj[rtid].link = makeLinkObj(rtid, getXMLNodeSerialisation(uagr_arr[prI]), agrtot_arr[prI].firstChild.data);      
+	ticketObj[rtid].full = tooltipString;
+	//alert("setting "+rtid+" excerpt to "+tooltipSubString);
+	ticketObj[rtid].excerpt = tooltipSubString;
+	ticketObj[rtid].user = users_arr[prI].firstChild ? users_arr[prI].firstChild.data : "";
+	ticketObj[rtid].ua = getXMLNodeSerialisation(uagr_arr[prI]);
+	ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data.replace(/note\.[0-9]+\./,'');;
+
+	//speed: maybe use cssQuery instead
+	//nodelist[rtid] = getElementsByClass('n'+rtid);
+	var divChild = document.createElement('div');
+	divChild.setAttribute('id','rt'+rtid);
+	divChild.setAttribute('onclick','showFull(\''+rtid+'\')');
+	//speed
+	//divChild.setAttribute('onmouseover',"notemouseover(this,nodelist["+rtid+"])");
+	//divChild.setAttribute('onmouseout','notemouseout(this,nodelist['+rtid+'])');
+	divChild.innerHTML = '\
+ <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+': </span><span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt +'<a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>';
+	divChild.setAttribute('class','newannotation '+rtid);
+	
+	newDiv[sn].appendChild(divChild);
+	
+      }
+    }
+  }
+  if (addCount > 0) {
+    for (var sn in newDiv) {
+      newDiv[sn].id = newDiv[sn].id.replace(/:$/,'');
+      subjNode = document.getElementById(sn);
+      if (placement && (placement == 'top')) {
+	subjNode.insertBefore(newDiv[sn],subjNode.lastChild);
+      }
+      else {
+	subjNode.appendChild(newDiv[sn]);
+      }
+      document.getElementById('tog'+sn).setAttribute('class','noteClose a'+newDiv[sn].itemcount);
+      document.getElementById('tog'+sn).setAttribute('onmousedown',"dragStart(event,\'"+newDiv[sn].id+"\')");
+      document.getElementById('x'+sn).setAttribute('onclick','killNoteGroup(\''+newDiv[sn].id+'\')');
+    }
+    unOverlap("notegroup",5);
+  } 
+  currently("Ready.");
+}
+
+function processAnt(response) {
+  currently('highlighting this page according to your query...');
+  var rtidsBySn = cacheAntVals(response);
+  highlightSelections(rtidsBySn);
+  //  unOverlap("annotation",5); // thse won't overlap anymore
+  currently('Ready.');
+}
+
+function cacheAntVals(response) {
+  // this used to be part of processAnt but then I needed it for process nant.
+  // populates global ticketObj[] for these rtids and returns
+  // the rtidsbysn that we need for highlighting.
+  var selections_arr = response.getElementsByTagName("s");
+  var startnodes_arr = response.getElementsByTagName("i");
+  var rtids_arr = response.getElementsByTagName("id");
+  var queues_arr = response.getElementsByTagName("qn");
+  var rtidsBySn = new Object;
+  for (prI = 0; prI < selections_arr.length; prI++) {
+    if (selections_arr[prI].firstChild) {
+      rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
+      if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; }
+      ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data.replace(/note\.[0-9]+\./,'');;
+      ticketObj[rtid].queue = queues_arr[prI].firstChild.data;
+      ticketObj[rtid].selection = selections_arr[prI].firstChild.data;
+      if(!rtidsBySn[ticketObj[rtid].startnode]) {
+	rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+      }
+      else {
+	rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+      }
+    }
+  }
+  return rtidsBySn;
+}
+
+function highlightSelections(rtidsBySn) {
+  // fixme todo: p drm.0 and sent drm.0.0 get called separately, and this fucks things up.
+  // (this is GIGO: nothing should be drm.0, only drm.0.0 .  Still, should be fixed at some point)
+  // ah, now it has to be fixed so we can highlight new annots.
+  for (var section in rtidsBySn) {
+    var Selections = new Array();
+    var Rtids = new Array();
+    for (var i = 0; i < rtidsBySn[section].length; i++) {
+      var rtid = rtidsBySn[section][i];
+      Selections.push(ticketObj[rtid].selection);
+      Rtids.push(rtid);
+    }
+    intense_annot(document.getElementById(section),Selections,Rtids);	      
+  }
+}
+function makeLinkObj(rtid,agreement,agrtot) {
+    returnLink = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+    	  agreestr = agreement;
+	  agreestr = agreestr.replace(/<\/?ua>/g,'');
+	  agreestr = agreestr.replace(/<\/?span>/g,'');
+	  agreestr = agreestr.replace(/<\/?b>/g,'');
+    	  if ((agreestr == "agree") || (agreestr == "unagree")) {
+    	    returnLink += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreestr+'\')">'+agreestr+'</a> | ';
+    	  }
+    	  else {
+    	    returnLink += '<span id="agree'+rtid+'">'+agreestr+'</span> | ';
+    	  }
+    	  if (agrtot) {
+    	    returnLink += ' [<span id="agrtot'+rtid+'">'+agrtot+'</span> agree]';
+    	  }
+	  return returnLink;
 }
 
 function processAgreement(response) {
-// dump("got an agreement\n");
+  currently('Indicating your agreement with this comment...');
 	myId = response.getElementsByTagName("id")[0].firstChild.data;
 	myOpn = response.getElementsByTagName("b")[0].firstChild.data;
-// dump('id is '+rtids_arr[0].firstChild.data);
 	myLink = document.getElementById('agree'+myId);
-	myOpn == "agree" ? opOpn = "unagree" : opOpn = "agree";
-	loadHTMLtoDiv(opOpn,'agree'+myId,"processagreement");
-	// FIX AGREE COUNT BY INCREMENTING/DECREMENTING HERE
-	agrcount = parseInt(document.getElementById('agrtot'+myId).innerHTML);
-	myOpn == "agree" ? agrcount++ : agrcount--;
+	opOpn = document.createElement('span');
+	myOpn == "agree" ? opOpn.appendChild(document.createTextNode("unagree")) : opOpn.appendChild(document.createTextNode("agree"));
+	var agrcount = response.getElementsByTagName("ct")[0].firstChild.data;
 	loadHTMLtoDiv(agrcount,'agrtot'+myId);
-	//	myLink.innerHTML = opOpn;
+	ticketObj[myId].link = makeLinkObj(myId,getXMLNodeSerialisation(opOpn),agrcount);
+	showFull(myId);
 	myLink.href = 'javascript:iAgree('+myId+',\''+opOpn+'\')';
+	currently('Ready.');
       }
 
   
 function onNoteifyBlur() {
 //	noteNode = document.getElementById('noteify');
 //	dump(noteNode);
-	submitComment();
-//  window.location = 'http://localhost/cgi-bin/stet-submit.pl?foo=bar';
+//	submitComment();
 }
 
 function checkKeyPressed(keyEvent) {
   if (!document.getElementById("noteify")) {
-	  keyEvent = (keyEvent) ? keyEvent : (window.event) ? event : null;
-	  if (keyEvent) {
-		var charCode = (keyEvent.charCode) ? keyEvent.charCode :
-					   ((keyEvent.keyCode) ? keyEvent.keyCode :
-					   ((keyEvent.which) ? keyEvent.which : 0));
-		//dump(charCode);
-		if (charCode == 99) { XpathSel(); }
-	
-	  }
+    keyEvent = (keyEvent) ? keyEvent : (window.event) ? event : null;
+    if (keyEvent) {
+      var charCode = (keyEvent.charCode) ? keyEvent.charCode :
+	((keyEvent.keyCode) ? keyEvent.keyCode :
+	 ((keyEvent.which) ? keyEvent.which : 0));
+      //printfire(charCode); // to find out others
+      if (charCode == 99) { XpathSel(); }
+    }
   }
 }
 
@@ -478,13 +605,13 @@ function cancelNote(div) {
   }
 }
 
-function createNoteDiv() {
+function createNoteDiv(startid) {
 
   // this would be a lot more readable and maintainable if it were
   // just a string.
 
 var noteifyDiv = document.createElement('form');
-noteifyDiv.setAttribute('action','/comments/rt/submitcomment.html');
+noteifyDiv.setAttribute('action','/comments/rt/submitcomment-cachetoo.html');
 noteifyDiv.setAttribute('class','noteify');
 noteifyDiv.setAttribute('id','noteify');
 noteifyDiv.setAttribute('name','noteify');
@@ -526,35 +653,15 @@ NoteText.setAttribute('rows','10');
 NoteText.setAttribute('cols','40');
 NoteText.setAttribute('class','addnote');
 
-var StartNode = document.createElement('input');
-StartNode.setAttribute('id','StartNode');
-StartNode.setAttribute('name','StartNode');
-StartNode.setAttribute('type','hidden');
-
-var EndNode = document.createElement('input');
-EndNode.setAttribute('id','EndNode');
-EndNode.setAttribute('name','EndNode');
-EndNode.setAttribute('type','hidden');
-
 var StartNodeId = document.createElement('input');
 StartNodeId.setAttribute('id','StartNodeId');
 StartNodeId.setAttribute('name','StartNodeId');
 StartNodeId.setAttribute('type','hidden');
 
-var EndNodeId = document.createElement('input');
-EndNodeId.setAttribute('id','EndNodeId');
-EndNodeId.setAttribute('name','EndNodeId');
-EndNodeId.setAttribute('type','hidden');
-
 var NoteUrl = document.createElement('input');
 NoteUrl.setAttribute('id','NoteUrl');
 NoteUrl.setAttribute('name','NoteUrl');
 NoteUrl.setAttribute('type','hidden');
-
-var DocRevision = document.createElement('input');
-DocRevision.setAttribute('id','DocRevision');
-DocRevision.setAttribute('name','DocRevision');
-DocRevision.setAttribute('type','hidden');
 
 var cancel = document.createElement('input');
 cancel.setAttribute('type','button');
@@ -571,118 +678,155 @@ var theBR2 = document.createElement('br');
 var theBR3 = document.createElement('br');
 var theBR4 = document.createElement('br');
 
+var pickQueue;
+if (drafter) {
+pickQueue = document.createElement('select');
+pickQueue.setAttribute('name','queue');
+pickQueue.setAttribute('id','queue');
+
+var optDrafter = document.createElement('option');
+optDrafter.setAttribute('value','Drafter');
+optDrafter.setAttribute('selected','selected');
+optDrafter.appendChild(document.createTextNode('Drafter'));
+
+var optInbox = document.createElement('option');
+optInbox.setAttribute('value','Inbox');
+optInbox.appendChild(document.createTextNode('Inbox'));
+
+var optIssues = document.createElement('option');
+optIssues.setAttribute('value','Issues');
+optIssues.appendChild(document.createTextNode('Issues'));
+
+pickQueue.appendChild(optDrafter);
+pickQueue.appendChild(optInbox);
+pickQueue.appendChild(optIssues);
+}
+else {
+pickQueue = document.createElement('input');
+pickQueue.setAttribute('type','hidden');
+pickQueue.setAttribute('name','queue');
+pickQueue.setAttribute('value','Inbox');
+}
 var submit = document.createElement('input');
 submit.setAttribute('type','button');
 submit.setAttribute('id','submitNote');
 submit.setAttribute('value','submit');
-//submit.onclick = 'dump("clicked submit")';
 submit.setAttribute('onClick','submitComment()');
 submit.setAttribute('class','annoteButton');
 submit.setAttribute('class','addnote');
 
 noteifyDiv.appendChild(DomPathTxt);
 noteifyDiv.appendChild(DomPath);
-//noteifyDiv.appendChild(theBR);
 noteifyDiv.appendChild(SelectionTxt);
 noteifyDiv.appendChild(theBR1);
 noteifyDiv.appendChild(Selection);
-// noteifyDiv.appendChild(theBR2);
 noteifyDiv.appendChild(NoteSubj);
 noteifyDiv.appendChild(theBR3);
 noteifyDiv.appendChild(NoteText);
-noteifyDiv.appendChild(StartNode);
-noteifyDiv.appendChild(EndNode);
 noteifyDiv.appendChild(StartNodeId);
-noteifyDiv.appendChild(EndNodeId);
+//noteifyDiv.appendChild(EndNodeId);
 noteifyDiv.appendChild(NoteUrl);
-noteifyDiv.appendChild(DocRevision);
+//noteifyDiv.appendChild(DocRevision);
 noteifyDiv.appendChild(theBR4);
 noteifyDiv.appendChild(submit);
 noteifyDiv.appendChild(cancel);
 
-return noteifyDiv;
-
+if (drafter) {
+pickQueue && noteifyDiv.appendChild(document.createTextNode(' Queue: ')) && noteifyDiv.appendChild(pickQueue);
+}
+else {
+pickQueue && noteifyDiv.appendChild(pickQueue);
 }
 
-function intense_annot(root,selection,rtid) {
-var selecObj = new Array;
-var rootObj = new Array;
- //dump('selection is '+selection+'\n');
- //dump('comment is '+ticketObj[rtid].excerpt+'\n');
- var selections = new Array(selection);
-// couple lines of html-ignoring help from
-// http://www.notestips.com/80256B3A007F2692/1/NAMO5RNV2S 
-// by Mike Golding, 9/24/2003
-//Extract HTML Tags
- regexp=/<[^<>]*>/ig;
- // dump('node text is '+root.innerHTML+'\n');
- rootHTMLArray = root.innerHTML.match(regexp);
- //Replace HTML tags
- // may not work in Safari
- rootStrippedHTML = root.innerHTML.replace(regexp,"$!$");
+ thisNode = document.getElementById(startid);
+ 
+ if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
+   thisNode.previousSibling.previousSibling.appendChild(noteifyDiv);
+ }
+ else 
+   if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
+     thisNode.previousSibling.appendChild(noteifyDiv);
+   }
+   else {
+     thisNode.appendChild(noteifyDiv);
+   }
+}
 
-root_words = rootStrippedHTML.split(/\s+/);
-
-// there is one rootObj, each word in the root sentence a sub-obj
-for (i=0; i<root_words.length; i++) {
+function intense_annot(root,selections,rtids) {
+  selecObj = new Array;
+  rootObj = new Array;
+  var rootstr = '';
+  var rootid = root.id;
+  var divstart = root.innerHTML.indexOf('<div');
+  var DIVstart = root.innerHTML.indexOf('<DIV');
+  divstart = (DIVstart > divstart) ? DIVstart : divstart;
+  if (divstart == -1) {
+    rootSer = getXMLNodeSerialisation(root,'noattr');
+    var divstartSer = rootSer.indexOf('<div');
+    rootstr = root.innerHTML;
+  }
+  if (divstart > -1) {
+    var olddivs = root.innerHTML.substring(divstart,root.innerHTML.length);
+    rootstr = root.innerHTML.substring(0,divstart);
+  }
+  else if (divstartSer > -1) {
+    var olddivs = rootSer.substring(divstartSer,rootSer.length);
+    rootstr = rootSer.substring(0,divstart);
+  }
+  // couple lines of html-ignoring help from
+  // http://www.notestips.com/80256B3A007F2692/1/NAMO5RNV2S 
+  // by Mike Golding, 9/24/2003
+  //Extract HTML Tags
+  var regexp=/<[^<>]*>/ig;
+  var rootHTMLArray = rootstr.match(regexp);
+  //Replace HTML tags (may not work in Safari)
+  rootStrippedHTML = rootstr.replace(regexp,"$!$");
+  
+  var root_words = rootStrippedHTML.split(/[\s$!]+/);
+  
+  // there is one rootObj, each word in the root sentence a sub-obj
+  for (var i=0; i<root_words.length; i++) {
     rootObj[i] = new Object;
     rootObj[i].word = root_words[i];
     rootObj[i].intensity = 0;
     rootObj[i].annotations = new Array;
-}
-
-// each selecObj[n] refers to a single selection, and then has a .words[] array
-// that holds each word in the selection.
-for (i=0; i<selections.length; i++) {
-   selecObj[i] = new Object;
-   selecObj[i].selection = selections[i];
-   selecObj[i].words = new Array(selections[i].split(/\s+/));
-
-   // we're getting the comment from the ticketObj so don't bother here
-//   selecObj[i].comment = comments[i];
-//   selecObj[i].comment = 'this would be a comment'; // test foo
-
-   // this initializes a handy "matchindex" attribute that tells you 
-   // which array index of rootObj has the first char of the match
-   // (so you can skip the irrelevant indices that precede it)
-   intense_doRoughMatch(selections,selecObj,root_words);
-}
-
-
- intense_incrWords(selecObj,rootObj);
- 
- returnstring = intense_genReturn(rootObj);
-
- loadHTMLtoDiv(returnstring,root.id);
- //  root.innerHTML = returnstring; 
-// return returnstring;
-
-}
-
-
-function intense_doRoughMatch(selections,selecObj,root_words) {   
-   // ok, so it's not perfect.  something  weird about the $!$ and stuff.
-
-  var rer = deParen(selections[i]);
-  //dump('rer is '+rer+'\n');
+  }
   
-  foo = rer.replace(/ /g,'[\\s\\$\\!]+');
-  // foo = rer.replace(/\s+/g,"ACKACK");
-  //dump('foo is '+foo+'\n');
-  re = new RegExp(foo);
-  //dump('re is '+re+', rootBlah is '+rootStrippedHTML+'\n');
-  roughMatch = rootStrippedHTML.match(re);
+  // each selecObj[n] refers to a single selection, and then has a .words[] array
+  // that holds each word in the selection.
+  for (var i=0; i<selections.length; i++) {
+    selecObj[i] = new Object;
+    selecObj[i].selection = selections[i];
+    selecObj[i].words = new Array(selections[i].split(/[\s$!]+/));
+    selecObj[i].rtid = rtids[i];
+    // this initializes a handy "matchindex" attribute that tells you 
+    // which array index of rootObj has the first char of the match
+    // (so you can skip the irrelevant indices that precede it)
+    intense_doRoughMatch(selections,selecObj,root_words,i);
+  }
+  intense_incrWords(selecObj,rootObj);
+  returnstring = intense_genReturn(rootObj,rootHTMLArray);
+  if (olddivs) {
+    returnstring += olddivs;
+  }
+  loadHTMLtoDiv(returnstring,rootid);
+}
+
+
+function intense_doRoughMatch(selections,selecObj,root_words,i) {   
+  var rer = deParen(selections[i]);
+  var foo = rer.replace(/ /g,'[\\s\\$\\!]+');
+  var re = new RegExp(foo);
+  var roughMatch = deParen(rootStrippedHTML).match(re);
   if (roughMatch) {
-    //dump('roughmatched at '+roughMatch.index+'\n');
-    selecObj[i].matchindex = roughMatch.index;
+    selecObj[i].matchindex = (roughMatch.index - selections[i].length);
+    var n,sum;
     for (n=0,sum=0; sum<roughMatch.index&&n<root_words.length; n++) {
       if (root_words[n]) {
-	//dump('word "'+root_words[n]+'" length: '+root_words[n].length+'\n');
 	sum += root_words[n].length + 1;
       }
     }
-    n == 0 ? selecObj[i].arrayIndex = 0 : selecObj[i].arrayIndex = n-1;
-    //dump('looks like '+n+' would get us to '+sum+' aka '+roughMatch.index+'\n');
+    n == 0 ? selecObj[i].arrayIndex = 0 : selecObj[i].arrayIndex = n-2;
   }
 }
 
@@ -694,197 +838,177 @@ function intense_incrWords(selecObj,rootObj) {
 // selectstring in the rootstring.  then split the rootstring... but
 // how do you know which array index corresponds to the offset?  do
 // selecObj[i].length until you get to the offset?
- 
 // for each selection...
- for (j=0; j<selecObj.length; j++) { 
+ for (var j=0; j<selecObj.length; j++) { 
    // for each word in the selection...
-   //dump('starting j loop iteration '+j+'\n');
-   for (k=0; k<selecObj[j].words.length; k++) {
-     //dump('starting k loop iteration '+k+'\n');
+   for (var k=0; k<selecObj[j].words.length; k++) {
      // start at the object's predetermined arrayindex, and look only until you get to
      // the arrayindex + the number of words in the selection...
-     //dump('should start at '+selecObj[j].arrayIndex+' looking across '+selecObj[j].words[k].length+' words in a '+rootObj.length+'-word sentence\n');
-     skip = 0;
-     // if we do i<...arrayIndex-1, gpl3 comments work
-     // if we do i<...arrayIndex, lincoln-thanksgiving works
-     // but they are mutually exclusive!
-     for (i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex-1; i++) {
-       //dump('starting i loop iteration '+i+'\n');
-       //dump('limit is '+selecObj[j].words[k].length+' plus '+selecObj[j].arrayIndex+'\n');
-   // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
-   // my desired result
-   
-       //   for (m=skip; ((skip<selecObj[j].words[k].length)); m++) {
-       m=skip;
-     matched = '';
-     //dump('word is '+selecObj[j].words[k][m]+' '+j+' '+k+' '+m+' '+skip+'\n');
-     //         re = new RegExp('\\b'+selecObj[j].words[k][m]+'\\b','m');
-     re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
-     //dump('i here is '+i+'\n');
-     thisMatch = rootObj[i].word.match(re);
-     if (thisMatch) {
-       //dump('matched '+re+': '+thisMatch.index+'\n');
-       rootObj[i].intensity++;
-       matched = 'true';
-       skip++;
-       //       m = selecObj[j].words[k].length+skip;
+     var skip = 0;
+     for (var i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex; i++) {
+       // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
+       // my desired result
+       if (rootObj[i]) {
+	 var m=skip;
+	 var matched = '';
+	 if (selecObj[j].words[k][m]) {
+	   var re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
+	   if (re) {
+	     try { var thisMatch = rootObj[i].word.match(re); } catch(e) {}
+	   }
+	   if (thisMatch) {
+	     rootObj[i].intensity++;
+	     matched = 'true';
+	     rootObj[i].annotations.push(selecObj[j].rtid);
+	     skip++;
+	   }
+	   if (matched && ((m+1) == selecObj[j].words[k].length-1)) {
+	     // ? fixme?
+	   }
+	 }
+       }
      }
-     if (matched && ((m+1) == selecObj[j].words[k].length-1)) {
-       //dump('pushing an annotation\n');
-       var pushed = 1;
-       rootObj[i].annotations.push('foo');
-     }
-     //   }
-     }
-     // this is a hack: I need to find out why some loops are ending early
-     // (sort out the .length vs. maxindex problem)
-     // argh this, too, breaks gpl3 but not lincoln!
-     //if (!pushed) {
-     //rootObj[i].annotations.push('foo');
-     //}
    }
  }
- }
-
-
-function intense_genReturn(rootObj) { 
- returnstring = '';
-
-for (i=0; i<rootObj.length; i++) {
-  if(rootObj[i].intensity > 0) {
-//    intensereturn += '<span style="font-size: 1'+rootObj[i].intensity+'0%">';
-    intensereturn += '<span class="highlight">';
+}
+function killNoteGroup(divid) {
+  myDiv = document.getElementById(divid);
+  myDiv.parentNode.removeChild(myDiv);
+  // ugh, we can't set it to nothing, but this clutters it with hashes
+  window.location.hash = window.location.hash.replace(divid,'#');
+  if(window.location.hash.length >= 2) { window.location.hash = window.location.hash.replace(/[^^]#/g,''); }
+  if(window.location.hash.length >= 2) { window.location.hash = window.location.hash.replace(/::/g,':'); }
+  if(window.location.hash.length >= 2) { window.location.hash = window.location.hash.replace(/#:/g,'#'); }
+  if(window.location.hash.length >= 2) { window.location.hash = window.location.hash.replace(/##/g,'#'); }
+  if(window.location.hash.length >= 2) { window.location.hash = window.location.hash.replace(/\%23/g,''); }
+}
+function killnotes(ids) {
+  if (ids.indexOf(":") > -1) {
+    var id_arr = ids.split(':');
   }
-  intensereturn += ' '+rootObj[i].word+' ';
-  if (rootObj[i].annotations.length) {
-    for (j=0; j<rootObj[i].annotations.length; j++) {
-
-      intensereturn += '<span class="annotation" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')">\
-  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
-  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt +'\
-  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
-</span>';
-
-
-
-   }
+  else {
+    var id_arr = new Array(ids);
   }
-  if(rootObj[i].intensity > 0) {
-    intensereturn += '</span>';
+  for (var kn=0; kn<id_arr.length; kn++) {
+    cancelNote("rt"+id_arr[kn]);
   }
-
+}
+function intense_genReturn(rootObj,rootHTMLArray) {  
+ var intensereturn = '';
+  for (i=0; i<rootObj.length; i++) {
+    if(rootObj[i].intensity > 0) {
+      intensereturn += '<span class="highlight n'+rootObj[i].annotations.join(" n")+' a'+((rootObj[i].intensity > 24) ? 24 : rootObj[i].intensity)+'" onclick="getnotes(\''+rootObj[i].annotations.join(":")+'\',\''+ticketObj[rootObj[i].annotations[0]].startnode+'\')" title="'+rootObj[i].annotations.length+' comments">'+rootObj[i].word+' </span>';
+    }
+    else { intensereturn += rootObj[i].word+' '; }
+  }
+  // thanks again, Mike Golding
+  for(r=0;intensereturn.indexOf("$!$") > -1;r++){
+    intensereturn = intensereturn.replace("$!$", rootHTMLArray[r]);
+  }
+  return intensereturn;
 }
 
-// thanks again, Mike Golding
- for(i=0;intensereturn.indexOf("$!$") > -1;i++){
-   intensereturn = intensereturn.replace("$!$", rootHTMLArray[i]);
- }
- return intensereturn;
- }
- 
-function highlightWord(node,word,tooltip,rtid,user) {
-/* this code is basically no longer descended from: */
-/* http://www.kryogenix.org/code/browser/searchhi/  */
-/* but that got me started ...                      */
-// it's also too rickety and will be replaced by intense_annot as soon
-// as that is a little less buggy.
-// but so far the only thing worse than this function, is everything I've
-// tried to replace it with.
-  var haveHighlighted = false;
-  if ((node) && (node.hasChildNodes)) {
-    highlightWord(node.firstChild,word,tooltip,rtid,user);
+function getnotes(rtids,startid) {
+  currently("loading annotations on this bit...");
+  if (startid) {
+    var newDiv = document.createElement('div');
+    newDiv.setAttribute('id','loading');
+    newDiv.setAttribute('class','notegroup');
+    // IE doesn't seem to honor these things from the stylesheet unless 
+    // I declare them here too.
+    newDiv.style.left = '55%';
+    newDiv.style.position = 'absolute';
+    newDiv.style.width = '40%';
+    newDiv.innerHTML = '<span class="noteClose">Loading comments on this text...</span>';
+    document.getElementById(startid).appendChild(newDiv);
   }
-  if ((node) && (node.nodeType == 3)) { // text node
-    if (!haveHighlighted) {
-      if ((node.parentNode) && (node.parentNode.parentNode) && (paragraph = node.parentNode.parentNode)) {
-	paragraphString = getXMLNodeSerialisation(paragraph);
-	paragraphString.replace(/\s+/g,' ');
-	tempNodeVal = paragraphString;
-	tempWordVal = word;
-	tempWordVal = tempWordVal.replace(/\W+/g,'\\W[^<>]*(<[^<]+>)*');
-	tempWordVal = tempWordVal.replace(/^\\W/,'');
-	tempWordVal = tempWordVal.replace(/\\W$/,'');
-	var re = new RegExp(tempWordVal, 'mi');
-//	dump("re is "+re+"\n");
+  if(!window.location.hash.match(rtids)) {
+    location.hash+=rtids+':';
+  }
+  loadXMLDoc('/comments/rt/getannotations.html','ids='+rtids);
+  currently("Ready.");
+}
 
-
-paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+'" id="'+node.parentNode.id+'">$&\
-<span class="annotation '+rtid+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
-  <span style="font-size: smaller;font-style: italic" id="rt'+rtid+'user">'+ticketObj[rtid].user+'</span>: \
-  <span id="rt'+rtid+'txt">'+ticketObj[rtid].excerpt+'\
-  <a href="javascript:showFull(\''+rtid+'\')">[+]</a></span>\
- </span>\
-</span>');
-   //      dump("replaced on "+$&+"\n");
-//dump("pString is now "+paragraphString+"\n");
- loadHTMLtoDiv(paragraphString,node.parentNode.parentNode.id,"highlightword 742"); 
-
- //    node.parentNode.parentNode.innerHTML = paragraphString;
-    
-    //    haveHighlighted=true;
+function getElementStyle(elem, IEStyleProp, CSSStyleProp) {
+  if (elem.currentStyle) {
+    if (elem.currentStyle[IEStyleProp] != '') {
+      return elem.currentStyle[IEStyleProp];
+    }
+  } else if (window.getComputedStyle) {
+    var compStyle = window.getComputedStyle(elem, "");
+    if (compStyle != '') {
+      return compStyle.getPropertyValue(CSSStyleProp);
     }
   }
-}
+
+  // we haven't returned yet, so:
+  // default to going back to yellow -- must sync with stet.css, augh, FIXME somehow
+  if (CSSStyleProp == 'border') {
+    return '#FFFF00';
+  }
+  if (CSSStyleProp == 'background') {
+    return '#f0ecb3';
+  }
+  return "";
 }
 
-function notemouseover(rtid) {
-  var noteArr = getElementsByClass(rtid);
-  for (i = 0; i<noteArr.length; i++) {
-    noteArr[i].style.background="#de7777";
+
+function notemouseover(ref,nodelist) {
+    ref.style.prevBG=getElementStyle(ref,'background','background');
+    ref.style.prevBRDT=getElementStyle(ref,'border-top','border-top');
+    ref.style.prevBRDB=getElementStyle(ref,'border-bottom','border-bottom');
+    ref.style.background="#f9f";
+    // too slow to do with getElementsById here -- must pre-process
+  for (i = 0; i<nodelist.length; i++) {
+    nodelist[i].style.prevBG=getElementStyle(nodelist[i],'background','background');
+    nodelist[i].style.prevBRDT=getElementStyle(nodelist[i],'border-top','border-top');
+    nodelist[i].style.prevBRDB=getElementStyle(nodelist[i],'border-bottom','border-bottom');
+    nodelist[i].style.background="#f9f";
   }
 }
-function notemouseout(rtid) {
-  var noteArr = getElementsByClass(rtid);
-  for (i = 0; i<noteArr.length; i++) {
-    noteArr[i].style.background="#f0ecb3";
+function notemouseout(ref,nodelist) {
+    ref.style.background=ref.style.prevBG;
+    ref.style['border-top']=ref.style.prevBRDT;
+    ref.style['border-bottom']=ref.style.prevBRDB;
+  for (i = 0; i<nodelist.length; i++) {
+    nodelist[i].style.background=nodelist[i].style.prevBG;
+    nodelist[i].style['border-top']=nodelist[i].style.prevBRDT;
+    nodelist[i].style['border-bottom']=nodelist[i].style.prevBRDB;
   }
 }
 
 
 function showFull (rtid) {
-  //dump('showing full for '+rtid+' since you asked\n');
   myCollapsed = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>',myCollapsed.id);
-  //  myCollapsed.innerHTML = ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>';
   myCollapsed.parentNode.setAttribute('onclick','');
   unOverlap("annotation",5);
 }
 
 function showExcerpt (rtid) {
-  //dump('showing excerpt for '+rtid+' since you asked\n');
   myFull = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>',myFull.id);
-  //  myFull.innerHTML = ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>';
   myFull.parentNode.setAttribute('onclick','showFull(\''+rtid+'\')');
   unOverlap("annotation",5);
 }
 
 function iAgree (rtid,opn) {
-// dump('agreeing with '+rtid+'\n');
   myAgr = document.getElementById('agree'+rtid);
-  myAgr.setAttribute('href','');
+  myAgr.setAttribute('href','#');
   loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
-  loadXMLDoc('agree.pl','rtid='+rtid+'&amp;opn='+opn);
-    
+  loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&amp;opn='+opn);
 }
 
 function unOverlap(cls,gapDesired) {
 items = getElementsByClass(cls);
 
  for (i = 0; i< (items.length - 1); i++) {
-   //dump("doing item "+i+", a "+items[i]+"\n");
    iheight =parseInt(document.defaultView.getComputedStyle(items[i], '').getPropertyValue("height"));
    ibottom = parseInt(parseInt(items[i].offsetTop) + parseInt(iheight));
-   //dump("iheight is "+iheight+" ibottom is "+ibottom+"\n");
    items[i+1].style.top = items[i+1].offsetTop+"px";
-   //dump("next offsetTop is "+items[i+1].offsetTop+" ibootom is "+ibottom+"\n");
-
    diff = parseInt(ibottom) - parseInt(items[i+1].style.top);
-   //dump("diff is "+diff+"\n");
    if (diff >= 0) {
      items[i+1].style.top = parseInt(parseInt(items[i+1].style.top)+parseInt(diff)+parseInt(gapDesired))+"px";
-     //     dump("items[i+1].style.top = "+parseInt(items[i+1].style.top)+"+"+diff+"+"+gapDesired+"\n");
-     //     dump("top is now "+items[i+1].style.top+"\n");
    }
  }
 }
@@ -894,74 +1018,201 @@ function last(obj) {
 }
 
 function statusbox(text) {
-  //  status.push(msg)
-  //  document.getElementById("statustext").innerHTML = text+readCookie('__ac');
   loadHTMLtoDiv(text,'statustext');
+  loginbox();
+}
+function currently(text) {
+  //  loadHTMLtoDiv(text,'currently');
+  //  alert(text);
+}
+
+function loginbox() {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	//        document.getElementById("login").innerHTML = 'you are logged in as '+name+'. <a href="http://gplv3.fsf.org/logout">logout</a>';
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a>','login');
+	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a> <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a><br/>\
+<span id="selectsome" class="selectsome">select some text</span> and <a class="fakelink" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
   }
   else {
-    //    document.getElementById("login").innerHTML = 'You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.';
-    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
+    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments. <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a>','login');
   }
 }
+function idLinks(cs) {
+  try { var say = cs.getElementsByTagName('say')[0].firstChild; } catch(e) { }
+    var id = cs.getElementsByTagName('ci')[0].firstChild; 
+    var list = cs.getElementsByTagName('l')[0].firstChild;
+    var newMe = document.createElement('span');
+    newMe.appendChild(document.createTextNode(say.data+' '));
+    newMe.appendChild(document.createTextNode(id.data+' '));
+    newMe.appendChild(document.createTextNode(' '));
+    Lnk = document.createElement('a');
+    Lnk.setAttribute('href',list.data);
+    Lnk.appendChild(document.createTextNode('[see thread]'));
+    newMe.appendChild(Lnk);
+    newMe.appendChild(document.createTextNode(' '));
+    sLnk = document.createElement('a');
+    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
+    sLnk.appendChild(document.createTextNode('search'));
+    newMe.appendChild(sLnk);
+    st = document.getElementById('statustext');
+    ch = st.childNodes;
+    while (ch.length > 0) {
+	st.removeChild(ch.item(0));
+    }
+    st.appendChild(newMe);
+}
 
+// whoa clean me up asap, what a mess for nothing now.  fixme.
+function qLinks(cs) {
+    var say = cs.getElementsByTagName('say')[0].firstChild;
+    var q = cs.getElementsByTagName('q')[0].firstChild; 
+    var r = cs.getElementsByTagName('r')[0].firstChild; 
+    var list = cs.getElementsByTagName('l')[0].firstChild;
+    var ra = cs.getElementsByTagName('ra')[0].firstChild; 
+    var t =  cs.getElementsByTagName('t')[0].firstChild; 
+    var newMe = document.createElement('span');
+    var pr;
+    var nx;
+    try { pr = cs.getElementsByTagName('pr')[0].firstChild; } catch(e) {}
+    try { nx = cs.getElementsByTagName('nx')[0].firstChild; } catch(e) {}
+    //try { 
+    newMe.appendChild(document.createTextNode(say.data+' ')); 
+//} catch(e) { alert("say "+say+", saydata "+say.data+", e "+e); }
+    //try {
+    newMe.appendChild(document.createTextNode(q.data)); 
+    //} catch(e) { alert("q "+q+", qdata "+q.data+", e "+e); }
+    newMe.appendChild(document.createTextNode(' '));
+    rLnk = document.createElement('a');
+    rLnk.setAttribute('href',r.data);
+    rLnk.appendChild(document.createTextNode('[rss]'));
+    try { newMe.appendChild(rLnk); } catch(e) { /* alert(e); */ }
+    newMe.appendChild(document.createTextNode(' '));
+    lLnk = document.createElement('a');
+    lLnk.setAttribute('href',list.data);
+    lLnk.appendChild(document.createTextNode('[list]'));
+    newMe.appendChild(lLnk);
+    newMe.appendChild(document.createTextNode(' '));
+    rat = document.createElement('a');
+    rat.setAttribute('href',"http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");
+    rat.appendChild(document.createTextNode('[rationale]'));
+    newMe.appendChild(rat);
+    newMe.appendChild(document.createElement('br'));
+    newMe.appendChild(document.createTextNode('(found '+t.data+': click highlights to show.) ')); // , showing '+rng.data));
+    /* if (pr || nx) { newMe.appendChild(document.createTextNode(': ')); }
+    if(pr) { 
+    pLnk = document.createElement('a');
+    pLnk.setAttribute('href',pr.data);
+    pLnk.appendChild(document.createTextNode('prev'));
+    newMe.appendChild(pLnk);
+    }
+    if (pr && nx) {
+      newMe.appendChild(document.createTextNode(' | '));
+    }
+    if (nx) {
+    nLnk = document.createElement('a');
+    nLnk.setAttribute('href',nx.data);
+    nLnk.appendChild(document.createTextNode('next'));
+    newMe.appendChild(nLnk);
+    }
+
+    newMe.appendChild(document.createTextNode(') '));
+    */
+    sLnk = document.createElement('a');
+    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
+    sLnk.appendChild(document.createTextNode('search'));
+    newMe.appendChild(sLnk);
+
+    st = document.getElementById('statustext');
+    ch = st.childNodes;
+    while (ch.length > 0) {
+	st.removeChild(ch.item(0));
+    }
+    st.appendChild(newMe);
+}
+
+function cstatusbox(cs) {
+  try { 
+    idLinks(cs);
+  } catch (e) {
+    qLinks(cs);
+  }
+  loginbox();
+}
 function deParen(str) {
-  str = str.replace(/\(/g,'\\(');
-  str = str.replace(/\)/g,'\\)');
+  str = str.replace(/\(/g,'$1\\(');
+  str = str.replace(/\)/g,'$1\\)');
   return str;
 }
 
 function newQuery() {
-  loadURLtoDiv('/comments/rt/changeshown.html','NewQuery=1&came_from='+document.location,'statustext');
-//	document.getElementById("querydiv").style.display = "block";
-
+  loadURLtoDiv('/comments/rt/changeshown.html','came_from='+document.location,'statustext');
 }
 
 function cancelNewQuery() {
   //  loadHTMLtoDiv(status.last,'statustext');
 }
 
-//* dragging behavior courtesy of brainjar.com.  License is GPL2+
+function kSerialize(node,attrflag) {
+  var returnme = '';
+  // really this should encompass any non-closed tag, but I'm not sure if I
+  // can generalize it without just getting a whole list.
+  if (node.nodeName.toLowerCase() == 'br') {
 
+    returnme += '<'+node.nodeName.toLowerCase()+'/>';
+  }
+  else if (node.nodeType == 1) {
+    returnme += '<'+node.nodeName.toLowerCase();
+    try { node.hasAttributes(); var hasAttr = 1; } catch (e) { 
+      if (attrflag != 'noattr') { 
+	return node+" [your browser doesn't support hasAttributes so this is funky: reload will fix]"; } 
+    };
+    if (!!hasAttr) {
+      for (var attrCt = 0; attrCt < node.attributes.length; attrCt++) {
+	returnme += ' '+node.attributes[attrCt].nodeName.toLowerCase()+'="'+node.attributes[attrCt].nodeValue+'"';
+      }
+    }
+    returnme += '>';
+    if (node.hasChildNodes()) {
+      for (var nodeCt = 0; nodeCt < node.childNodes.length; nodeCt++) {
+	returnme += kSerialize(node.childNodes[nodeCt]);
+      }
+    } 
+    returnme += '</'+node.nodeName.toLowerCase()+'>';
+  }
+  else if (node.nodeType == 3) {
+    returnme += node.data;
+  }
+  return returnme;
+}
+
+// end of code by Orion Montoya
+
+//* dragging behavior courtesy of brainjar.com.  License is GPL2+
 //*****************************************************************************
 // Do not remove this notice.
-//
 // Copyright 2001 by Mike Hall.
 // See http://www.brainjar.com for terms of use.
 //*****************************************************************************
-
 // Determine browser and version.
-
 function Browser() {
-
   var ua, s, i;
-
   this.isIE    = false;
   this.isNS    = false;
   this.version = null;
-
   ua = navigator.userAgent;
-
   s = "MSIE";
   if ((i = ua.indexOf(s)) >= 0) {
     this.isIE = true;
     this.version = parseFloat(ua.substr(i + s.length));
     return;
   }
-
   s = "Netscape6/";
   if ((i = ua.indexOf(s)) >= 0) {
     this.isNS = true;
     this.version = parseFloat(ua.substr(i + s.length));
     return;
   }
-
   // Treat any other "Gecko" browser as NS 6.1.
-
   s = "Gecko";
   if ((i = ua.indexOf(s)) >= 0) {
     this.isNS = true;
@@ -971,20 +1222,15 @@ function Browser() {
 }
 
 var browser = new Browser();
-
 // Global object to hold drag information.
-
 var dragObj = new Object();
 dragObj.zIndex = 0;
 
 function dragStart(event, id) {
-
   var el;
   var x, y;
-
   // If an element id was given, find it. Otherwise use the element being
   // clicked on.
-
   if (id)
     dragObj.elNode = document.getElementById(id);
   else {
@@ -1011,12 +1257,9 @@ function dragStart(event, id) {
     x = event.clientX + window.scrollX;
     y = event.clientY + window.scrollY;
   }
-
   // Save starting positions of cursor and element.
-
   dragObj.cursorStartX = x;
   dragObj.cursorStartY = y;
-
   dragObj.elStartLeft  = parseInt(dragObj.elNode.offsetLeft, 10);
   dragObj.elStartTop   = parseInt(dragObj.elNode.offsetTop,  10);
 
@@ -1024,11 +1267,9 @@ function dragStart(event, id) {
   if (isNaN(dragObj.elStartTop))  dragObj.elStartTop  = 0;
 
   // Update element's z-index.
-
   dragObj.elNode.style.zIndex = ++dragObj.zIndex;
 
   // Capture mousemove and mouseup events on the page.
-
   if (browser.isIE) {
     document.attachEvent("onmousemove", dragGo);
     document.attachEvent("onmouseup",   dragStop);
@@ -1043,11 +1284,8 @@ function dragStart(event, id) {
 }
 
 function dragGo(event) {
-
   var x, y;
-
   // Get cursor position with respect to the page.
-
   if (browser.isIE) {
     x = window.event.clientX + document.documentElement.scrollLeft
       + document.body.scrollLeft;
@@ -1058,21 +1296,9 @@ function dragGo(event) {
     x = event.clientX + window.scrollX;
     y = event.clientY + window.scrollY;
   }
-
   // Move drag element by the same amount the cursor has moved.
-  //  dump("left starts as "+dragObj.elStartLeft+"; top starts as "+dragObj.elStartTop+"\n");
-  //  dump("x is "+x+" and y is "+y+"\n");
-
-//  dragObj.elNode.style.left = (dragObj.elStartLeft + x - dragObj.cursorStartX) + "px";
-//  dragObj.elNode.style.top  = (dragObj.elStartTop  + y - dragObj.cursorStartY) + "px";
-
 dragObj.elNode.style.left = (dragObj.elStartLeft + x - dragObj.cursorStartX) + "px";
 dragObj.elNode.style.top  = (dragObj.elStartTop + y - dragObj.cursorStartY) + "px";
-
-
-
-//  dump("left is now "+dragObj.elNode.style.left+"; top is now "+dragObj.elNode.style.top+"\n");
-
   if (browser.isIE) {
     window.event.cancelBubble = true;
     window.event.returnValue = false;
@@ -1082,9 +1308,7 @@ dragObj.elNode.style.top  = (dragObj.elStartTop + y - dragObj.cursorStartY) + "p
 }
 
 function dragStop(event) {
-
   // Stop capturing mousemove and mouseup events.
-
   if (browser.isIE) {
     document.detachEvent("onmousemove", dragGo);
     document.detachEvent("onmouseup",   dragStop);
@@ -1095,58 +1319,18 @@ function dragStop(event) {
   }
 }
 
-/* cookie stuff also from Brainjar 2001, see above and */
-/* http://www.brainjar.com for terms of use (GPL2+)    */
-
-function createCookie(name,value,days)
-{
-	if (days)
-	{
-		var date = new Date();
-		date.setTime(date.getTime()+(days*24*60*60*1000));
-		var expires = "; expires="+date.toGMTString();
-	}
-	else var expires = "";
-	document.cookie = name+"="+value+expires+"; path=/";
-}
-function saveIt(name)
-{
-	var x = document.forms[0].cookievalue.value;
-	if (!x)
-		alert('Please fill in a value in the input box.');
-	else
-		createCookie(name,x,7);
-}
 function readCookie(name)
 {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i<ca.length;i++)
-	{
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i<ca.length;i++)
+    {
+      var c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1,c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+  return null;
 }
-
-function eraseCookie(name)
-{
-	createCookie(name,"",-1);
-}
-
-function readIt(name)
-{
-	alert('The value of the cookie is ' + readCookie(name));
-}
-
-function eraseIt(name)
-{
-	eraseCookie(name);
-	alert('Cookie erased');
-}
-
-// end of brainjar code
 
 
 
@@ -1164,9 +1348,24 @@ function eraseIt(name)
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 // General Public License for more details.
 var END_OF_INPUT = -1;
-
 var base64Str;
 var base64Count;
+var base64Chars = new Array(
+			    'A','B','C','D','E','F','G','H',
+			    'I','J','K','L','M','N','O','P',
+			    'Q','R','S','T','U','V','W','X',
+			    'Y','Z','a','b','c','d','e','f',
+			    'g','h','i','j','k','l','m','n',
+			    'o','p','q','r','s','t','u','v',
+			    'w','x','y','z','0','1','2','3',
+			    '4','5','6','7','8','9','+','/'
+			    );
+
+var reverseBase64Chars = new Array();
+for (var i=0; i < base64Chars.length; i++){
+  reverseBase64Chars[base64Chars[i]] = i;
+}
+
 function setBase64Str(str){
   base64Str = str;
   base64Count = 0;
@@ -1178,40 +1377,9 @@ function readBase64(){
   base64Count++;
   return c;
 }
-function encodeBase64(str){
-  setBase64Str(str);
-  var result = '';
-  var inBuffer = new Array(3);
-  var lineCount = 0;
-  var done = false;
-  while (!done && (inBuffer[0] = readBase64()) != END_OF_INPUT){
-    inBuffer[1] = readBase64();
-    inBuffer[2] = readBase64();
-    result += (base64Chars[ inBuffer[0] >> 2 ]);
-    if (inBuffer[1] != END_OF_INPUT){
-      result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30) | (inBuffer[1] >> 4) ]);
-      if (inBuffer[2] != END_OF_INPUT){
-	result += (base64Chars [((inBuffer[1] << 2) & 0x3c) | (inBuffer[2] >> 6) ]);
-	result += (base64Chars [inBuffer[2] & 0x3F]);
-      } else {
-	result += (base64Chars [((inBuffer[1] << 2) & 0x3c)]);
-	result += ('=');
-	done = true;
-      }
-    } else {
-      result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30)]);
-      result += ('=');
-      result += ('=');
-      done = true;
-    }
-    lineCount += 4;
-    if (lineCount >= 76){
-      result += ('\n');
-      lineCount = 0;
-    }
-  }
-  return result;
-}
+
+// removed encodeBase64(str){ } since I don't use it
+
 function readReverseBase64(){   
   if (!base64Str) return END_OF_INPUT;
   while (true){      
@@ -1256,15 +1424,3 @@ function decodeBase64(str){
   }
   return result;
 }
-
-// from rt:
-function hideshow(num) {
-    idstring = "element-" + num;
-    chunk = document.getElementById(idstring);
-    if ( chunk.style.display == "none")  {
-    chunk.style.display = chunk.style.tag;
-    } else {
-        chunk.style.tag = chunk.style.display;
-        chunk.style.display = "none";
-    }
-}   

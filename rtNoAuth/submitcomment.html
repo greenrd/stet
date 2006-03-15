@@ -20,7 +20,6 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-
 % if ($resp == 0) {
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
@@ -75,8 +74,11 @@ my ($dompath, $url, $urlpath, $selectedtext, $notesubj, $start, $startid, $end, 
 if(%ARGS) {
 
  $url = $ARGS{'NoteUrl'};
- if ($url =~ m!^http://gplv3.fsf.org/comments/$!) {
+ if ($url =~ m!^http://gplv3.fsf.org/comments/$|gplv3-draft-1!) {
      $url = "gplv3-draft-1";
+ }
+ if ($url =~ m!.*(gplv3-draft-\d).*!) {
+     $url = $1;
  }
 
  $urlpath = $url;
@@ -93,7 +95,7 @@ $url =~ s/.*\/([^\/]+)\.(html|xml).*/$1/;
  $endid = $ARGS{'EndNodeId'};
  $notetext = URI::Escape::uri_unescape($ARGS{'NoteText'});
 
-print STDERR "q arg is ".$queue."\n";
+#print STDERR "q arg is ".$queue."\n";
 # $queue ? $queue = $queue : $queue = "Inbox";
 # print STDERR "wq is $queue\n";
 my $ThisQueue = RT::Queue->new($CurrentUser);
@@ -106,7 +108,7 @@ my $ThisQueue = RT::Queue->new($CurrentUser);
   else {
       $realqueue = "Inbox";
   }
-print STDERR "rq is $realqueue\n";
+#print STDERR "rq is $realqueue\n";
 
 if ($resp == 1) {
 my $ticket = new RT::Ticket($CurrentUser);
@@ -125,7 +127,7 @@ my %ticket_vals = ( Queue => $realqueue,
 		      'CustomField-4' => $startid,
 		      'CustomField-5' => $endid,
 		      'CustomField-6' => $notetext,
-		      'CustomField-7' => $name,
+#		      'CustomField-7' => $name,
 		      );
   ($id, my $transaction_object, my $err) = $ticket->Create(%ticket_vals);
   print STDERR $err . "\n" if $err;

@@ -56,7 +56,7 @@ for (var i=0; i < base64Chars.length; i++){
 function initPage() {
   statusbox("Please wait while we load some comments.");
   filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
-  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/)) || (filename.match(/debug/))) {
+  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))|| (filename.match(/comments\/\?/)) || (filename.match(/comments\/#/)) || (filename.match(/debug/) || (filename.match(/classic/)))) {
     filename = 'gplv3-draft-1';
   }
 if(window.location.search.length) {
@@ -70,7 +70,7 @@ if(window.location.search.length) {
 
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
 function XpathSel() {
-  alert("firing XpathSel");
+  //alert("firing XpathSel");
   if (!readCookie('__ac')) {
     document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
     return;
@@ -85,82 +85,84 @@ function XpathSel() {
   else if (document.getSelection)
     {
       textObj= document.getSelection();
-      kObj = textObj.createRange();
     }
   else if (document.selection)
     {
       textObj= document.selection.createRange().text;
     }
-  alert(textObj.toString()+' '+kObj);
-    //   if(!textObj.length) {
-  //document.getElementById('selectsome').setAttribute('class','error');
-  //  document.getElementById('login').innerHTML(textObj.length);
-  //  return;
-  //}
-  try { startNode = textObj.anchorNode; } catch(e) { alert(e); }
+  //alert(textObj.toString());
+       if(textObj.length < 1) {
+	 document.getElementById('selectsome').setAttribute('class','error');
+	 document.getElementById('login').innerHTML(textObj.length);
+	 return;
+       }
 
-  try { startid = startNode.parentNode.id; } catch(e) { }
-  try { start = startNode.parentNode.nodeName; } catch(e) { }
-  try { startid; } catch(e) {
-    alert("let's try another form from "+startNode);
-    //    myNoteIfy = createNoteDiv();
-    
-    return;
-  }  
+    try { sn = textObj.anchorNode; } catch(e) {
+      alert(e);
+    }
+    if (!sn) {
+       //alert('trying to load /comments/rt/formxml3.html?'+encodeURI(textObj.toString()));
+       loadXMLDoc('/comments/rt/formxml3.html','selection='+encodeURI(textObj.toString()));
+    }
 
+    else {
+      try { startNode = textObj.anchorNode; } catch(e) { }
+      try { startid = startNode.parentNode.id; } catch(e) { }
+      try { start = startNode.parentNode.nodeName; } catch(e) { }
       endnode = textObj.focusNode.parentNode;
       endid = endnode.id;
       end = endnode.nodeName;
-
       if (!readCookie('__ac')) {
 	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
       }
       else {
-
 	oStr = getDomPath(startNode);
-	
-	myNoteIfy = createNoteDiv();
+	createNoteDiv(startid);
 	textString = textObj.toString();
+	document.getElementById('DomPath').value = oStr;
+	document.getElementById('Selection').value = textString;
+	loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
+	// document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
+	document.getElementById('NoteSubj').value = 'Subject/summary [required]';
+	document.getElementById('StartNodeId').value = startid;
+	// document.getElementById('EndNodeId').value = endid;
+	document.getElementById('NoteUrl').value = filename;
 	
-	thisNode = document.getElementById(startid);
-    
-    if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
-      thisNode.previousSibling.previousSibling.appendChild(myNoteIfy);
-    }
-    else 
-      if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
-	thisNode.previousSibling.appendChild(myNoteIfy);
+	if(startid != endid) {
+	  noteErr('Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead');
+	}
+	if((startid =='login') || (startid == undefined) || (textString == undefined) || (textString == '')) {
+	  noteErr('You\'ve found a browser-compatibility bug that we\'re trying to fix; we would appreciate an email to stet@gplv3.fsf.org saying exactly what browser you\'re using (though we know about Safari).  For the moment the best way to send your comment would be via email: see http://gplv3.fsf.org/comments/email.html');
+	}
       }
-      else {
-	thisNode.appendChild(myNoteIfy);
-      }
-    document.getElementById('DomPath').value = oStr;
-    document.getElementById('Selection').value = textString;
-    loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
-    //    document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
-    document.getElementById('NoteSubj').value = 'Subject/summary [required]';
-    document.getElementById('StartNodeId').value = startid;
-    document.getElementById('EndNodeId').value = endid;
-    document.getElementById('StartNode').value = start;
-    document.getElementById('EndNode').value = end;
-    document.getElementById('NoteUrl').value = filename;
-
-    if(startid != endid) {
-      document.getElementById('NoteText').value = 'Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead';      
-      document.getElementById('submitNote').setAttribute('disabled','disabled');
-      document.getElementById('NoteSubj').setAttribute('disabled','disabled');
-      //document.getElementById('NoteText').setAttribute('disabled','disabled');
     }
-    if((startid =='login') || (startid == undefined)) {
-      document.getElementById('NoteText').value = 'You\'ve found a browser-compatibility bug that we\'re trying to fix; we would appreciate an email to stet@gplv3.fsf.org saying exactly what browser you\'re using (though we know about Safari).  For the moment the best way to send your comment would be via email: see http://gplv3.fsf.org/comments/email.html';
-      document.getElementById('submitNote').setAttribute('disabled','disabled');
-      document.getElementById('NoteSubj').setAttribute('disabled','disabled');
-
-    }
-
-  }
 }
 
+function noteErr(msg) {
+  document.getElementById('NoteText').value = msg;
+  document.getElementById('submitNote').setAttribute('disabled','disabled');
+  document.getElementById('NoteSubj').setAttribute('disabled','disabled');
+  //document.getElementById('NoteText').setAttribute('disabled','disabled');
+}
+
+function processDompath(response) {
+  //  alert("got to processDompath");
+  try { var fail = response.getElementsByTagName("nf")[0].firstChild.data; } catch(e) {}
+  if (fail) { noteErr(fail); }
+  else {
+    createNoteDiv(response.getElementsByTagName("si")[0].firstChild.data);
+    //    document.getElementById('noteify').setAttribute('action','/comments/rt/simpleform.html');
+    document.getElementById('DomPath').value = response.getElementsByTagName("dp")[0].firstChild.data;
+    document.getElementById('Selection').value = response.getElementsByTagName("sl")[0].firstChild.data;
+    loadHTMLtoDiv('comment on: <strong>'+response.getElementsByTagName("sl")[0].firstChild.data+'</strong>','SelectionTxt');
+    // document.getElementById('SelectionTxt').innerHTML = 'comment on: <strong>'+textString+'</strong>';
+    document.getElementById('NoteSubj').value = 'Subject/summary [required]';
+    document.getElementById('StartNodeId').value = response.getElementsByTagName("si")[0].firstChild.data;
+    //    document.getElementById('NoteText').value = "dp: "+document.getElementById('DomPath').value+"\nsl: "+document.getElementById('Selection').value+"\nsi: "+document.getElementById('StartNodeId').value;
+    // document.getElementById('EndNodeId').value = endid;
+    document.getElementById('NoteUrl').value = response.getElementsByTagName("fn")[0].firstChild.data;;
+  }
+}
 
 function getDomPath(startNode) {
   // helped here by http://www.howtocreate.co.uk/emails/FlorianSauvin.html
@@ -177,8 +179,6 @@ function getDomPath(startNode) {
 function submitComment() {
   
   if ((document.getElementById('NoteSubj').value == 'Subject/summary [required]') || (document.getElementById('NoteSubj').value == ' ')) {
-    //    document.getElementById('SelectionTxt').innerHTML = '<span class="error">Please enter a brief explanatory subject for this comment</span>';
-
     loadHTMLtoDiv('<span class="error">Please enter a brief explanatory subject for this comment</span>','SelectionTxt');
   }
   else {
@@ -192,11 +192,9 @@ function submitComment() {
   document.getElementById('cancel').setAttribute('disabled','disabled');
   form.style.background = '#aaa';
 
-  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNode='+form.StartNode.value+'&amp;EndNode='+form.EndNode.value+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;EndNodeId='+form.EndNodeId.value+'&amp;NoteUrl='+location.href+'&map;queue='+form.queue.value);
-  
-  
+  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;NoteUrl='+location.href+'&map;queue='+form.queue.value);
 
-  var theUrl = '/comments/rt/submitcomment-devel.html'; 
+  var theUrl = '/comments/rt/submitcomment.html'; 
   //highlightWord(form.StartNode.value,form.Selection.value,noteText,'');   
   loadXMLDoc(theUrl,params);
   }
@@ -224,6 +222,7 @@ var req;
 function loadXMLDoc(url,theData) 
 {
   //dump('loading '+url+'?'+theData+'\n');
+  //alert('loading '+url+'?'+theData+'\n');
   // branch for native XMLHttpRequest object
   if (window.XMLHttpRequest) {
     req = new XMLHttpRequest();
@@ -274,7 +273,7 @@ function getXMLNodeSerialisation(xmlNode) {
   var text = false;
   try {
     // Gecko-based browsers, Safari, Opera.
-    var serializer = new XMLSerializer();
+    //    var serializer = new XMLSerializer();
     text = serializer.serializeToString(xmlNode);
   }
   catch (e) {
@@ -283,9 +282,16 @@ function getXMLNodeSerialisation(xmlNode) {
       text = xmlNode.xml;
     }
     catch (e) {
-      text = xmlNode.firstChild.data;
+      text = kSerialize(xmlNode);
+      //      alert("xmlnode.xml failed: serialized to "+text);
+      
     }
   }
+  if (text == undefined) {
+    text = kSerialize(xmlNode);
+    //    alert("undefined serialized to "+text);
+  }
+  //  alert("serialized to "+text);
   return text;
 }
 
@@ -303,29 +309,37 @@ function loadURLtoDiv(url,args,targetid) {
 
 function processReqChange() 
 {
+  var did = 0;
   //  alert("doing PRC");
   // only if req shows "complete"
   if (req.readyState == 4) {
     // only if "OK"
     if (req.status == 200) {
       cancelNote("noteify");
-      //alert(req.responseText);
+      //alert("response: "+req.responseText);
       response  = req.responseXML.documentElement;
       var resp_arrN;
       var resp_arrA;
       var resp_arrF;
+      var resp_arrS;
 	try {
 	      drafter = response.getElementsByTagName("d")[0].firstChild.data;
 	}
 	catch (e) {}
 	//alert("about to call cstatusbox");
-	try { cs = response.getElementsByTagName("cs"); } catch(e) {}
+	try {
+	  cs = response.getElementsByTagName("cs");
+	  if (cs.length > 0) {
+	    cstatusbox(cs[0]);
+	  }
+	  } catch(e) {}
 
-      cstatusbox(cs[0]);
+
       resp_arrN = response.getElementsByTagName("annotation");
       if(resp_arrN.length > 0) {
 	//dump("processAnnot starting from "+resp_arrN[0].firstChild.data+"\n")
-	  processAnnotation(response);
+	processAnnotation(response);
+	did++;
       }
 /*       else if (resp_arrF = response.getElementsByTagName("form")) { */
 /* 	dump("pre processNQ\n") */
@@ -335,15 +349,23 @@ function processReqChange()
 /* 	  } */
 /*       } */
 
-      else if (resp_arrA = response.getElementsByTagName("agreement")) {
+      resp_arrA = response.getElementsByTagName("agreement");
+      if(resp_arrA.length > 0) {
 	//dump("pre processAgree from"+resp_arrA[0].firstChild.data+"\n");
-	if(resp_arrA.length > 0) {
-	  //dump("processAgree\n");
-	  processAgreement(response);
-	}
+	//dump("processAgree\n");
+	processAgreement(response);
+	did++;
       }
 
-      else {
+      resp_arrS = response.getElementsByTagName("sdp");
+    if(resp_arrS.length > 0) {
+      //dump("pre processDompath from"+resp_arrA[0].firstChild.data+"\n");
+      //dump("processDompath\n");
+      processDompath(response);
+      did++;
+    }
+    
+    if (!did) {
 	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
       }
     }
@@ -355,6 +377,7 @@ function onNoteifyMouseover() {
   //this.onblur = onNoteifyBlur;
   
 }
+
 
 function processAnnotation(response) {
   selections_arr = response.getElementsByTagName("s");
@@ -418,11 +441,11 @@ function processAnnotation(response) {
 function makeLinkObj(rtid,agreement,agrtot) {
     returnLink = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
     
-    agreechild = agreement;
     //alert("calling gXNS at 395");
-    	  agreestr = getXMLNodeSerialisation(agreement);
-    	  if ((agreechild == "agree") || (agreechild == "unagree")) {
-    	    returnLink += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | ';
+    	  agreestr = agreement.firstChild.data;
+	  //alert("agreestr is'"+agreestr+"'");
+    	  if ((agreestr == "agree") || (agreestr == "unagree")) {
+    	    returnLink += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreestr+'\')">'+agreestr+'</a> | ';
     	  }
     	  else {
     	    returnLink += '<span id="agree'+rtid+'">'+agreestr+'</span> | ';
@@ -439,14 +462,15 @@ function processAgreement(response) {
 	myOpn = response.getElementsByTagName("b")[0].firstChild.data;
 // dump('id is '+rtids_arr[0].firstChild.data);
 	myLink = document.getElementById('agree'+myId);
-	myOpn == "agree" ? opOpn = "unagree" : opOpn = "agree";
-	loadHTMLtoDiv(opOpn,'agree'+myId,"processagreement");
-	// FIX AGREE COUNT BY INCREMENTING/DECREMENTING HERE
-	agrcount = parseInt(document.getElementById('agrtot'+myId).innerHTML);
-	myOpn == "agree" ? agrcount++ : agrcount--;
+	opOpn = document.createElement('span');
+	myOpn == "agree" ? opOpn.appendChild(document.createTextNode("unagree")) : opOpn.appendChild(document.createTextNode("agree"));
+	//loadHTMLtoDiv(opOpn.firstChild.data,'agree'+myId,"processagreement");
+	var agrcount = response.getElementsByTagName("ct")[0].firstChild.data;
+	//alert("agrcount: "+agrcount);
 	loadHTMLtoDiv(agrcount,'agrtot'+myId);
 	ticketObj[myId].link = makeLinkObj(myId,opOpn,agrcount);
-	//	myLink.innerHTML = opOpn;
+	showFull(myId);
+//	myLink.innerHTML = opOpn;
 	myLink.href = 'javascript:iAgree('+myId+',\''+opOpn+'\')';
       }
 
@@ -477,13 +501,13 @@ function cancelNote(div) {
   }
 }
 
-function createNoteDiv() {
+function createNoteDiv(startid) {
 
   // this would be a lot more readable and maintainable if it were
   // just a string.
 
 var noteifyDiv = document.createElement('form');
-noteifyDiv.setAttribute('action','/comments/rt/submitcomment-devel.html');
+noteifyDiv.setAttribute('action','/comments/rt/submitcomment.html');
 noteifyDiv.setAttribute('class','noteify');
 noteifyDiv.setAttribute('id','noteify');
 noteifyDiv.setAttribute('name','noteify');
@@ -525,35 +549,15 @@ NoteText.setAttribute('rows','10');
 NoteText.setAttribute('cols','40');
 NoteText.setAttribute('class','addnote');
 
-var StartNode = document.createElement('input');
-StartNode.setAttribute('id','StartNode');
-StartNode.setAttribute('name','StartNode');
-StartNode.setAttribute('type','hidden');
-
-var EndNode = document.createElement('input');
-EndNode.setAttribute('id','EndNode');
-EndNode.setAttribute('name','EndNode');
-EndNode.setAttribute('type','hidden');
-
 var StartNodeId = document.createElement('input');
 StartNodeId.setAttribute('id','StartNodeId');
 StartNodeId.setAttribute('name','StartNodeId');
 StartNodeId.setAttribute('type','hidden');
 
-var EndNodeId = document.createElement('input');
-EndNodeId.setAttribute('id','EndNodeId');
-EndNodeId.setAttribute('name','EndNodeId');
-EndNodeId.setAttribute('type','hidden');
-
 var NoteUrl = document.createElement('input');
 NoteUrl.setAttribute('id','NoteUrl');
 NoteUrl.setAttribute('name','NoteUrl');
 NoteUrl.setAttribute('type','hidden');
-
-var DocRevision = document.createElement('input');
-DocRevision.setAttribute('id','DocRevision');
-DocRevision.setAttribute('name','DocRevision');
-DocRevision.setAttribute('type','hidden');
 
 var cancel = document.createElement('input');
 cancel.setAttribute('type','button');
@@ -615,12 +619,10 @@ noteifyDiv.appendChild(Selection);
 noteifyDiv.appendChild(NoteSubj);
 noteifyDiv.appendChild(theBR3);
 noteifyDiv.appendChild(NoteText);
-noteifyDiv.appendChild(StartNode);
-noteifyDiv.appendChild(EndNode);
 noteifyDiv.appendChild(StartNodeId);
-noteifyDiv.appendChild(EndNodeId);
+//noteifyDiv.appendChild(EndNodeId);
 noteifyDiv.appendChild(NoteUrl);
-noteifyDiv.appendChild(DocRevision);
+//noteifyDiv.appendChild(DocRevision);
 noteifyDiv.appendChild(theBR4);
 noteifyDiv.appendChild(submit);
 noteifyDiv.appendChild(cancel);
@@ -632,8 +634,18 @@ else {
 pickQueue && noteifyDiv.appendChild(pickQueue);
 }
 
-return noteifyDiv;
-
+ thisNode = document.getElementById(startid);
+ 
+ if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
+   thisNode.previousSibling.previousSibling.appendChild(noteifyDiv);
+ }
+ else 
+   if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
+     thisNode.previousSibling.appendChild(noteifyDiv);
+   }
+   else {
+     thisNode.appendChild(noteifyDiv);
+   }
 }
 
 function highlightWord(nodeId,word,tooltip,rtid,user) {
@@ -659,17 +671,17 @@ function highlightWord(nodeId,word,tooltip,rtid,user) {
 	paragraphString.replace(/\s+/gm,' ');
 	//alert("pString is "+paragraphString);
 	tempWordVal = word;
-	tempWordVal = tempWordVal.replace(/\)/g,'\\)');
-	tempWordVal = tempWordVal.replace(/\(/g,'\\(');
+	tempWordVal = tempWordVal.replace(/\)/g,"\\)");
+	tempWordVal = tempWordVal.replace(/\(/g,"\\(");
 	tempWordVal = tempWordVal.replace(/\b\W+\b/g,'\\W[^<>]*(?:<[^<]+>)*');
 	//tempWordVal = tempWordVal.replace(/^\\W/,'');
 	//tempWordVal = tempWordVal.replace(/\\W$/,'');
 	//tempWordVal = tempWordVal.replace(/\\W[<>^*()+\]]+$/,'');
 	tempWordVal = '('+tempWordVal+')(.*)';
 	//alert('t: '+tempWordVal);
-	var re = new RegExp(tempWordVal, 'm');
-	//dump("re is "+re+"\n");
-
+	try { var re = new RegExp(tempWordVal, 'm'); } catch (e) {};
+	//	dump("re is "+re+"\n");
+	if (re) {
 
 paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+' '+ticketObj[rtid].queue+'" id="'+node.id+'">'+"$1"+'</span>'+"$2"+'\
 <span class="annotation '+rtid+' '+ticketObj[rtid].queue+'" id="rt'+rtid+'" onmousedown="dragStart(event,\'rt'+rtid+'\')" onclick="showFull(\''+rtid+'\')" onmouseover="notemouseover('+rtid+')" onmouseout="notemouseout('+rtid+')">\
@@ -680,20 +692,32 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+' '+
 //dump("replaced on "+$&+"\n");
 //alert("pString is now "+paragraphString+"\n\n");
  loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
+}
     }
   }
 
 function getElementStyle(elem, IEStyleProp, CSSStyleProp) {
-  //  var elem = document.getElementById(elemID);
+  //  var elem = document.getElementById(elemID); // we're passing the element instead of its id
   if (elem.currentStyle) {
-    return elem.currentStyle[IEStyleProp];
+    if (elem.currentStyle[IEStyleProp] != '') {
+      return elem.currentStyle[IEStyleProp];
+    }
   } else if (window.getComputedStyle) {
     var compStyle = window.getComputedStyle(elem, "");
-    return compStyle.getPropertyValue(CSSStyleProp);
+    if (compStyle != '') {
+      return compStyle.getPropertyValue(CSSStyleProp);
+    }
+  }
+  // default to going back to yellow -- must sync with stet.css, augh, FIXME
+  if (CSSStyleProp == 'border') {
+    return '#FFFF00';
+  }
+  if (CSSStyleProp == 'background') {
+    return '#f0ecb3';
   }
   return "";
 }
-
+  
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
@@ -733,7 +757,7 @@ function showExcerpt (rtid) {
 
 function iAgree (rtid,opn) {
   myAgr = document.getElementById('agree'+rtid);
-  myAgr.setAttribute('href','');
+  myAgr.setAttribute('href','#');
   loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
   loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&amp;opn='+opn);
 }
@@ -764,7 +788,7 @@ function loginbox() {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="javascript:XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a>','login');
+	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a><br/><span id="selectsome" class="selectsome">select some text</span> and <a href="#" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
   }
   else {
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
@@ -772,7 +796,7 @@ function loginbox() {
 }
 function idLinks(cs) {
   //alert("entering idlinks");
-  try { var say = cs.getElementsByTagName('say')[0].firstChild; } catch(e) { alert(e); }
+  try { var say = cs.getElementsByTagName('say')[0].firstChild; } catch(e) { }
     var id = cs.getElementsByTagName('ci')[0].firstChild; 
     var list = cs.getElementsByTagName('l')[0].firstChild;
     var newMe = document.createElement('span');
@@ -892,6 +916,34 @@ function newQuery() {
 
 function cancelNewQuery() {
   //  loadHTMLtoDiv(status.last,'statustext');
+}
+
+function kSerialize(node) {
+  var returnme = '';
+  // really this should encompass any non-closed tag, but I'm not sure if I
+  // can generalize it without just getting a whole list.
+  if (node.nodeName.toLowerCase() == 'br') {
+    returnme += '<'+node.nodeName.toLowerCase()+'/>';
+  }
+  else if (node.nodeType == 1) {
+    returnme += '<'+node.nodeName.toLowerCase();
+    if (node.hasAttributes()) {
+      for (var attrCt = 0; attrCt < node.attributes.length; attrCt++) {
+	returnme += ' '+node.attributes[attrCt].nodeName.toLowerCase()+'="'+node.attributes[attrCt].nodeValue+'"';
+      }
+    }
+    returnme += '>';
+    if (node.hasChildNodes()) {
+      for (var nodeCt = 0; nodeCt < node.childNodes.length; nodeCt++) {
+	returnme += kSerialize(node.childNodes[nodeCt]);
+      }
+    } 
+    returnme += '</'+node.nodeName.toLowerCase()+'>';
+  }
+  else if (node.nodeType == 3) {
+    returnme += node.data;
+  }
+  return returnme;
 }
 
 //* dragging behavior courtesy of brainjar.com.  License is GPL2+
@@ -1197,3 +1249,4 @@ function hideshow(num) {
         chunk.style.display = "none";
     }
 }   
+
