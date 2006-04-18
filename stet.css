@@ -21,7 +21,6 @@
 /* License, version 3, and the GNU General Public License, version 2,     */
 /* along with this software.  If not, see <http://www.gnu.org/licenses/>. */
 
-
 body {
     font: 94% Verdana, Lucida, Helvetica, Arial, sans-serif;
 }
@@ -51,9 +50,17 @@ em.addhide {
 background: #F0ECB3;
 color: #000;
  }
-
+.box {
+	padding: 5px;
+    border-color: #8cacbb;
+    border-width: 1px;
+    border-style: solid;
+}
+.admin {
+background: #FFFFCC;
+}
 .h1 {
-font-size: 200%;
+font-size: 160%;
 font-weight: bold;
 }
 

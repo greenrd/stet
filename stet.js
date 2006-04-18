@@ -60,10 +60,11 @@ function initPage() {
     filename = 'gplv3-draft-1';
   }
 if(window.location.search.length) {
- loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
+  // loadXMLDoc('/comments/rt/xmlresults.html',window.location.search.substring(1));
+ loadXMLDoc('/comments/rt/xmlresults-devel.html',window.location.search.substring(1));
 }
  else {
-   loadXMLDoc('/comments/rt/xmlresults.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
+   loadXMLDoc('/comments/rt/xmlresults-devel.html','Query=+%27CF.NoteUrl%27+LIKE+%27'+filename+'%27+&RowsPerPage=25&Order=DESC');
  }
 }
 
@@ -185,7 +186,7 @@ function submitComment() {
   
   
 
-  var theUrl = '/comments/rt/submitcomment-devel.html'; 
+  var theUrl = '/comments/rt/submitcomment.html'; 
   //highlightWord(form.StartNode.value,form.Selection.value,noteText,'');   
   loadXMLDoc(theUrl,params);
   }
@@ -320,13 +321,13 @@ function processReqChange()
 /* 	  } */
 /*       } */
 
-/*       else if (resp_arrA = response.getElementsByTagName("agreement")) { */
-/* 	//dump("pre processAgree from"+resp_arrA[0].firstChild.data+"\n"); */
-/* 	if(resp_arrA.length > 0) { */
-/* 	  //dump("processAgree\n"); */
-/* 	  processAgreement(response); */
-/* 	} */
-/*       } */
+      else if (resp_arrA = response.getElementsByTagName("agreement")) {
+	//dump("pre processAgree from"+resp_arrA[0].firstChild.data+"\n");
+	if(resp_arrA.length > 0) {
+	  //dump("processAgree\n");
+	  processAgreement(response);
+	}
+      }
 
       else {
 	statusbox("Your search didn't return anything usable: maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+""); //debug
@@ -361,22 +362,9 @@ function processAnnotation(response) {
 	    tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
 	    
 	    ticketObj[rtid] = new Object;
-	    
-	    ticketObj[rtid].link = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
-	    
-	    /* 	  agreechild = uagr_arr[prI].firstChild.data */
-	    /* 	  agreestr = getXMLNodeSerialisation(uagr_arr[prI]); */
-	    /* 	  if ((agreechild == "agree") || (agreechild == "unagree")) { */
-	    /* 	    ticketObj[rtid].link += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | '; */
-	    /* 	    //ticketObj[rtid].agree = agreechild; */
-	    /* 	  } */
-	    /* 	  else { */
-	    /* 	    ticketObj[rtid].link += '<span id="agree'+rtid+'">'+agreestr+'</span> | '; */
-	    /* 	    //ticketObj[rtid].agree = agreestr; */
-	    /* 	  } */
-	    /* 	  if (agrtot_arr[prI].firstChild.data > 0) { */
-	    /* 	    ticketObj[rtid].link += ' [<span id="agrtot'+rtid+'">'+agrtot_arr[prI].firstChild.data+'</span> agree]'; */
-	    /* 	  } */
+
+	    ticketObj[rtid].link = makeLinkObj(rtid, uagr_arr[prI].firstChild.data, agrtot_arr[prI].firstChild.data);
+
 	    
 	    ticketObj[rtid].full = tooltipString;
 	    ticketObj[rtid].excerpt = tooltipSubString;
@@ -402,6 +390,23 @@ function processAnnotation(response) {
 	}
 }
 
+function makeLinkObj(rtid,agreement,agrtot) {
+    returnLink = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+    
+    agreechild = agreement;
+    	  agreestr = getXMLNodeSerialisation(agreement);
+    	  if ((agreechild == "agree") || (agreechild == "unagree")) {
+    	    returnLink += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreechild+'\')">'+agreechild+'</a> | ';
+    	  }
+    	  else {
+//    	    returnLink += '<span id="agree'+rtid+'"><a href="http://gplv3.fsf.org/login_form?came_from=/comments/?'+window.location.search.substring(1)+'">login</a> to agree</span> | ';
+    	  }
+    	  if (agrtot) {
+    	    returnLink += ' [<span id="agrtot'+rtid+'">'+agrtot+'</span> agree]';
+    	  }
+	  return returnLink;
+}
+
 function processAgreement(response) {
 // dump("got an agreement\n");
 	myId = response.getElementsByTagName("id")[0].firstChild.data;
@@ -410,10 +415,9 @@ function processAgreement(response) {
 	myLink = document.getElementById('agree'+myId);
 	myOpn == "agree" ? opOpn = "unagree" : opOpn = "agree";
 	loadHTMLtoDiv(opOpn,'agree'+myId,"processagreement");
-	// FIX AGREE COUNT BY INCREMENTING/DECREMENTING HERE
-	agrcount = parseInt(document.getElementById('agrtot'+myId).innerHTML);
-	myOpn == "agree" ? agrcount++ : agrcount--;
+	var agrcount = parseInt(response.getElementsByTagName("ct")[0].firstChild.data);
 	loadHTMLtoDiv(agrcount,'agrtot'+myId);
+	ticketObj[myId].link = makeLinkObj(myId,opOpn,agrcount);
 	//	myLink.innerHTML = opOpn;
 	myLink.href = 'javascript:iAgree('+myId+',\''+opOpn+'\')';
       }
@@ -642,6 +646,7 @@ paragraphString = paragraphString.replace(re,'<span class="highlight '+rtid+' '+
  loadHTMLtoDiv(paragraphString,node.id,"highlightword 742"); 
     }
   }
+
 function getElementStyle(elem, IEStyleProp, CSSStyleProp) {
   //  var elem = document.getElementById(elemID);
   if (elem.currentStyle) {
@@ -656,8 +661,10 @@ function getElementStyle(elem, IEStyleProp, CSSStyleProp) {
 function notemouseover(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
-    noteArr[i].style.prevBG=getElementStyle(noteArr[i],'background','background');
-    noteArr[i].style.prevBRD=getElementStyle(noteArr[i],'border','border');
+	noteArr[i].style.prevBG=getElementStyle(noteArr[i],'background','background');
+	noteArr[i].style.prevBRD=getElementStyle(noteArr[i],'border','border');
+	//dump('s prevBG '+noteArr[i].style.prevBG+'\n');
+	//dump('s prevBRD '+noteArr[i].style.prevBRD+'\n');
     noteArr[i].style.background="#f9f";
     noteArr[i].style.border="1px solid #f0f";
 
@@ -666,6 +673,8 @@ function notemouseover(rtid) {
 function notemouseout(rtid) {
   var noteArr = getElementsByClass(rtid);
   for (i = 0; i<noteArr.length; i++) {
+	dump('r prevBG '+noteArr[i].style.prevBG+'\n');
+	dump('r prevBRD '+noteArr[i].style.prevBRD+'\n');
     noteArr[i].style.background=noteArr[i].style.prevBG;
     noteArr[i].style.border=noteArr[i].style.prevBRD;
   }
@@ -688,9 +697,9 @@ function showExcerpt (rtid) {
 
 function iAgree (rtid,opn) {
   myAgr = document.getElementById('agree'+rtid);
-  myAgr.setAttribute('href','');
+  myAgr.setAttribute('href','#');
   loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
-  loadXMLDoc('agree.pl','rtid='+rtid+'&amp;opn='+opn);
+  loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&amp;opn='+opn);
 }
 
 function unOverlap(cls,gapDesired) {
@@ -716,7 +725,7 @@ function statusbox(text) {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('<span id="selectsome" class="selectsome">select some text</span> and <a href="#" onmousedown="XpathSel()">add a comment</a> | you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a>','login');
+	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a><br/><span id="selectsome" class="selectsome">select some text</span> and <a href="#" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
   }
   else {
     loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');

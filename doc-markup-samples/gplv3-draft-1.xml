@@ -635,14 +635,14 @@ choice.</sent>
 <section id="geolimits" name="[13.[8] Geographical Limitations">
 <title>[13.[8] Geographical Limitations</title>
 
-<p id="gpl3.libertyordeath.p0">
- <sent id="gpl3.libertyordeath.p0.s1">If the distribution and/or use of the Program is restricted in certain
+<p id="gpl3.geolimits.p0">
+ <sent id="gpl3.geolimits.p0.s1">If the distribution and/or use of the Program is restricted in certain
 countries either by patents or by copyrighted interfaces, the original
 copyright holder who places the Program under this License may add an
 explicit geographical distribution limitation excluding those countries,
 so that distribution is permitted only in or among countries not thus
 excluded.</sent>
- <sent id="gpl3.libertyordeath.p0.s2">In such case, this License incorporates the limitation as if
+ <sent id="gpl3.geolimits.p0.s2">In such case, this License incorporates the limitation as if
 written in the body of this License.]</sent>
 </p>
 </section>

@@ -21,6 +21,16 @@
 /* License, version 3, and the GNU General Public License, version 2,     */
 /* along with this software.  If not, see <http://www.gnu.org/licenses/>. */
 
+
+.plink {
+font-size: 12pt;
+color: #c8a8ff;
+}
+.plink a {
+color: #c8a8ff;
+text-decoration: none;
+}
+
 body {
     font: 94% Verdana, Lucida, Helvetica, Arial, sans-serif;
 }
@@ -37,13 +47,11 @@ em.add {
       display: inline;
  }
 
-em.delhide { 
-      display: none;
-}
 
-em.addhide { 
+.hide { 
       display: none;
  }
+
 
 .highlight { 
 background: #F0ECB3;

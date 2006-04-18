@@ -28,16 +28,17 @@
 
 function printfire(foo) {
   //  alert(foo);
-  /*   if (document.createEvent) {
+  /*       if (document.createEvent) {
     printfire.args = arguments;
     var ev = document.createEvent("Events");
     ev.initEvent("printfire", false, true);
     dispatchEvent(ev);
-    } */
+    }  */
 }
 
 // a few things need to be global
 var ticketObj = new Object;
+ticketObj.length = 0;
 var nodelist = new Object;
 var drafter = '';
 var filename;
@@ -61,9 +62,20 @@ function initPage() {
   }
 }
 function loadFromHash() { // checks the location hash for bookmarked notes to show
-  if (window.location.hash.length > 0) {
+  if ((window.location.hash.length > 0) && (window.location.hash.match(/^#\d\d\d/))) {
     getnotes(location.hash.substring(1,location.hash.length));
   } 
+  else if (window.location.hash.match(/^#all/)) {
+    loadAll()
+  }
+}
+
+function loadAll() {
+  var getUs = '';
+  for (var rtid in ticketObj) {
+    getUs += rtid+':';
+  }
+  getnotes(getUs);
 }
 // XpathSel adapted from http://www.quirksmode.org/js/selected.html
 // this is for browsers with a featureful getSelection object; others
@@ -359,33 +371,33 @@ function processReqChange()
       catch (e) {}
       try {
 	cs = response.getElementsByTagName("cs");
-	if (cs.length > 0) {
+	if (!!cs.length && (cs.length > 0)) {
 	  cstatusbox(cs[0]);
 	}
       } catch(e) {}
       resp_arrN = response.getElementsByTagName("ant");
-      if(resp_arrN.length > 0) {
+      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
 	processAnt(response);
 	did++;
       }
       resp_arrN = response.getElementsByTagName("anf");
-      if(resp_arrN.length > 0) {
+      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
 	processAnf(response);
 	did++;
       }
       resp_arrN = response.getElementsByTagName("nant");
-      if(resp_arrN.length > 0) {
+      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
 	cacheAntVals(response);
 	processAnf(response,'top');
 	did++;
       }
       resp_arrA = response.getElementsByTagName("agreement");
-      if(resp_arrA.length > 0) {
+      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
 	processAgreement(response);
 	did++;
       }
       resp_arrS = response.getElementsByTagName("sdp");
-      if(resp_arrS.length > 0) {
+      if(!!resp_arrS.length && (resp_arrS.length > 0)) {
 	processDompath(response);
 	did++;
       }
@@ -451,7 +463,7 @@ function processAnf(response,placement) {
 	try { var tooltipString = getXMLNodeSerialisation(annotations_arr[prI]); } catch(e) { };
 	if (!tooltipString) { var tooltipString = annotations_arr[prI].firstChild.data; }
 	tooltipString.length > 165 ? tooltipSubString = tooltipString.substr(0,199) + '...' : tooltipSubString = tooltipString;
-	if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; }
+	if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; ticketObj.length++;}
 	ticketObj[rtid].link = makeLinkObj(rtid, getXMLNodeSerialisation(uagr_arr[prI]), agrtot_arr[prI].firstChild.data);      
 	ticketObj[rtid].full = tooltipString;
 	//alert("setting "+rtid+" excerpt to "+tooltipSubString);
@@ -498,11 +510,48 @@ function processAnf(response,placement) {
 
 function processAnt(response) {
   currently('highlighting this page according to your query...');
-  var rtidsBySn = cacheAntVals(response);
+  var rtidsBySn;
+  var rtidsByP;
+  var rtnArray;
+  rtnArray = cacheAntVals(response);
+  rtidsBySn = rtnArray[0];
+  rtidsByP = rtnArray[1];
   highlightSelections(rtidsBySn);
+  PLinks(rtidsByP);
+  addAllLink();
   //  unOverlap("annotation",5); // thse won't overlap anymore
   currently('Ready.');
 }
+
+function addAllLink() {
+  if (ticketObj.length < 150) {
+    var sLnk = document.createElement('a');
+    sLnk.setAttribute('href','#all');
+    sLnk.setAttribute('onClick','loadAll()');
+    sLnk.appendChild(document.createTextNode('display all'));
+    document.getElementById('statustext').appendChild(document.createTextNode(' '));
+    document.getElementById('statustext').appendChild(sLnk);
+  }
+}
+function PLinks(rtidsByP) {
+  for (var p in rtidsByP) {
+    var pLnk = document.createElement('span');
+    pLnk.setAttribute('id','pLnk'+p);
+    pLnk.setAttribute('class','plink');
+    pLnk.style.display = 'none';
+    pLnk.innerHTML = '<a href="#'+p+'" title="paragraph id: #'+p+'">&para;</a>&nbsp;<a title="show all '+rtidsByP[p].length+' comments on this paragraph" href="javascript:getnotes(\''+rtidsByP[p].join(":")+'\')">&raquo;</a>';
+    document.getElementById(p).appendChild(pLnk);
+    document.getElementById(p).setAttribute('onmouseover','show("pLnk'+p+'")');
+    document.getElementById(p).setAttribute('onmouseout','hide("pLnk'+p+'")');
+  }
+}
+function show(id) {
+  document.getElementById(id).style.display = 'inline';
+}
+function hide(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
 
 function cacheAntVals(response) {
   // this used to be part of processAnt but then I needed it for process nant.
@@ -513,22 +562,27 @@ function cacheAntVals(response) {
   var rtids_arr = response.getElementsByTagName("id");
   var queues_arr = response.getElementsByTagName("qn");
   var rtidsBySn = new Object;
+  var rtidsByP = new Object;
   for (prI = 0; prI < selections_arr.length; prI++) {
     if (selections_arr[prI].firstChild) {
       rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
-      if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; }
+      if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; ticketObj.length++;}
       ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data.replace(/note\.[0-9]+\./,'');;
       ticketObj[rtid].queue = queues_arr[prI].firstChild.data;
       ticketObj[rtid].selection = selections_arr[prI].firstChild.data;
+      startp = ticketObj[rtid].startnode.replace(/.s[\d+]$/, '');
       if(!rtidsBySn[ticketObj[rtid].startnode]) {
 	rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	rtidsByP[startp] = new Array(rtid);
       }
       else {
 	rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+	rtidsByP[startp].push(rtid);
       }
     }
   }
-  return rtidsBySn;
+
+  return Array(rtidsBySn, rtidsByP);
 }
 
 function highlightSelections(rtidsBySn) {
@@ -845,7 +899,7 @@ function intense_incrWords(selecObj,rootObj) {
      // start at the object's predetermined arrayindex, and look only until you get to
      // the arrayindex + the number of words in the selection...
      var skip = 0;
-     for (var i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex; i++) {
+     for (var i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex+2; i++) {
        // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
        // my desired result
        if (rootObj[i]) {
@@ -862,8 +916,9 @@ function intense_incrWords(selecObj,rootObj) {
 	     rootObj[i].annotations.push(selecObj[j].rtid);
 	     skip++;
 	   }
-	   if (matched && ((m+1) == selecObj[j].words[k].length-1)) {
+	   if (matched && ((m+1) == selecObj[j].words[k].length)) {
 	     // ? fixme?
+	     //skip++;
 	   }
 	 }
        }
@@ -922,7 +977,7 @@ function getnotes(rtids,startid) {
     newDiv.innerHTML = '<span class="noteClose">Loading comments on this text...</span>';
     document.getElementById(startid).appendChild(newDiv);
   }
-  if(!window.location.hash.match(rtids)) {
+  if((!window.location.hash.match(rtids) && (!window.location.hash.match(/^#all/)))) {
     location.hash+=rtids+':';
   }
   loadXMLDoc('/comments/rt/getannotations.html','ids='+rtids);
@@ -1030,7 +1085,7 @@ function loginbox() {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/stet-2006-01-20.tar.gz">source</a> <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a><br/>\
+	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/source/stet-2006-03-14.tar.bz2">source</a> <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a><br/>\
 <span id="selectsome" class="selectsome">select some text</span> and <a class="fakelink" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
   }
   else {
@@ -1098,28 +1153,13 @@ function qLinks(cs) {
     newMe.appendChild(rat);
     newMe.appendChild(document.createElement('br'));
     newMe.appendChild(document.createTextNode('(found '+t.data+': click highlights to show.) ')); // , showing '+rng.data));
-    /* if (pr || nx) { newMe.appendChild(document.createTextNode(': ')); }
-    if(pr) { 
-    pLnk = document.createElement('a');
-    pLnk.setAttribute('href',pr.data);
-    pLnk.appendChild(document.createTextNode('prev'));
-    newMe.appendChild(pLnk);
-    }
-    if (pr && nx) {
-      newMe.appendChild(document.createTextNode(' | '));
-    }
-    if (nx) {
-    nLnk = document.createElement('a');
-    nLnk.setAttribute('href',nx.data);
-    nLnk.appendChild(document.createTextNode('next'));
-    newMe.appendChild(nLnk);
-    }
-
-    newMe.appendChild(document.createTextNode(') '));
-    */
-    sLnk = document.createElement('a');
-    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
-    sLnk.appendChild(document.createTextNode('search'));
+ 
+    sLnk = document.createElement('span');
+    sLnk.setAttribute('id','searchlink');
+    sLnkA = document.createElement('a');
+    sLnkA.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
+    sLnkA.appendChild(document.createTextNode('search'));
+    sLnk.appendChild(sLnkA)
     newMe.appendChild(sLnk);
 
     st = document.getElementById('statustext');
@@ -1139,8 +1179,8 @@ function cstatusbox(cs) {
   loginbox();
 }
 function deParen(str) {
-  str = str.replace(/\(/g,'$1\\(');
-  str = str.replace(/\)/g,'$1\\)');
+  str = str.replace(/[\\]*\(/g,'\\(');
+  str = str.replace(/[\\]*\)/g,'\\)');
   return str;
 }
 
@@ -1351,15 +1391,15 @@ var END_OF_INPUT = -1;
 var base64Str;
 var base64Count;
 var base64Chars = new Array(
-			    'A','B','C','D','E','F','G','H',
-			    'I','J','K','L','M','N','O','P',
-			    'Q','R','S','T','U','V','W','X',
-			    'Y','Z','a','b','c','d','e','f',
-			    'g','h','i','j','k','l','m','n',
-			    'o','p','q','r','s','t','u','v',
-			    'w','x','y','z','0','1','2','3',
-			    '4','5','6','7','8','9','+','/'
-			    );
+'A','B','C','D','E','F','G','H',
+'I','J','K','L','M','N','O','P',
+'Q','R','S','T','U','V','W','X',
+'Y','Z','a','b','c','d','e','f',
+'g','h','i','j','k','l','m','n',
+'o','p','q','r','s','t','u','v',
+'w','x','y','z','0','1','2','3',
+'4','5','6','7','8','9','+','/'
+);
 
 var reverseBase64Chars = new Array();
 for (var i=0; i < base64Chars.length; i++){

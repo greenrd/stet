@@ -32,16 +32,16 @@
       <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title><xsl:value-of select="//head/title"/></title>
-        <script type="text/javascript" src="stet.js"/>
+        <script type="text/javascript" src="stet-intense-shorter.js"/>
 	<script type="text/javascript" language="javascript">
 window.onload = initPage();
 </script>
 
-        <link rel="stylesheet" type="text/css" href="stet.css"/>
+        <link rel="stylesheet" type="text/css" href="stet-ie.css"/>
       </head>
       <body onkeypress="checkKeyPressed(event);" bgcolor="#FFFFFF">
 <div id="topbar" class="topbar">
-<span id="statustext" class="statustext">Loading comments.  If you're still reading this after about 15 seconds, we do not completely support your browser yet.  We abjectly apologize for not yet supporting Konqueror, and thank you for your continued patience.  If you don't mind clicking through a bunch of javascript alerts, you could <a href="http://gplv3.fsf.org/comments/konqueror">peek at our Konqueror progress</a>.  You'll still need to <a href="/comments/email.html">email your comments</a> instead, or try another recent Gecko-based browser.  But you can <a href="http://gplv3.fsf.org/comments/rt/readsay.html?Query=%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC">browse</a> and <a href="http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=rt/readsay.html">search</a> comments on any browser.</span>	  <span id="querydiv" style="display:none"></span>
+<span id="statustext" class="statustext">Loading comments.  Please be patient: this can take a little while.  If nothing has shown up after about 15-30 seconds (Konqueror, IE), try reloading.  In the event of continued failures, you will probably need to <a href="/comments/email.html">email your comments</a> instead.   You can <a href="http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=readsay.html">search</a> and <a href="http://gplv3.fsf.org/comments/rt/readsay.html?Query=%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC">browse</a> comments on any browser.</span><span id="querydiv" style="display:none"></span>
 	  <span id="login" class="login"></span>
 </div>
       <div class="portlet" id="portlet-dogear">

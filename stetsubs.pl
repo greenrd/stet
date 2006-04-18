@@ -1,4 +1,4 @@
-# Copyright (C) 2005   Software Freedom Law Center, Inc.
+# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
 # Author: Orion Montoya <orion@mdcclv.com>
 #
 # This software gives you freedom; it is licensed to you under version
@@ -118,7 +118,7 @@ sub getUser($) {
 # authorized users get privileges
     if ($resp == 1) {
 	$CurrentUser->LoadByName($name);
-	print STDERR "current $resp a user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
+#	print STDERR "current $resp a user is ".$CurrentUser->id."(".$CurrentUser->Name.")\n";
     }
     if (($resp ==1) && (!$CurrentUser->id)) {
 	my ($val, $msg) = createUser($name,$pass);
@@ -161,6 +161,19 @@ sub longOrg ($) {
     }
 }
 
+sub longOrgTxt ($) {
+    my $user = shift;
+    if ($user->Organization) {
+	if ($user->Organization =~ /[A-Z]/) {
+	    $X = $user->Organization;
+	    return " (of Committee $X) ";
+	}
+	else {
+	    return " (".$user->Organization.") ";
+	}
+    }
+}
+
 sub createUser($$) {
 my $name = shift;
 my $pass = shift;
@@ -168,7 +181,7 @@ my $UserObj = RT::User->new(RT::CurrentUser->new('RT_System'));
 our $server;
 my $email = '';
 
-    eval{ $email = $server->call('getEmail',$name) };
+eval{ $email = $server->call('getEmail',$name) };
 
 if ($email) { print STDERR "got email $email\n"; }
 else { $email = $name; }
@@ -219,7 +232,7 @@ sub humanQuery {
 # {{{ sub myCFValueUpdater 
 
 sub myCFValueUpdater {
-	    print STDERR "stetsubs.pl 157\n";
+#	    print STDERR "stetsubs.pl 157\n";
     my %args = (
         ARGSRef => undef,
         @_
@@ -237,7 +250,7 @@ sub myCFValueUpdater {
 
             # For each of those tickets, find out what custom fields we want to work with.
             $custom_fields_to_mod{$1}{$2} = 1;
-	    print STDERR "Web.pm 1059 ticket $1 field $2\n";
+#	    print STDERR "Web.pm 1059 ticket $1 field $2\n";
         }
     }
 
