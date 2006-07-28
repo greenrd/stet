@@ -21,6 +21,15 @@
 /* License, version 3, and the GNU General Public License, version 2,     */
 /* along with this software.  If not, see <http://www.gnu.org/licenses/>. */
 
+.plink {
+font-size: 80%;
+color: #c8a8ff;
+}
+.plink a {
+color: #c8a8ff;
+text-decoration: none;
+}
+
 body {
     font: 94% Verdana, Lucida, Helvetica, Arial, sans-serif;
 }
@@ -37,33 +46,27 @@ em.add {
       display: inline;
  }
 
-em.delhide { 
-      display: none;
-}
 
-em.addhide { 
+.hide { 
       display: none;
  }
 
-.highlight { 
 
+.highlight { 
 background: #F0ECB3;
 color: #000;
  }
-.box {
-	padding: 5px;
-    border-color: #8cacbb;
-    border-width: 1px;
-    border-style: solid;
-}
-.admin {
-background: #FFFFCC;
-}
-.h1 {
-font-size: 160%;
-font-weight: bold;
+
+.fakelink {
+text-decoration: underline;
+color: blue;
 }
 
+.h1 {
+font-size: 180%;
+font-weight: bold;
+}
+/* 
 .a1 {
 background: #FFFFCC;
 }
@@ -76,80 +79,180 @@ background: #FFFF66;
 
 }
 .a4 {
-background: #FFFF33;
+background: #EEF341;
 
 }
 .a5 {
-background: #FFFF00;
+background: #F3F02C;
 
 }
 .a6 {
-background: #FFCC66;
-
+background: #F8ED17;
 }
 .a7 {
-background: #FC3;
+background: #FFEB0A;
 
 }
 .a8 {
-background: #FC0;
+background: #FFDA11;
 
 }
 .a9 {
-background: #F96;
+background: #FFC918;
 
 }
 .a10 {
-background: #F93;
+background: #FFB81F;
 
 }
 .a11 {
-background: #F90;
+background: #FFA726;
 
 }
 .a12 {
-background: #F66;
+background: #F88B0B;
 
 }
 .a13 {
-background: #F63;
+background: #F28309;
 
 }
 .a14 {
-background: #F60;
+background: #EC7B07;
 }
 .a15 {
-background: #F36;
+background: #E67305;
 }
 .a16 {
-background: #F33;
+background: #E06B03;
 }
 .a17 {
-background: #F30;
+background: #E15202;
 }
 .a18 {
-background: #F06;
+background: #E74202;
 }
 .a19 {
-background: #F03;
+background: #ED3202;
 }
 .a20 {
-background: #F00;
+background: #F32202;
 }
 .a21 {
-background: #C00;
+background: #F91202;
+color: #FFF;
+}
+.a22 {
+background: #F00;
 color: #FFF;
 }
 .a22 {
 background: #900;
 color: #FFF;
 }
-.a22 {
+.a23 {
 background: #600;
 color: #FFF;
 }
-.a23 {
+.a24 {
 background: #300;
+color: #FFF;
+}
+*/
+
+.a1 {
+background: #FFFdc5;
+}
+.a2 {
+background: #fff09a;
+
+} 
+.a3 {
+background: #FFFF66;
+
+}
+.a4 {
+background: #ffe26f;
+
+}
+.a5 {
+background: #ffd441;
+
+}
+.a6 {
+background: #ffc614;
+}
+.a7 {
+background: #ffb600;
+
+}
+.a8 {
+background: #ffa800;
+
+}
+.a9 {
+background: #ff9900;
+
+}
+.a10 {
+background: #ff8b00;
+
+}
+.a11 {
+background: #ff7b00;
+
+}
+.a12 {
+background: #ff6500;
+
+}
+.a13 {
+background: #ff5100;
+
+}
+.a14 {
+background: #ff3d00;
+}
+.a15 { 
+background: #ff0c00;
+}
+.a16 {
+background: #f80000;
+}
+.a17 {
+background: #dc0000;
+color: #FFF;
+}
+.a18 {
+background: #c00000;
+color: #FFF;
+}
+.a19 {
+background: #9c0000;
+color: #FFF;
+}
+.a20 {
+background: #7f0000;
+color: #FFF;
+}
+.a21 {
+background: #640000;
+color: #FFF;
+}
+.a22 {
+background: #480000;
+color: #FFF;
+}
+.a22 {
+background: #2c0000;
+color: #FFF;
+}
+.a23 {
+background: #180000;
+color: #FFF;
+}
+.a24 {
+background: #000;
 color: #FFF;
 }
 
@@ -284,7 +387,7 @@ background: #dee7ec;
 background: #dee7ec;
 color: #000;
 /*  background: transparent; */
-float: left;
+float: left; 
 /* width: 70%; */
 }
 .login {
@@ -301,21 +404,17 @@ color: #000;
  }
 
 #maintext { 
-/* 	float:left; */
-	margin-left: 3em;
+ 	margin-left: 3em; 
         margin-top: 2em;
-/*         float: left;  */
         width: 50%;
 	color: #000;
  }
 
 #readsaymain {
-	margin-left: 3em;
         margin-top: 2em;
-        float: left;
         width: 80%;
 }
-::-moz-selection{
+/* ::-moz-selection{
         background:#f1efb9;
         color:#000;
 }
@@ -334,7 +433,7 @@ color: #000;
         background: #AF0078;
         color:#fff;
 }
-
+*/
 .noteify { 
 font-size: smaller;
 left: 55%;
@@ -354,22 +453,29 @@ left: 55%;
 width: 40%;
 border: 1px solid #FFFF00;
 background: #f0ecb3;
-
  }
+
+/* .newannotation:hover {
+background: #f0f;
+} */
 .notegroup {
 position: absolute;
 left: 55%;
+width: 90%;
+clear: right;
+}
+body:last-child .notegroup {
 width: 40%;
 }
 .newannotation { 
 font-size: 10pt;
+/* fontSize: 10pt; */
 color: #000;
 width: 100%;
-position: inline;
+/* position: inline; */
 font-weight: normal;
-border: 1px dashed #EEE;
-/* background: #F0ECDF; */ /* f0ecb3; */
-background: #F5F5F5;
+border: 1px dashed #DDD;
+background: #F5F5F5; 
 
 }
 
@@ -440,7 +546,7 @@ color: #555;
 }
 
 .indent {
-margin-left: 4em;
+margin-left: 4em; 
 }
 
 .TktLabel {
@@ -472,7 +578,6 @@ color: #777;
     padding: 0;
     z-index: 1;
     border: none;
-    float: none;
 }
 
 #portlet-dogear .portletBody {
@@ -544,11 +649,11 @@ color: #777;
     color: #436976;
 }
 
-#portal-globalnav li a:hover {
+ #portal-globalnav li a:hover {
     background-color: #dee7ec;
     border-color: #8cacbb;
     color: #436976;
-}
+} 
 
 #portal-personaltools {
     /* Bar with personalized menu (user preferences, favorites etc) */
@@ -571,25 +676,24 @@ color: #777;
 
 .formHelpIsh {
 font-size: 90%; 
-/* color: red; */
 font-weight: bold;
-/* text-decoration: blink; */
 margin: 0 0 0.2em 0;
 }
 
+.selfdoc {
+background: #ddd;
+border: 1px solid #999;
+padding: 0em 2em 0em 2em;
+margin-bottom: 2em;
+}
 .date {
 font-size: 90%;
 font-weight: normal;
 color: #5F5F5c;
 }
-
-/* .formHelpIsh:hover {
-     color: #000;
-     cursor: default;
-} */
 #portal-personaltools .portalUser {
     background: transparent url(http://gplv3.fsf.org/user.gif) center left no-repeat;
-    padding-left: 15px;
+    padding-left: 15px; 
 }
 
 #portal-personaltools .portalNotLoggedIn {
