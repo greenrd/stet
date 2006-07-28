@@ -21,7 +21,6 @@
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
-%
 % sub displayTicket($$$);
 %
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -29,6 +28,32 @@
 <head>
 <title>read GPLv3 comments: <% humanQuery($ARGS{'Query'}) || $ARGS{'id'} %></title>
 <link rel="stylesheet" type="text/css" href="/comments/stet.css" />
+<script type="text/javascript" src="/comments/prototype.js"></script>
+<script type="text/javascript">
+function hideall(class) {
+var sc = document.getElementsByClassName(class);
+sc.length.times(function(n) {
+Element.hide(sc[n]);
+});
+
+}
+function showall(class) {
+var sc = document.getElementsByClassName(class);
+sc.length.times(function(n) {
+Element.show(sc[n]);
+});
+}
+function togExp(el) {
+if (el.innerHTML.indexOf('collapse') != -1) {
+el.innerHTML = "expand children";
+el.setAttribute('onclick',"showall('child'); togExp(this); return false;");
+}
+else {
+el.innerHTML = "collapse children";
+el.setAttribute('onclick',"hideall('child'); togExp(this); return false;");
+}
+}
+</script>
 </head>
 <body>
 <div id="topbar" class="topbar">
@@ -58,14 +83,14 @@ Showing comments <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<%
     }
 </%perl>
 % } elsif ($Ticket) {
-Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $Ticket->FirstCustomFieldValue('NoteStartNodeId') %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
+Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $ARGS{'id'} %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
 % }
 % if ($name) {
 </span><span id="login" class="login">you are <% $name %>: <a href="http://gplv3.fsf.org/logout">logout</a></span></div>
 % } else {
 </span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/readsay.html?<% $Tickets ? 'Query='.$ARGS{'Query'} : 'id='.$ARGS{'id'} %>">login</a></span></div>
 % }
-<& header-devel.html, name => $name &>
+<& header.html, name => $name &>
 <div id="readsaymain">
 <span id="listactions">
 <& Elements/ListActions, actions => \@results &>
@@ -87,9 +112,19 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 % my $item = $$itemref;
 % my $showactions = shift;
 % my $deletelink = shift;
+% if (!$deletelink) {
+%  if ($resp == 1) {
+    <form action="readsay-devel.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
+       <input type="hidden" name="id" value="<% $item->id %>">
+%  }
+% }
+
 % if ($item->QueueObj->CurrentUserHasRight('SeeQueue')) {
- <div class="onecomment">
-  <h4><% thingType(\$item) %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
+ <div class="onecomment<% ($item->QueueObj->Name =~ /Drafter/) && " Drafter" %><% $deletelink && " child\" id=\"child".$item->id |n %>">
+  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
+%  if ($item->Queue == $fsfqueue) {
+<div class="admin">This issue has been escalated to the Drafters <!-- by fixme --> </div>
+%  }
 %      if (($HasIssueRights) && ($showactions) && ($deletelink)) {
             <span class="TktInput">[dissociate: <INPUT TYPE=CHECKBOX NAME="<% $deletelink %>" value="1">]</span>
 %      }
@@ -110,6 +145,7 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
     <span class="formHelpIsh">In section: <span class="nodeLink"><a href="/comments/rt/readsay.html?Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span></span><br/>
 %#    In section: <span class="nodeLink"><a href="/comments/<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>?Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span><br/>
   <span class="formHelpIsh">Submitted by: <% userlink(\$item, \$item) |n%> <span class="date">on <% doDate(\$item) %></span></span><br/>
+<% listAgree(\$item) %>
 %# my ($agrees,$agr_count) = showAgree(\$item);
 %# print STDERR "agree is $agree\n";
 %#  <% $agree |n %><br/>
@@ -117,32 +153,29 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 %#  comments:<br/> 
 <br/>
 <% getThread(\$item) |n %>
+<br/><strong><a href="#" onclick="hideall('child'); togExp(this); return false;">collapse children</a></strong><br> 
 
 %   if ($item->Members->GotoFirstItem) {
         <em>this <% thingType(\$item) %> does not have any children </em><br/>
 %   }
 <br/>
 %   while (my $link = $item->Members->Next) {
-    <span class="TktLabel">Child comment of <% $item->id %>:</span>
+    <span class="TktLabel">Child comment of <% $item->id %>: <a href="#" onclick="javascript:Element.toggle(document.getElementById('child<% $link->BaseURI->Object->id %>'));return false;"><% $link->BaseURI->Object->id %>: <% $link->BaseURI->Object->Subject %> &plusmn;</a></span><br/>
 %    my $child = RT::Ticket->new($CurrentUser);
 %    $child->Load($link->BaseURI->Object->id);
-% my $deletelink = "DeleteLink-". $link->Base ."-". $link->Type;
+% my $deletelink = "DeleteLink-". $link->Base ."-". $link->Type."-";
 <% displayTicket(\$child,$showactions,$deletelink) %>
 %   }
-
+<br/>
 %  if (($HasIssueRights) && ($showactions) && (!$deletelink)) {
 <br/>
   <span class="TktLabel">Children:</span><br/>
         <span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
 % if (($showactions) & (!$deletelink)){
-%  if ($resp == 1) {
-    <form action="readsay.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
-       <input type="hidden" name="id" value="<% $item->id %>">
-%  }
-
+<br/>
 %  if ($HasIssueRights) {
-    <span class="TktLabel">Parents:</span>
+    <span class="TktLabel">Parents:</span><br/>
        <span class="TktInput indent">add new: <INPUT NAME="<% $item->id %>-MemberOf"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
     <br/>
@@ -154,7 +187,7 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
 %   while (my $link = $item->RefersTo->Next) {
         <A HREF="<% $link->Target %>"><% $link->Target %></A>
 %	if ($HasIssueRights) {
-            <span class="TktInput">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink-<% $link->Base %>-<% $link->Type %>" value="1">]</span>
+            <span class="TktInput">[delete: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Base %>-<% $link->Type %>" value="1">]</span>
 %	    }
  <br/>
 %   }
@@ -194,11 +227,14 @@ Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARG
         <option value="" <% !$selected && 'SELECTED' %>><&|/l&>(no value)</&></option>
       </select><br/></span>
 %
-%  if (($HasIssueRights) && ($item->Queue != $issuequeue)) {
-       <input type="checkbox" value="1" name="MakeIssue"/><span class="TktLabel"> Upgrade this to an Issue</span><br/>
+%  if (($HasIssueRights) && ($item->Queue != ($issuequeue || $fsfqueue ))) {
+       <input type="checkbox" value="1" name="MakeIssue"/><span class="TktLabel"> Upgrade this Comment to an Issue</span><br/>
+
 %  }
-%  if (($HasIssueRights) && ($item->Queue == $issuequeue)) {
-    <input type="checkbox" value="1" name="NonIssue"/><span class="TktLabel"> Downgrade this Issue to a Comment</span><br/>
+%  if (($HasIssueRights) && ($item->Queue == ($issuequeue || $fsfqueue))) {
+<div class="admin box">
+       <input type="radio" value="Escalated" name="ChangeQueue"/><span class="TktLabel"> Escalate this for FSF review (intentionally hard to undo)</span><br/>
+    <input type="radio" value="Inbox" name="ChangeQueue"/><span class="TktLabel"> Downgrade this Issue to a Comment</span></div>
 %  }
 % if ($item->OwnerObj->Name =~ "Nobody") {
  <input type="checkbox" name="Take" value="Take"> <span class="TktLabel">Take personal ownership of this ticket</span><br/>
@@ -242,6 +278,7 @@ use HTML::Scrubber;
 our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
 require "/var/www/stet/stetsubs.pl";
 our $issuequeue = 5; 
+our $fsfqueue = 6;
 my $rc = 0;
 our ($name, $resp, $CurrentUser, $HasIssueRights);
 my ($pass, $agr_vals, $thing);
@@ -272,8 +309,8 @@ elsif ($ARGS{'id'}) {
     if ($ARGS{'MakeIssue'}) {
 	$Ticket->SetQueue($issuequeue);
     }
-    if ($ARGS{'NonIssue'}) {
-	$Ticket->SetQueue('Inbox');
+    if ($ARGS{'ChangeQueue'}) {
+	$Ticket->SetQueue($ARGS{'ChangeQueue'});
     }
 
     foreach my $result (@msgresults,@linkresults,@cfresults) {
@@ -301,10 +338,13 @@ sub thingType($) {
     my $itemref = shift;
     my $item = $$itemref;
 if ($item->Queue == 5) {
-    return "issue";
+    return "Issue";
+}
+elsif ($item->Queue == 6) {
+    return "Escalated Issue";
 }
 else {
-    return "comment";
+    return "Comment";
 }
 }
 
@@ -343,14 +383,14 @@ sub getThread($) {
 #			     $cont = $scrubber->scrub($cont);
 #			 }
 		
-		$allcomments .= "<span class=\"formHelpIsh\">Comment noted by ". userlink(\$item,\$message) ." <span class=\"date\">on ".doDate(\$message).":</span></span></span>\n";		
+		$allcomments .= "<span class=\"formHelpIsh\">noted by ". userlink(\$item,\$message) ." <span class=\"date\">on ".doDate(\$message).":</span></span></span>\n";		
 		$allcomments .= "<blockquote><h4>$subj</h4>\n".$cont."</blockquote>\n";
 
 #	    $allcomments .= "</blockquote>";
 	    }
 	}
 	    else {
-		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId")) {
+		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId|Agreeer")) {
 	       
 		    $allcomments .= "<div class=\"formHelpIsh\">".$Transaction->BriefDescription." by ".userlink(\$item,\$Transaction)." <span class=\"date\">on ".doDate(\$Transaction)."</span></div>\n";
 		}
@@ -367,12 +407,7 @@ sub userlink($$) {
     my $item = $$itemref;
     my $msgref = shift;
     my $message = $$msgref;
-    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a></span>";
-}
-
-sub formatTransaction($) {
-## this should handle 
-
+    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a>". longOrg($message->CreatorObj)."</span>";
 }
 
 sub doDate($) {
@@ -382,7 +417,8 @@ sub doDate($) {
     return  "$1 at $2 ". getTZ($item->Created);
 }
 
-sub getTZ($) {
+sub getTZ($) {  # RT doesn't store dates with timezones.  
+# this implementation is somehow wrong, though...
 my $date = shift;
 $date =~ s/\d\d\d\d-(\d\d)-\d\d.*/$1/;
 my $eastern = "EST";
@@ -395,6 +431,20 @@ if ($date > 10) {  # after the end of October...
 
 return $eastern;
 }
+
+sub listAgree($) {
+    my $item = shift;
+    my $agr_vals;
+    my $showagree = '';	
+    $agr_vals = $$item->CustomFieldValues(7);
+    while (my $value = $agr_vals->Next) {
+	$showagree .= $value->Content.", ";
+    }
+    $showagree =~ s/\n,/,/g;
+    $showagree =~ s/, $//g;
+    return $agr_vals->Count. " agree: ".$showagree;
+}
+
 
 </%INIT>
 <%ARGS>

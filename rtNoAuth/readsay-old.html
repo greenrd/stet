@@ -21,7 +21,6 @@
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %#  
-%
 % sub displayTicket($$$);
 %
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -58,7 +57,7 @@ Showing comments <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<%
     }
 </%perl>
 % } elsif ($Ticket) {
-Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $Ticket->FirstCustomFieldValue('NoteStartNodeId') %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
+Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $ARGS{'id'} %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
 % }
 % if ($name) {
 </span><span id="login" class="login">you are <% $name %>: <a href="http://gplv3.fsf.org/logout">logout</a></span></div>

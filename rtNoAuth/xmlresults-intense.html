@@ -21,7 +21,6 @@
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
-%
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 %
 <response>
@@ -33,7 +32,7 @@
 <q><% humanQuery($ARGS{'Query'}) |n %></q>
 <r><% $rsslink %></r>
 <l><% $listlink %></l>
-<ra>http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80</ra>
+<ra>http://gplv3.fsf.org/comments/<% $filename %>?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'<% $filename %>'%20&amp;Order=DESC&amp;OrderBy=id&amp;StartAt=1&amp;Rows=80</ra>
 <t><% $Tickets->CountAll()%></t>
 <rng><% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %></rng>
 %   if ($Tickets->CountAll() > $Rows) {
@@ -84,7 +83,7 @@
 % }
 % }
 % else {
-<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search again</a> </cs>
+<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=<% $filename %>">search again</a> </cs>
 % }
 </response>
 %
@@ -159,4 +158,5 @@ $Rows => 30
 $StartAt => 1
 $Order => 'DESC'
 $Query => "'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'";
+$filename => 'gplv3-draft-1';
 </%ARGS>

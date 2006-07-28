@@ -24,59 +24,120 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
 <sdp>
-% if ($matched > 1) {
-    <nf>too many results</nf>
-% } elsif ($dompath) {
+% if ($dompath) {
     <dp><% $dompath %></dp>
     <sl><% $selection %></sl>
     <si><% $startid %></si>
     <fn>gplv3-draft-1</fn>
 % } else {
-    <nf>not found: <% $selection %></nf>
+    <nf>not found</nf>
 % }
 </sdp>
 </response>
 <%INIT>
-use XML::DOM;
-use XML::DOM;
+use XML::Twig;
+require "/var/www/stet/stetsubs.pl";
 
-my $parser = new XML::DOM::Parser;
-my $doc = $parser->parsefile ("/var/www/stet/gplv3-draft-1.xml");
+use Data::Dumper;
 
-my $nodes = $doc->getElementsByTagName("sent");
-my $n = $nodes->getLength;
+my $mastertext = '/var/www/stet/gplv3-draft-1.xml';
+open(XML,$mastertext);
+# my $wholefile;
+our ($dompath, $startid, $matched, $notesubj, $ticket_body, $form, $wholefile); # = 0;
+while (<XML>) {
+    $wholefile .= $_;
+}
 
-$selection =~ s/\x00$//;
-#print STDERR "selection is ";
-#foreach my $char (split(//,$selection)) {
-#    printf STDERR ( "%02X ", ord($char) );
-#}
-#print STDERR "\n";
-#$selection = "software are designed";
-our ($dompath, $startid, $matched, $notesubj, $ticket_body, $form, $wholefile) = 0;
-for (my $i = 0; $i < $n; $i++)
-{
-    my $node = $nodes->item($i);
-    my $sent = $node->toString;
-    $sent =~ s/\s+/ /g;
-    $selection =~ s/\s+/ /g;
-    if ($sent =~ m/.*$selection.*/) {
-#	print STDERR "MATCHED $sent\n";
-	$matched++;
-	$startid = $node->getAttribute('id');
-	$dompath = $node->getParentNode->getParentNode->getParentNode->getNodeName;
-	$dompath .= "/".$node->getParentNode->getParentNode->getNodeName;
-	$dompath .= "[id=".$node->getParentNode->getParentNode->getAttributeNode('id')->getValue."]/";
-	$dompath .= $node->getParentNode->getNodeName;
-	$dompath .= "[id=".$node->getParentNode->getAttributeNode('id')->getValue."]/";
-	$dompath .= $node->getNodeName."[id=".$node->getAttributeNode('id')->getValue."]"; 
-	
+our $selection = $ARGS{'selection'};
+$wholefile =~ s/\s+/ /g;
+my @matchcount = $wholefile =~ m/$selection/g;
+unless ($#matchcount > 1) {
+    my $twig= new XML::Twig(TwigHandlers => { 'sent' => \&sentence, 'title', \&title },
+			    TwigRoots    => {body => 1});
+    $twig->parsefile($mastertext);    # parsing also looks for matches
+}
+else {  $matched = 100; }
+if ($matched < 1) {
+    &noMatch;
+}
+elsif ($matched == 1) {
+#    print "notesubj is: $notesubj\ntkt_body is:\n$ticket_body\n\n";
+    &oneMatch;
+}
+elsif ($matched > 1) {
+    &manyMatches; 
+}
+
+sub sentence {
+
+    if ($selection) {
+	my ($twig, $sent) = @_;
+	my $sent_txt = $sent->text;
+	our $msg;
+	$sent_txt =~ s/\s+/ /g;
+#     $sent_txt =~ s/\(/\\(/g;
+#     $sent_txt =~ s/\)/\\)/g;
+#	print "s: $sent_txt\n";
+#	print "sent_txt is ".$sent_txt."\n";
+	print STDERR "$sent_txt =~ $selection\n";
+	if ($sent_txt =~ /$selection/s) {
+print STDERR "got a match\n";
+	    $startid = $sent->att('id');
+	    $dompath = $sent->parent->parent->parent->name."/".$sent->parent->parent->name."[id=".$sent->parent->parent->id."]/".$sent->parent->name."[id=".$sent->parent->id."]/".$sent->name."[id=".$sent->id."]"; 
+	    print STDERR "dompath is $dompath\n";
+	    $matched++;
+	    $form = &offerTicket;
+#	    my $CurrentUser = getEmailUser($msg->header->{'from'});
+	} 
     }
 }
 
-#print $startid."\n".$dompath."\n";
- # Avoid memory leaks - cleanup circular references for garbage collection
- $doc->dispose;
+sub title {
+    if ($selection) {
+	my ($twig, $title) = @_;
+	my $title_txt = $title->text;
+	$title_txt =~ s/\n/ /g;
+	print STDERR "$title_txt =~ $selection\n";
+	if ($title_txt =~ /$selection/s) {
+print STDERR "got a match\n";
+	    our $startid = $title->parent->att('id');
+	    our $dompath = $title->parent->parent->name."[id=".$title->parent->parent->id."]/".$title->parent->name."[id=".$title->parent->id."]/".$title->name."[id=".$title->id."]";
+	    print "matched \"$selection\" in $startid\n (context: $dompath)\n";
+	    $matched++;
+	    our $form = &offerTicket;
+#	    my $CurrentUser = getEmailUser($msg->header->{'from'});
+	} 
+    }
+}
+
+sub offerTicket {
+    $form = <<"EOT";
+EOT
+    return $form;
+}
+sub noMatch {
+#print "no match: $selection\n";
+#    print "sending to $addr";
+#    sendMail("/var/www/stet/email-reply-template-notfound.txt",$addr);
+}
+
+sub oneMatch {
+#    print "matched: $selection\n";
+#    print "sending to $addr";    
+#    sendMail("/var/www/stet/email-reply-template-created.txt",$addr);
+}
+
+sub manyMatches {
+#    print "sending to $addr";
+#    sendMail("/var/www/stet/email-reply-template-toomany.txt",$addr);
+}
+
+  print STDERR <<"EOT";
+     <dp>$dompath</dp>
+     <sl>$selection</sl>
+    <si>$startid</si>
+     <fn>gplv3-draft-1</fn>
+EOT
 
 $r->content_type('text/xml');
 </%INIT>

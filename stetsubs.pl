@@ -140,7 +140,7 @@ sub getUser($) {
 sub shortOrg ($) {
     my $user = shift;
     if ($user->Organization) {
-	if ($user->Organization =~ /[A-Z]/) {
+	if ($user->Organization =~ /^[A-Z]$/) {
 	    return " (of ".$user->Organization.") ";
 	}
 	else {
@@ -151,7 +151,7 @@ sub shortOrg ($) {
 sub longOrg ($) {
     my $user = shift;
     if ($user->Organization) {
-	if ($user->Organization =~ /[A-Z]/) {
+	if ($user->Organization =~ /^[A-Z]$/) {
 	    $X = $user->Organization;
 	    return " (of Committee <a href=\"http://gplv3.fsf.org/comments/rt/readsay.html?Query='CF.DiscussionGroup'%20LIKE%20'".$X."'\">".$X."</a>) ";
 	}
@@ -164,7 +164,7 @@ sub longOrg ($) {
 sub longOrgTxt ($) {
     my $user = shift;
     if ($user->Organization) {
-	if ($user->Organization =~ /[A-Z]/) {
+	if ($user->Organization =~ /^[A-Z]$/) {
 	    $X = $user->Organization;
 	    return " (of Committee $X) ";
 	}

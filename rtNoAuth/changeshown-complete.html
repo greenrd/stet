@@ -44,12 +44,13 @@
 % my $qs;
 % if (!$ARGS{'came_from'}) {
 % $qs = $ENV{'HTTP_REFERER'};
-% $qs =~ s/(.*)\?.*/$1/;
-% $qs =~ s/.*\/(.*)/$1/;
 % } else {
 % $qs = $ARGS{'came_from'};
 % }
+% $qs =~ s/(.*)\?.*/$1/;
+% $qs =~ s/.*\/(.*)/$1/;
 % $qs =~ s/(.html|.xml)$//;
+% $came_from = $qs;
 <h3 class="searchheader">Search for comments on <% $qs %></h3>
 <input type=hidden name="came_from" value="<% $came_from %>">
 <table>
@@ -204,27 +205,50 @@ Filename commented on
 
 
 <tr><td class=label align="right">
-Section id
+Section
 </td>
 <td>
 <SELECT NAME ="&#39;CF.NoteStartNodeId&#39;Op">
 <OPTION VALUE="LIKE"
->contains</OPTION>
+>is</OPTION>
 <OPTION VALUE="NOT LIKE"
 >doesn&#39;t contain</OPTION>
-<OPTION VALUE="="
+<!-- <OPTION VALUE="="
 >is</OPTION>
 <OPTION VALUE="!="
 >isn&#39;t</OPTION>
 <OPTION VALUE="&lt;"
 >less than</OPTION>
 <OPTION VALUE="&gt;"
->greater than</OPTION>
+>greater than</OPTION> -->
 </SELECT>
 </td>
 <td>
-<input name="ValueOf&#39;CF.NoteStartNodeId&#39;" size="20">
-</td></tr>
+<!-- <input name="ValueOf&#39;CF.NoteStartNodeId&#39;" size="20"> -->
+<select name="ValueOf&#39;CF.NoteStartNodeId&#39;" id="simplepicker">
+<option selected value="">-</option>
+<option value="gpl3.preamble">Preamble</option>
+<option value="gpl3.definitions">0. Definitions</option>
+<option value="gpl3.sourcecode">1. Source Code</option>
+<option value="basicperms">2. Basic Permissions</option>
+<option value="gpl3.drm">3. Digital Restrictions Management</option>
+<option value="verbatimcopying">4. Verbatim Copying</option>
+<option value="distribmod">5. Distributing Modified Source Versions</option>
+<option value="nonsource">6. Non-Source Distribution</option>
+<option value="licensecompat">7. License Compatibility</option>
+<option value="termination">8. Termination</option>
+<option value="notacontract">9. Not A Contract</option>
+<option value="autolicense">10. Automatic Licensing of Downstream Users</option>
+<option value="licensingpatents">11. Licensing of Patents</option>
+<option value="gpl3.libertyordeath">12. Liberty or Death for the Program</option>
+<option value="geolimits">[13. Geographical Limitations]</option>
+<option value="revisedversions">14. Revised Versions of this License</option>
+<option value="requestingexceptions">15. Requesting Exceptions</option>
+<option value="nowarranty0">16. NO WARRANTY</option>
+<option value="nowarranty1">17. NO WARRANTY (cont.)</option>
+<option value="nottested">18. [not tested for safety-critical]</option>
+<option value="howtoapply">How to Apply These Terms to Your New Programs</option>
+</select> <a href="javascript:sectId('suggest')">autocomplete</a></td></tr>
 
 <tr><td class=label align="right">
 

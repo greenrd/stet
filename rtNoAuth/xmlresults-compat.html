@@ -22,8 +22,6 @@
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %
-%
-%
 <response>
 % if ($Tickets) {
 <d><% $drafter %></d>
@@ -84,7 +82,7 @@
 % }
 % }
 % else {
-<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=gplv3-draft-1">search again</a> </cs>
+<cs>No comments found. <a href="/comments/rt/changeshown.html?came_from=/comments/<% $filename %>">search again</a> </cs>
 % }
 </response>
 %
@@ -159,4 +157,5 @@ $Rows => 30
 $StartAt => 1
 $Order => 'DESC'
 $Query => "'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'";
+$filename => 'gplv3-draft-1'
 </%ARGS>

@@ -1,0 +1,309 @@
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%#  
+%
+% sub displayTicket($$$);
+%
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>User Preferences for <% $CurrentUser->Name %> || GPLv3 Comment System</title>
+<link rel="stylesheet" type="text/css" href="/comments/stet.css" />
+<script type="text/javascript" src="/comments/prototype.js"></script>
+<script type="text/javascript">
+function hideall(class) {
+var sc = document.getElementsByClassName(class);
+sc.length.times(function(n) {
+Element.hide(sc[n]);
+});
+
+}
+function showall(class) {
+var sc = document.getElementsByClassName(class);
+sc.length.times(function(n) {
+Element.show(sc[n]);
+});
+}
+</script>
+</head>
+<body>
+<div id="topbar" class="topbar">
+<span id="statustext" class="statustext">
+User Preferences for <% $CurrentUser->Name %><br/> 
+( concerns <% $CTickets->CountAll() + $WTickets->CountAll() %> tickets: <a href="http://gplv3.fsf.org/comments/rt/readsay.html?uid=<% $CurrentUser->id %>read them</a> <a href="http://gplv3.fsf.org/comments/?uid=<% $CurrentUser->id %>see on license</a> 
+<a href="/comments/rt/changeshown.html?came_from=rt/readsay.html">search</a> 
+% if ($name) {
+</span><span id="login" class="login">you are <% $name %>: <a href="http://gplv3.fsf.org/logout">logout</a></span></div>
+% } else {
+</span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/userprefs.html">login</a></span></div>
+% }
+<& header.html, name => $name &>
+<div id="readsaymain">
+<span id="listactions">
+<& Elements/ListActions, actions => \@results &>
+</span>
+%
+
+<p>Here are all the comments you have either created or joined in
+  discussing.  You may turn email notification "on" or "off" for each
+  of them individually; if you turn "off" notification on a ticket you
+  did not create, it will no longer appear on this page.</p>
+
+    <form action="userprefs.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
+
+<p><input type="checkbox" name="never"> [Almost] never email me updates about new comments I make</p>
+
+Email notification for <strong>tickets you created</strong>:
+<table>
+<tr><td align="center">on</td><td align="center">off</td><td>&nbsp;</td></tr>
+% while (my $item = $CTickets->Next) {
+% my $showactions = $CTickets ? 0 : 1;
+% $done .= $item->id.",";
+<% toggleWatcher(\$item,"don't email") %>
+% }
+</table> 
+Email notification for <strong>tickets you are watching:</strong> (turning "off" will remove from this page in the future)
+<table>
+<tr><td align="center">on</td><td align="center">off</td><td>&nbsp;</td></tr>
+% while (my $item = $WTickets->Next) {
+% my $showactions = $WTickets ? 0 : 1;
+% my $id = $item->id;
+% unless ($done =~ /\b$id\b/) {
+<% toggleWatcher(\$item,"delete") %>
+% } }
+</table>
+<input type="submit" value="Update These Prefs"/>
+</form>
+<p>To receive email updates for comments whose discussion you have not
+joined, visit those comments individually and check the appropriate
+box.  You will then see those comments on this page (though if you
+uncheck them they you will have to hunt them down again).</p>
+
+<p>Regardless of your global or ticket-specific settings, you will
+still receive email notification when major changes happen to comments
+you submitted: if we believe a new draft resolves your comment, if
+your comment is deleted or rejected [which is not currently a part of
+our process, but is implemented in the software], and possibly other
+comment-specific reasons we have not foreseen.</p>
+
+<!-- <div id="bottombar"><a href="stet-latest.tar.gz">get the latest source code for this comment system</a></div> -->
+%
+% sub toggleWatcher($$) {
+% my $itemref = shift;
+% my $item = $$itemref;
+% my $killtxt;
+% my $iswatching;
+% my $wType;
+% if ($item->IsWatcher(Type => 'Requestor', PrincipalId => $CurrentUser->id)) {%
+     $iswatching = 1;
+%     $wType = 'Requestor';
+%     }
+% elsif ($item->IsWatcher(Type => 'Cc', PrincipalId => $CurrentUser->id)) {
+%     $iswatching = 1;
+%     $wType = 'Cc';
+%     }
+% elsif ($item->CreatorObj->id == $CurrentUser->id) {
+% $wType = 'Requestor';
+% $iswatching = 0;
+% } else {
+%     $wType = 'Cc';
+%     $iswatching = 0;
+% }
+
+<tr><td align="center"><input type="radio" <% $iswatching ? "checked" : '' %> name="Ticket-<% $item->id %>-TogWatcher-Type-<% $wType %>-Principal-<% $CurrentUser->id %>" value="on"></td><td align="center"><input type="radio" <% $iswatching ? "" : 'checked' %> name="Ticket-<% $item->id %>-TogWatcher-Type-<% $wType %>-Principal-<% $CurrentUser->id %>" value="off"></td><td><a href="/comments/rt/readsay.html?id=<% $item->id %>">#<% $item->id %>: <% $item->Subject %></a></td></tr>
+% }
+</body>
+</html>
+<%INIT>
+use CGI qw/:standard/;
+use HTML::Scrubber;
+our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+require "/var/www/stet/stetsubs.pl";
+our $issuequeue = 5; 
+my $rc = 0;
+our ($name, $resp, $CurrentUser, $HasIssueRights);
+my ($pass, $agr_vals, $thing, $done);
+($CurrentUser, $resp, $name) = getUser("foo");
+$CurrentUser = $session{'CurrentUser'};
+
+my $rsslink = "/comments/rt/rssresults.rdf?id=".$ARGS{'id'}."&Query=".$ARGS{'Query'};
+
+my ($CTickets, $WTickets, @results, @msgresults, @linkresults, @cfresults);
+
+if ($CurrentUser) {
+    $CTickets = RT::Tickets->new($CurrentUser);
+    $CTickets->FromSQL("Creator.Id = '".$CurrentUser->id."'");
+    $CTickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+
+    $WTickets = RT::Tickets->new($CurrentUser);
+    $WTickets->FromSQL("Watcher.Id = '".$CurrentUser->id."'");
+    $WTickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+    
+}
+
+foreach my $key ( keys %ARGS ) {
+#<input type="checkbox" name="Ticket-994-AddWatcher-Type-Cc-Principal-681-Checked"> #994: 
+    # {{{ Delete deletable watchers
+    if ( ( $key =~ /^Ticket-(\d+)-TogWatcher-Type-(.*)-Principal-(\d+)$/ )  ) {
+	my $id = $3;
+	my $type = $2;
+	my $togtk = RT::Ticket->new($CurrentUser);
+	$togtk->Load($1);
+	if ($ARGS{$key} eq "on") {
+	    my ( $code, $msg ) = 
+		$togtk->AddWatcher(PrincipalId => $id,
+				   Type => $type);
+	    push @results, $msg." (#".$togtk->id.")";
+	}
+	elsif ($ARGS{$key} eq "off") {
+	    my ( $code, $msg ) = 
+		$togtk->DeleteWatcher(PrincipalId => $id,
+				      Type => $type);
+	    push @results, $msg." (#".$togtk->id.")";
+	}
+	
+    }
+}
+foreach my $result (@msgresults,@linkresults,@cfresults) {
+    push @results,$result;
+}
+
+my $NewQueueObj = RT::Queue->new( $CurrentUser );
+$NewQueueObj->Load($issuequeue); 
+
+if (
+    (
+        $CurrentUser->HasRight(
+            Right    => 'CreateTicket',
+            Object => $NewQueueObj
+        )
+      )
+)
+    {
+	$HasIssueRights = 1;
+    }
+else {$HasIssueRights = '';}
+
+sub thingType($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+if ($item->Queue == 5) {
+    return "Issue";
+}
+else {
+    return "Comment";
+}
+}
+
+
+
+sub getThread($) {
+
+    my $itemref = shift;
+    my $item = $$itemref;
+    my $Transactions = $item->Transactions;
+    my $allcomments = '';
+    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+    while (my $Transaction = $Transactions->Next) {
+	
+	if ($Transaction->Type =~ /^(Create|Correspond|Comment$)/) {
+	    
+	    my $attachments = $Transaction->Attachments;
+#    my $CustomFields = $item->QueueObj->TicketCustomFields();
+	    my $CustomFields = $item->QueueObj->CustomFields();
+	    $attachments->GotoFirstItem;
+	    while (my $message = $attachments->Next) {
+#			 $allcomments .= $Transaction->Content;
+		my ($subj, $cont) = ('');
+		if ($message->Subject != '') {
+		    $subj = $scrubber->scrub($message->Subject);
+		}
+		#$cont = sprintf("%s",$message->Content);
+ 		#	 if ($message->Content != '') {
+		$cont = $scrubber->scrub($message->Content);
+		if ($cont =~ s/(\S)\n\n(\S)/$1<\/p><p>\n$2/gs) {
+		$cont = "<p>$cont</p>";
+	    }
+		$cont =~ s/&(?!amp;)/&amp;/g;
+ 		#	 }
+# 			 if ($cont = $message->Content) {
+#			     $cont = $scrubber->scrub($cont);
+#			 }
+		
+		$allcomments .= "<span class=\"formHelpIsh\">Comment noted by ". userlink(\$item,\$message) ." <span class=\"date\">on ".doDate(\$message).":</span></span></span>\n";		
+		$allcomments .= "<blockquote><h4>$subj</h4>\n".$cont."</blockquote>\n";
+
+#	    $allcomments .= "</blockquote>";
+	    }
+	}
+	    else {
+		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId|Agreeer")) {
+	       
+		    $allcomments .= "<div class=\"formHelpIsh\">".$Transaction->BriefDescription." by ".userlink(\$item,\$Transaction)." <span class=\"date\">on ".doDate(\$Transaction)."</span></div>\n";
+		}
+	    }
+
+	}
+      
+	    return $allcomments;
+	
+    }
+
+sub userlink($$) {
+    my $itemref = shift;
+    my $item = $$itemref;
+    my $msgref = shift;
+    my $message = $$msgref;
+    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a>". longOrg($message->CreatorObj)."</span>";
+}
+
+sub doDate($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+    $item->Created =~ m/(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d):\d\d/;
+    return  "$1 at $2 ". getTZ($item->Created);
+}
+
+sub getTZ($) {
+my $date = shift;
+$date =~ s/\d\d\d\d-(\d\d)-\d\d.*/$1/;
+my $eastern = "EST";
+if ($date > 3) {  # after the end of March...
+    $eastern = "EDT";
+}
+if ($date > 10) {  # after the end of October...
+    $eastern = "EST";
+}
+
+return $eastern;
+}
+</%INIT>
+<%ARGS>
+$Rows => 30
+$StartAt => 1
+$Order => 'DESC'
+$Query => "'CF.NoteUrl' LIKE 'gplv3-draft-1'"
+$Take => undef
+$Steal => undef
+$Untake => undef
+</%ARGS>

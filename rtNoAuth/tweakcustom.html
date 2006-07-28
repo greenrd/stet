@@ -20,7 +20,7 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-%#  
+%
 % sub displayTicket($$$);
 %
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -63,17 +63,17 @@ Showing comments <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<%
 ( found <% $Tickets->CountAll()%>, showing newest <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>:
 %   if ($Tickets->CountAll() > $Rows) {
 %       if ($StartAt > 1 ) {
-      <a href="/comments/rt/summarydecision.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev <% $Rows %></a>
+      <a href="/comments/rt/readsay.html?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev <% $Rows %></a>
 %       }
 %   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() < $StartAt + $Rows)) {
 |
 %   }
 %   if ($Tickets->CountAll() > $StartAt + $Rows) {
-         <a href="/comments/rt/summarydecision.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next <% $Rows %></a>
+         <a href="/comments/rt/readsay.html?Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next <% $Rows %></a>
 %   }
 %}
 )
-<a href="/comments/rt/changeshown.html?came_from=rt/summarydecision.html&filename=<% $filename %>">search</a> 
+<a href="/comments/rt/changeshown.html?came_from=rt/readsay.html">search</a> 
 <%perl> 
     $Tickets->GotoFirstItem;
     if ($StartAt > 1) {
@@ -83,12 +83,12 @@ Showing comments <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<%
     }
 </%perl>
 % } elsif ($Ticket) {
-Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename %>&id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $ARGS{'id'} %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
+Showing comment <a href="/comments/rt/readsay.html?id=<% $ARGS{'id'} %>"><% $ARGS{'id'} %></a> <a class="rsslink" href="<% $rsslink %>">[rss]</a> <a href="/comments/<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>?id=<% $ARGS{'id'} %>#<% $ARGS{'id'} %>">[see on license]</a> <a href="/comments/rt/changeshown.html?came_from=<% stripCrap($Ticket->FirstCustomFieldValue('NoteUrl')) %>">search</a>
 % }
 % if ($name) {
 </span><span id="login" class="login">you are <% $name %>: <a href="http://gplv3.fsf.org/logout">logout</a></span></div>
 % } else {
-</span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/summarydecision.html?filename=<% $filename %>&<% $Tickets ? 'Query='.$ARGS{'Query'} : 'id='.$ARGS{'id'} %>&filename=<% $filename %>">login</a></span></div>
+</span><span id="login" class="login">you could <a href="http://gplv3.fsf.org/login_form?came_from=/comments/rt/readsay.html?<% $Tickets ? 'Query='.$ARGS{'Query'} : 'id='.$ARGS{'id'} %>">login</a></span></div>
 % }
 <& header.html, name => $name &>
 <div id="readsaymain">
@@ -114,15 +114,14 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 % my $deletelink = shift;
 % if (!$deletelink) {
 %  if ($resp == 1) {
-    <form action="summarydecision.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
-<input type="hidden" name="filename" value="<% $filename %>">
+    <form action="readsay-devel.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
        <input type="hidden" name="id" value="<% $item->id %>">
 %  }
 % }
 
 % if ($item->QueueObj->CurrentUserHasRight('SeeQueue')) {
  <div class="onecomment<% ($item->QueueObj->Name =~ /Drafter/) && " Drafter" %><% $deletelink && " child\" id=\"child".$item->id |n %>">
-  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="summarydecision.html?filename=<% $filename %>&id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
+  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="readsay.html?id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
 %  if ($item->Queue == $fsfqueue) {
 <div class="admin">This issue has been escalated to the Drafters <!-- by fixme --> </div>
 %  }
@@ -131,21 +130,19 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 %      }
 </h4>
 % if (!$deletelink) {
-%#   while (my $link = $item->DependsOn->Next) {
-%#    <span class="formHelpIsh">This <% thingType(\$item) %> is part of the discussion  on:<br/> #<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &></span><span class="TktInput">
-%#   while (my $link = $item->DependsOn->Next) {
-    <span class="formHelpIsh">This <% thingType(\$item) %> is part of the discussion  on:<br/> <% listAncestry(\$item,0) |n%></span><span class="TktInput">
+%   while (my $link = $item->MemberOf->Next) {
+    <span class="formHelpIsh">This <% thingType(\$item) %> is part of the discussion  on:<br/> #<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &></span><span class="TktInput">
 %
-%#     if ($HasIssueRights == 1) {
-%#	   <span class="TktInput">[dissociate from parent: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Type %>-<% $link->Target %>" value="1">]</span>
-% #     }
-%#       <br/>
-%# }
+%      if ($HasIssueRights == 1) {
+	   <span class="TktInput">[dissociate from parent: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Type %>-<% $link->Target %>" value="1">]</span>
+%      }
+       <br/>
+% }
 
 %   }
 <br/>
   <span class="formHelpIsh">Regarding the text:</span> <span class="ontextText"><q><% $scrubber->scrub($item->FirstCustomFieldValue('NoteSelection')) %></q></span><br/>
-    <span class="formHelpIsh">In section: <span class="nodeLink"><a href="/comments/rt/summarydecision.html?filename=<% $filename %>&Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span></span><br/>
+    <span class="formHelpIsh">In section: <span class="nodeLink"><a href="/comments/rt/readsay.html?Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span></span><br/>
 %#    In section: <span class="nodeLink"><a href="/comments/<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>?Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span><br/>
   <span class="formHelpIsh">Submitted by: <% userlink(\$item, \$item) |n%> <span class="date">on <% doDate(\$item) %></span></span><br/>
 <% listAgree(\$item) %>
@@ -158,11 +155,11 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 <% getThread(\$item) |n %>
 <br/><strong><a href="#" onclick="hideall('child'); togExp(this); return false;">collapse children</a></strong><br> 
 
-%   if ($item->DependedOnBy->GotoFirstItem) {
+%   if ($item->Members->GotoFirstItem) {
         <em>this <% thingType(\$item) %> does not have any children </em><br/>
 %   }
 <br/>
-%   while (my $link = $item->DependedOnBy->Next) {
+%   while (my $link = $item->Members->Next) {
     <span class="TktLabel">Child comment of <% $item->id %>: <a href="#" onclick="javascript:Element.toggle(document.getElementById('child<% $link->BaseURI->Object->id %>'));return false;"><% $link->BaseURI->Object->id %>: <% $link->BaseURI->Object->Subject %> &plusmn;</a></span><br/>
 %    my $child = RT::Ticket->new($CurrentUser);
 %    $child->Load($link->BaseURI->Object->id);
@@ -173,13 +170,13 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 %  if (($HasIssueRights) && ($showactions) && (!$deletelink)) {
 <br/>
   <span class="TktLabel">Children:</span><br/>
-        <span class="TktInput indent">add new: <INPUT NAME="DependsOn-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+        <span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
 % if (($showactions) & (!$deletelink)){
 <br/>
 %  if ($HasIssueRights) {
     <span class="TktLabel">Parents:</span><br/>
-       <span class="TktInput indent">add new: <INPUT NAME="<% $item->id %>-DependsOn"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+       <span class="TktInput indent">add new: <INPUT NAME="<% $item->id %>-MemberOf"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
 %  }
     <br/>
     <span class="TktLabel">Links:</span>
@@ -448,26 +445,6 @@ sub listAgree($) {
     return $agr_vals->Count. " agree: ".$showagree;
 }
 
-sub listAncestry($$) {
-my $itemref = shift;
-my $item = $$itemref;
-my $depth = shift;
-    my $returnlist = '';
-    while (my $parent = $item->DependsOn->Next) {
-	if ($parent->TargetURI->IsLocal) {
-	    my $ptkt = RT::Ticket->new($CurrentUser);
-	    $ptkt->Load($parent->TargetObj->id);
-	    $depth++;
-	    my $fn = stripCrap($item->FirstCustomFieldValue('NoteUrl'));
-	    $returnlist = ("&nbsp;" x $depth ). thingType(\$ptkt). "#<a href=\"/comments/rt/summarydecision.html?filename=<% $fn %>&id=".$ptkt->id."\">".$ptkt->id."  ".$ptkt->Subject."</a><br/>\n";
-
-	    $returnlist = listAncestry(\$ptkt,$depth) . $returnlist;
-	}
-	$depth--;
-    }
-
-return $returnlist;
-}
 
 </%INIT>
 <%ARGS>
@@ -475,7 +452,6 @@ $Rows => 30
 $StartAt => 1
 $Order => 'DESC'
 $Query => "'CF.NoteUrl' LIKE 'gplv3-draft-1'"
-$filename => 'gplv3-draft-1'
 $Take => undef
 $Steal => undef
 $Untake => undef

@@ -1,0 +1,78 @@
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response>
+<sdp>
+% for (my $i = 0; $i < $n; $i++) }
+<id><% $nodes->item($i)->getAttribute('id') %></id>
+% } 
+</sdp>
+</response>
+<%INIT>
+use XML::DOM;
+use XML::DOM;
+
+my $parser = new XML::DOM::Parser;
+my $doc = $parser->parsefile ("/var/www/stet/gplv3-draft-1.xml");
+
+my $nodes = $doc->getElementsByTagName("section")->getElementsById("*");
+my $n = $nodes->getLength;
+
+#$selection =~ s/\x00$//;
+#print STDERR "selection is ";
+#foreach my $char (split(//,$selection)) {
+#    printf STDERR ( "%02X ", ord($char) );
+#}
+#print STDERR "\n";
+#$selection = "software are designed";
+# our ($dompath, $startid, $matched, $notesubj, $ticket_body, $form, $wholefile) = 0;
+# for (my $i = 0; $i < $n; $i++)
+# {
+#     my $node = $nodes->item($i);
+#     my $sent = $node->toString;
+#     $sent =~ s/\s+/ /g;
+#     $selection =~ s/\s+/ /g;
+#     if ($sent =~ m/.*$selection.*/) {
+# #	print STDERR "MATCHED $sent\n";
+# 	$matched++;
+# 	$startid = $node->getAttribute('id');
+# 	$dompath = $node->getParentNode->getParentNode->getParentNode->getNodeName;
+# 	$dompath .= "/".$node->getParentNode->getParentNode->getNodeName;
+# 	$dompath .= "[id=".$node->getParentNode->getParentNode->getAttributeNode('id')->getValue."]/";
+# 	$dompath .= $node->getParentNode->getNodeName;
+# 	$dompath .= "[id=".$node->getParentNode->getAttributeNode('id')->getValue."]/";
+# 	$dompath .= $node->getNodeName."[id=".$node->getAttributeNode('id')->getValue."]"; 
+	
+#     }
+# }
+
+#print $startid."\n".$dompath."\n";
+ # Avoid memory leaks - cleanup circular references for garbage collection
+ $doc->dispose;
+
+$r->content_type('text/xml');
+</%INIT>
+<%ARGS>
+$L => undef;
+</%ARGS>

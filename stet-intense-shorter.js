@@ -27,13 +27,13 @@
 //   You may copy, tweak, rewrite, sell or lease any code example on this site.
 
 function printfire(foo) {
-  //  alert(foo);
-  /*       if (document.createEvent) {
-    printfire.args = arguments;
-    var ev = document.createEvent("Events");
-    ev.initEvent("printfire", false, true);
-    dispatchEvent(ev);
-    }  */
+/*     alert(foo); */
+/*          if (document.createEvent) { */
+/*       printfire.args = arguments; */
+/*       var ev = document.createEvent("Events"); */
+/*   ev.initEvent("printfire", false, true); */
+/*       dispatchEvent(ev); */
+/*   }  */
 }
 
 // a few things need to be global
@@ -43,7 +43,7 @@ var nodelist = new Object;
 var drafter = '';
 var filename;
 var firstLoad = "1";
-
+var noMatch =  0;
 function initPage() {
   // quit if this function has already been called
   if (arguments.callee.done) return;
@@ -51,14 +51,16 @@ function initPage() {
   arguments.callee.done = true;
   statusbox("Please wait while we load some comments.");
   filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
+  filename = filename.replace(/.xml|.html/,'');
+  //	printfire('filename is '+filename);
   if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))|| (filename.match(/comments\/\?/)) || (filename.match(/comments\/#/)) || (filename.match(/debug/) || (filename.match(/classic/)))) {
-    filename = 'gplv3-draft-1';
+    filename = 'uncertain';
   }
   if(window.location.search.length) {
-    loadXMLDoc('/comments/rt/xmlresults-intense.html',window.location.search.substring(1));
+   loadXMLDoc('/comments/rt/xmlresults-intense.html',window.location.search.substring(1)+'&filename='+filename);
   }
   else {
-    loadXMLDoc('/comments/cached.xml','');
+    loadXMLDoc('/comments/cached-'+filename+'.xml','');
   }
 }
 function loadFromHash() { // checks the location hash for bookmarked notes to show
@@ -224,7 +226,7 @@ function submitComment() {
   document.getElementById('cancel').setAttribute('disabled','disabled');
   form.style.background = '#aaa';
 
-  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;NoteUrl='+location.href+'&map;queue='+form.queue.value);
+  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;NoteUrl='+location.href+'&amp;queue='+form.queue.value);
 
   var theUrl = '/comments/rt/submitcomment-cachetoo.html'; 
   loadXMLDoc(theUrl,params);
@@ -278,12 +280,12 @@ function loadXMLDoc(url,theData)
     req = new ActiveXObject('Microsoft.XMLHTTP');
   }
   var method;
-  req.onreadystatechange = processReqChange;
   if(theData=='') { method="GET"; } 
   else { method = "POST"; }
   req.open(method, url, true);
   req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
   req.setRequestHeader('X-Referer',document.location);
+  req.onreadystatechange = processReqChange;
   req.send(theData);
 }
 
@@ -403,7 +405,7 @@ function processReqChange()
       }
       
       if (!did) {
-	statusbox("Your search didn't return anything usable: try a reload, or maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+" "); //debug
+	statusbox("Your search didn't return anything usable: try a reload, or maybe there are no comments:  <a href=\"http://gplv3.fsf.org/comments/rt/changeshown.html?filename="+filename+"\">search again</a>\n\n<br/>HTTP Status: " + req.statusText+" "); //debug
       }
     }
     if (firstLoad == 1) {
@@ -516,33 +518,37 @@ function processAnt(response) {
   rtnArray = cacheAntVals(response);
   rtidsBySn = rtnArray[0];
   rtidsByP = rtnArray[1];
+  //  alert(rtidsBySn.length);
   highlightSelections(rtidsBySn);
   PLinks(rtidsByP);
-  addAllLink();
+  //  addAllLink();
   //  unOverlap("annotation",5); // thse won't overlap anymore
   currently('Ready.');
 }
 
 function addAllLink() {
   if (ticketObj.length < 150) {
-    var sLnk = document.createElement('a');
-    sLnk.setAttribute('href','#all');
-    sLnk.setAttribute('onClick','loadAll()');
-    sLnk.appendChild(document.createTextNode('display all'));
-    document.getElementById('statustext').appendChild(document.createTextNode(' '));
-    document.getElementById('statustext').appendChild(sLnk);
+        loadAll();
+     var sLnk = document.createElement('a'); 
+/*     sLnk.setAttribute('href','#all'); */
+/*     sLnk.setAttribute('onClick','loadAll()'); */
+     sLnk.appendChild(document.createTextNode('[currently showing all]')); 
+     document.getElementById('statustext').appendChild(document.createTextNode(' ')); 
+     document.getElementById('statustext').appendChild(sLnk); 
   }
 }
 function PLinks(rtidsByP) {
   for (var p in rtidsByP) {
+    if(document.getElementById(p)) {
     var pLnk = document.createElement('span');
     pLnk.setAttribute('id','pLnk'+p);
     pLnk.setAttribute('class','plink');
     pLnk.style.display = 'none';
-    pLnk.innerHTML = '<a href="#'+p+'" title="paragraph id: #'+p+'">&para;</a>&nbsp;<a title="show all '+rtidsByP[p].length+' comments on this paragraph" href="javascript:getnotes(\''+rtidsByP[p].join(":")+'\')">&raquo;</a>';
+    pLnk.innerHTML = '<a href="#'+p+'">&para;</a> <a href="javascript:getnotes(\''+rtidsByP[p].join(":")+'\')">&rarr;</a>';
     document.getElementById(p).appendChild(pLnk);
     document.getElementById(p).setAttribute('onmouseover','show("pLnk'+p+'")');
     document.getElementById(p).setAttribute('onmouseout','hide("pLnk'+p+'")');
+    }
   }
 }
 function show(id) {
@@ -566,6 +572,7 @@ function cacheAntVals(response) {
   for (prI = 0; prI < selections_arr.length; prI++) {
     if (selections_arr[prI].firstChild) {
       rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
+      //      printfire('prI '+prI+',rtid '+rtid);
       if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; ticketObj.length++;}
       ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data.replace(/note\.[0-9]+\./,'');;
       ticketObj[rtid].queue = queues_arr[prI].firstChild.data;
@@ -573,9 +580,11 @@ function cacheAntVals(response) {
       startp = ticketObj[rtid].startnode.replace(/.s[\d+]$/, '');
       if(!rtidsBySn[ticketObj[rtid].startnode]) {
 	rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
+	//	alert('pushing '+rtid+' to '+ticketObj[rtid].startnode);
 	rtidsByP[startp] = new Array(rtid);
       }
       else {
+	//	alert('pushing '+rtid+' to '+ticketObj[rtid].startnode);
 	rtidsBySn[ticketObj[rtid].startnode].push(rtid);
 	rtidsByP[startp].push(rtid);
       }
@@ -590,6 +599,8 @@ function highlightSelections(rtidsBySn) {
   // (this is GIGO: nothing should be drm.0, only drm.0.0 .  Still, should be fixed at some point)
   // ah, now it has to be fixed so we can highlight new annots.
   for (var section in rtidsBySn) {
+    if(document.getElementById(section)) {
+    //    printfire('section is '+section);    	
     var Selections = new Array();
     var Rtids = new Array();
     for (var i = 0; i < rtidsBySn[section].length; i++) {
@@ -597,26 +608,29 @@ function highlightSelections(rtidsBySn) {
       Selections.push(ticketObj[rtid].selection);
       Rtids.push(rtid);
     }
-    intense_annot(document.getElementById(section),Selections,Rtids);	      
+    intense_annot(section,Selections,Rtids);	      
+    }
   }
 }
 function makeLinkObj(rtid,agreement,agrtot) {
-    returnLink = rtid ? '<a href="/comments/rt/readsay.html?id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
+    returnLink = rtid ? '<a href="/comments/rt/readsay.html?filename='+filename+'&id='+rtid+'">read/say more</a> ' : '[problem with ticket link]';
     	  agreestr = agreement;
 	  agreestr = agreestr.replace(/<\/?ua>/g,'');
 	  agreestr = agreestr.replace(/<\/?span>/g,'');
 	  agreestr = agreestr.replace(/<\/?b>/g,'');
     	  if ((agreestr == "agree") || (agreestr == "unagree")) {
-    	    returnLink += '<a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreestr+'\')">'+agreestr+'</a> | ';
+    	    returnLink += ' | <a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreestr+'\')">'+agreestr+'</a> | ';
     	  }
     	  else {
-    	    returnLink += '<span id="agree'+rtid+'">'+agreestr+'</span> | ';
+    	    returnLink += ' | <span id="agree'+rtid+'">'+agreestr+'</span> | ';
     	  }
-    	  if (agrtot) {
+    	  if (agrtot > 0) {
     	    returnLink += ' [<span id="agrtot'+rtid+'">'+agrtot+'</span> agree]';
     	  }
 	  return returnLink;
 }
+
+
 
 function processAgreement(response) {
   currently('Indicating your agreement with this comment...');
@@ -806,22 +820,23 @@ pickQueue && noteifyDiv.appendChild(pickQueue);
    }
 }
 
-function intense_annot(root,selections,rtids) {
+function intense_annot(rootid,selections,rtids) {
+  //alert('rootid is '+rootid.toString());
   selecObj = new Array;
   rootObj = new Array;
-  var rootstr = '';
-  var rootid = root.id;
-  var divstart = root.innerHTML.indexOf('<div');
-  var DIVstart = root.innerHTML.indexOf('<DIV');
+  //var rooty = document.getElementById(rootid);
+  var rooty = document.getElementById(rootid.toString());
+  var divstart = rooty.innerHTML.indexOf('<div');
+  var DIVstart = rooty.innerHTML.indexOf('<DIV');
   divstart = (DIVstart > divstart) ? DIVstart : divstart;
   if (divstart == -1) {
-    rootSer = getXMLNodeSerialisation(root,'noattr');
+    rootSer = getXMLNodeSerialisation(rooty,'noattr');
     var divstartSer = rootSer.indexOf('<div');
-    rootstr = root.innerHTML;
+    rootstr = rooty.innerHTML;
   }
   if (divstart > -1) {
-    var olddivs = root.innerHTML.substring(divstart,root.innerHTML.length);
-    rootstr = root.innerHTML.substring(0,divstart);
+    var olddivs = rooty.innerHTML.substring(divstart,rooty.innerHTML.length);
+    rootstr = rooty.innerHTML.substring(0,divstart);
   }
   else if (divstartSer > -1) {
     var olddivs = rootSer.substring(divstartSer,rootSer.length);
@@ -869,9 +884,13 @@ function intense_annot(root,selections,rtids) {
 
 function intense_doRoughMatch(selections,selecObj,root_words,i) {   
   var rer = deParen(selections[i]);
-  var foo = rer.replace(/ /g,'[\\s\\$\\!]+');
-  var re = new RegExp(foo);
-  var roughMatch = deParen(rootStrippedHTML).match(re);
+  rer = rer.replace(/[\s$!]+$/g,'');
+  var foo = rer.replace(/ \b/g,'[\\s\$\!]+');
+
+
+  var re = new RegExp(foo,'im');
+  var roughMatch = rootStrippedHTML.match(re);
+
   if (roughMatch) {
     selecObj[i].matchindex = (roughMatch.index - selections[i].length);
     var n,sum;
@@ -881,6 +900,9 @@ function intense_doRoughMatch(selections,selecObj,root_words,i) {
       }
     }
     n == 0 ? selecObj[i].arrayIndex = 0 : selecObj[i].arrayIndex = n-2;
+  }
+  else {
+    //  printfire(++noMatch+': id: '+selecObj[i].rtid+'\nrM: '+roughMatch+'\nre: '+re+'\nrSH: '+rootStrippedHTML);
   }
 }
 
@@ -901,14 +923,17 @@ function intense_incrWords(selecObj,rootObj) {
      var skip = 0;
      for (var i=selecObj[j].arrayIndex; i<selecObj[j].words[k].length+selecObj[j].arrayIndex+2; i++) {
        // I'm clueless as to why I need an additional [m] incrementer, but this so far produces
-       // my desired result
+       // my desired result: selecObj[j].words[k][m] is a single word from this selection.
        if (rootObj[i]) {
 	 var m=skip;
 	 var matched = '';
 	 if (selecObj[j].words[k][m]) {
+	   //	   var re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
 	   var re = new RegExp(''+deParen(selecObj[j].words[k][m])+'','m');
+	   //printfire('word: '+selecObj[j].words[k][m]+' re:'+re);
 	   if (re) {
-	     try { var thisMatch = rootObj[i].word.match(re); } catch(e) {}
+	     //printfire('re: '+re+' word: '+rootObj[i].word);
+	     try { var thisMatch = rootObj[i].word.match(re); } catch(e) { /* printfire('error on '+re); */ }
 	   }
 	   if (thisMatch) {
 	     rootObj[i].intensity++;
@@ -980,7 +1005,7 @@ function getnotes(rtids,startid) {
   if((!window.location.hash.match(rtids) && (!window.location.hash.match(/^#all/)))) {
     location.hash+=rtids+':';
   }
-  loadXMLDoc('/comments/rt/getannotations.html','ids='+rtids);
+  loadXMLDoc('/comments/rt/getannotations-devel.html','ids='+rtids);
   currently("Ready.");
 }
 
@@ -1106,7 +1131,7 @@ function idLinks(cs) {
     newMe.appendChild(Lnk);
     newMe.appendChild(document.createTextNode(' '));
     sLnk = document.createElement('a');
-    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
+    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from='+location.pathname);
     sLnk.appendChild(document.createTextNode('search'));
     newMe.appendChild(sLnk);
     st = document.getElementById('statustext');
@@ -1148,7 +1173,7 @@ function qLinks(cs) {
     newMe.appendChild(lLnk);
     newMe.appendChild(document.createTextNode(' '));
     rat = document.createElement('a');
-    rat.setAttribute('href',"http://gplv3.fsf.org/comments/gplv3-draft-1?Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'gplv3-draft-1'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");
+    rat.setAttribute('href',location.pathname+"?filename="+filename+"&Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'"+filename+"'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");
     rat.appendChild(document.createTextNode('[rationale]'));
     newMe.appendChild(rat);
     newMe.appendChild(document.createElement('br'));
@@ -1157,7 +1182,7 @@ function qLinks(cs) {
     sLnk = document.createElement('span');
     sLnk.setAttribute('id','searchlink');
     sLnkA = document.createElement('a');
-    sLnkA.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from=gplv3-draft-1');
+    sLnkA.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?filename='+filename+'came_from='+location.pathname);
     sLnkA.appendChild(document.createTextNode('search'));
     sLnk.appendChild(sLnkA)
     newMe.appendChild(sLnk);
@@ -1178,9 +1203,12 @@ function cstatusbox(cs) {
   }
   loginbox();
 }
+
 function deParen(str) {
   str = str.replace(/[\\]*\(/g,'\\(');
   str = str.replace(/[\\]*\)/g,'\\)');
+  str = str.replace(/[\\]*\[/g,'\\[');
+  str = str.replace(/[\\]*\]/g,'\\]');
   return str;
 }
 

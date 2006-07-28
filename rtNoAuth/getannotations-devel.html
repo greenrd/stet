@@ -34,7 +34,7 @@
 % my $item = LoadTicket($id);
 % if ($item) {
 <anf>
-<n><% $item->Transactions->First->Content %></n>
+<n><% ptag($item->Transactions->First->Content) %></n>
 %# <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
 %# <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
@@ -82,7 +82,13 @@ if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
 
 $r->content_type('text/xml');
 
-
+sub ptag {
+    my $cont = shift;
+    if ($cont =~ s/(\S)\n\n(\S)/$1<\/p><p>\n$2/gs) {
+	$cont = "<p style=\"display: inline\">$cont</p>";
+    }			
+    return $cont;
+}
 </%INIT>
 <%ARGS>
 $Rows => 30

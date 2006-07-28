@@ -61,7 +61,7 @@
 <e><% $item->FirstCustomFieldValue('NoteEndNodeId') %></e>
 <s><% cleanNoteSel(\$item) %></s>
 <i><% $item->FirstCustomFieldValue('NoteStartNodeId') %></i>
-<u><% $item->CreatorObj->Name %></u>
+<u><% $item->CreatorObj->Name %><% shortOrg($item->CreatorObj) %></u>
 % my ($agree,$agr_count) = showAgree(\$item,$name);
 <ua><% $agree |n %></ua>
 <at><% $agr_count %></at>
@@ -94,7 +94,7 @@ my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
 
 require "/var/www/stet/stetsubs.pl";
 
-my ($name, $resp, $pass, $agr_vals, $CurrentUser);
+my ($name, $resp, $pass, $agr_vals, $CurrentUser, $org);
 # our $session;
 # print STDERR Dumper(%ARGS);
 
@@ -104,7 +104,7 @@ my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARG
 
 
 ($CurrentUser, $resp, $name) = getUser("foo");
-print STDERR "Currentuser $CurrentUser, $resp\n";
+print STDERR "Currentuser $CurrentUser, $resp, committee $org\n";
 #my $Tickets = RT::Tickets->new($session{'CurrentUser'});
 
 my ($Tickets, $Ticket);
@@ -134,7 +134,6 @@ elsif ($ARGS{'id'}) {
     $Ticket = RT::Ticket->new($CurrentUser);
     $Ticket = LoadTicket($ARGS{'id'});
 }
-
 
 
 

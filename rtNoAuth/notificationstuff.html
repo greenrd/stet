@@ -1,0 +1,225 @@
+%# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+%
+% sub displayTicket($$$);
+%
+Subject: GPLv3 Comment updates for <% $CurrentUser->Name %>
+
+This is a summary of the developments so far on all of the GPLv3
+comments you submitted or replied to.  Each comment is associated with
+a ticket. You will receive a shorter message like this whenever a new
+comment is added to one of your tickets, but you can turn this off or
+set specific notification preferences at
+http://gplv3.fsf.org/comments/rt/userprefs.html
+
+You may also track your personal ticket developments at
+http://gplv3.fsf.org/comments/rt/readsay.html?uid=<% $CurrentUser->id %>
+or use a feed at 
+http://gplv3.fsf.org/comments/rt/rsswithcomments.rdf?uid=<% $CurrentUser->id %>
+
+% while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
+% my $showactions = $Tickets ? 0 : 1;
+<% displayTicket(\$item,$showactions,0) %>
+% $Ticket = '';
+% $rc++;
+% if ($rc == (($StartAt + $Rows) - 1)) {
+%    $Tickets = '';
+% } 
+% }
+% sub displayTicket($$$) {
+% my $itemref = shift;
+% my $item = $$itemref;
+% my $showactions = shift;
+% my $deletelink = shift;
+
+% if ($item->QueueObj->CurrentUserHasRight('SeeQueue')) {
+<% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <% $item->id %>: <% $item->Subject %>
+http://gplv3.fsf.org/comments/rt/readsay.html?id=<% $item->id %>
+Regarding the text: "<% $scrubber->scrub($item->FirstCustomFieldValue('NoteSelection')) |n %>"
+In section: <% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>
+Submitted by: <% userlink(\$item, \$item) |n%> on <% doDate(\$item) %>
+<% getThread(\$item) |n%>
+
+% return '';
+% }
+% }
+<%INIT>
+use CGI qw/:standard/;
+use HTML::Scrubber;
+our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+require "/var/www/stet/stetsubs.pl";
+our $issuequeue = 5; 
+my $rc = 0;
+our ($name, $resp, $CurrentUser, $HasIssueRights);
+my ($pass, $agr_vals, $thing);
+#($CurrentUser, $resp, $name) = getUser("foo");
+#$CurrentUser = $session{'CurrentUser'};
+$CurrentUser = RT::CurrentUser->new($ARGS{'uid'});
+
+my $rsslink = "/comments/rt/rssresults.rdf?uid=".$ARGS{'id'}."&Query=".$ARGS{'Query'};
+
+my ($Tickets, $Ticket, @results, @msgresults, @linkresults, @cfresults);
+
+
+if ($ARGS{'Query'}) {
+    $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL($ARGS{'Query'});
+    $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+}
+elsif ($ARGS{'uid'}) {
+    $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL("Watcher.Id = '".$CurrentUser->id."'");
+    $Tickets->OrderBy( FIELD => 'id', ORDER => $ARGS{'Order'});
+}
+elsif ($ARGS{'id'}) {
+    $Ticket = RT::Ticket->new($CurrentUser);
+    $Ticket = LoadTicket($ARGS{'id'});
+    if ($ARGS{'SubmitTicket'}) {
+	ProcessUpdateMessage(TicketObj => $Ticket, ARGSRef=>\%ARGS, Actions=>\@msgresults);
+	@linkresults = ProcessTicketLinks( TicketObj => $Ticket, ARGSRef => \%ARGS);
+	@cfresults = ProcessTicketCustomFieldUpdates(TicketObj => $Ticket, ARGSRef => \%ARGS);
+	$ARGS{'Take'} && ($Ticket->Take()); # && print STDERR $CurrentUser->Name." taking ticket ".$Ticket->id."\n");
+	$ARGS{'Steal'} && ($Ticket->Steal()); # && print STDERR $CurrentUser->Name." stealing ticket ".$Ticket->id."\n");
+	$ARGS{'Untake'} && ($Ticket->Untake()); # && print STDERR $CurrentUser->Name." untaking ticket ".$Ticket->id."\n");
+   }
+    if ($ARGS{'MakeIssue'}) {
+	$Ticket->SetQueue($issuequeue);
+    }
+    if ($ARGS{'NonIssue'}) {
+	$Ticket->SetQueue('Inbox');
+    }
+
+    foreach my $result (@msgresults,@linkresults,@cfresults) {
+        push @results,$result;
+    }
+}
+my $NewQueueObj = RT::Queue->new( $CurrentUser );
+$NewQueueObj->Load($issuequeue); 
+
+if (
+    (
+        $CurrentUser->HasRight(
+            Right    => 'CreateTicket',
+            Object => $NewQueueObj
+        )
+      )
+)
+    {
+	$HasIssueRights = 1;
+    }
+else {$HasIssueRights = '';}
+
+sub thingType($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+if ($item->Queue == 5) {
+    return "Issue";
+}
+else {
+    return "Comment";
+}
+}
+
+
+
+sub getThread($) {
+
+    my $itemref = shift;
+    my $item = $$itemref;
+    my $Transactions = $item->Transactions;
+    my $allcomments = '';
+    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+    while (my $Transaction = $Transactions->Next) {
+	
+	if ($Transaction->Type =~ /^(Create|Correspond|Comment$)/) {
+	    
+	    my $attachments = $Transaction->Attachments;
+	    my $CustomFields = $item->QueueObj->CustomFields();
+	    $attachments->GotoFirstItem;
+	    while (my $message = $attachments->Next) {
+		my ($subj, $cont) = ('');
+		if ($message->Subject != '') {
+		    $subj = $scrubber->scrub($message->Subject);
+		}
+		$cont = $scrubber->scrub($message->Content);
+		if ($cont =~ s/(\S)\n\n(\S)/$1<\/p><p>\n$2/gs) {
+		$cont = "\n$cont\n";
+	    }
+		$cont =~ s/&(?!amp;)/&amp;/g;
+		$allcomments .= "\nComment noted by ". userlink(\$item,\$message) ." on ".doDate(\$message).":\n";		
+		$allcomments .= "$subj".$cont."\n";
+	    }
+	}
+	    else {
+		unless (($Transaction->CreatorObj->Name =~ "RT_System") || ($Transaction->BriefDescription =~ "NoteText|NoteSelection|NodeId|Agreeer|NoteUrl")) {
+	       
+		    $allcomments .= $Transaction->BriefDescription." by ".userlink(\$item,\$Transaction)." on ".doDate(\$Transaction)."\n";
+		}
+	    }
+
+	}
+      
+	    return $allcomments;
+	
+    }
+
+sub userlink($$) {
+    my $itemref = shift;
+    my $item = $$itemref;
+    my $msgref = shift;
+    my $message = $$msgref;
+#    return "<span class=\"userlink\"><a href=\"/comments/".$item->FirstCustomFieldValue('NoteUrl')."?Query=%20Requestor.Name%20LIKE%20'".$message->CreatorObj->Name."'%20AND%20'CF.NoteUrl'%20LIKE%20'".$item->FirstCustomFieldValue('NoteUrl')."'%20\">".$message->CreatorObj->Name."</a>". longOrg($message->CreatorObj)."</span>";
+    return $message->CreatorObj->Name." ".longOrgTxt($message->CreatorObj);
+}
+
+sub doDate($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+    $item->Created =~ m/(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d):\d\d/;
+    return  "$1 at $2 ". getTZ($item->Created);
+}
+
+sub getTZ($) {
+my $date = shift;
+$date =~ s/\d\d\d\d-(\d\d)-\d\d.*/$1/;
+my $eastern = "EST";
+if ($date > 3) {  # after the end of March...
+    $eastern = "EDT";
+}
+if ($date > 10) {  # after the end of October...
+    $eastern = "EST";
+}
+
+return $eastern;
+}
+
+</%INIT>
+<%ARGS>
+$Rows => 30
+$StartAt => 1
+$Order => 'DESC'
+#$Query => "'CF.NoteUrl' LIKE 'gplv3-draft-1'"
+$Take => undef
+$Steal => undef
+$Untake => undef
+</%ARGS>

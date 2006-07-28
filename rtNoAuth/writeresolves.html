@@ -1,0 +1,137 @@
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Author: Orion Montoya <orion@mdcclv.com>
+%#
+%# This software gives you freedom; it is licensed to you under version
+%# 3 of the GNU Affero General Public License, along with the
+%# additional permission in the following paragraph.
+%#
+%# This notice constitutes a grant of such permission as is necessary
+%# to combine or link this software, or a modified version of it, with
+%# Request Tracker (RT), published by Jesse Vincent and Best Practical
+%# Solutions, LLC, or a derivative work of RT, and to copy, modify, and
+%# distribute the resulting work.  RT is licensed under version 2 of
+%# the GNU General Public License.
+%# 
+%# This software is distributed WITHOUT ANY WARRANTY, without even the
+%# implied warranties of MERCHANTABILITY and FITNESS FOR A PARTICULAR
+%# PURPOSE.  See the GNU Affero General Public License for further
+%# details.
+%#  
+%# You should have received a copy of the GNU Affero General Public
+%# License, version 3, and the GNU General Public License, version 2,
+%# along with this software.  If not, see <http://www.gnu.org/licenses/>.
+% if (!$edit && !$doedit && !$create) {
+<h1>Creating a new summary/resolution</h1>
+<h4>to edit an existing ticket, give the arg "edit=<em>tktid</em>" to this url</h4>
+<form action="writeresolves.html" method="GET">
+<input type="hidden" name="create" value="create"/>
+Subject: <input type="text" name="subject"/><br/>
+Issue summary:<br/>
+<textarea name="toComment" rows="24" cols="70"></textarea><br/>
+Resolution:<br/>
+<textarea name="toReply" rows="24" cols="70"></textarea><br/>
+<input type="submit"><br/>
+</form>
+Assign tickets to this resolution at summarydecision.html?id=<em>tktid</em><br/>
+% } elsif ($edit || $create) {
+% my $Ticket = new RT::Ticket($CurrentUser);
+% $id ? $edit = $id : $edit = $edit;
+% $Ticket->Load($edit);
+% if ($Ticket->id == $edit) {
+    [ticket <% $Ticket->id %> successfully loaded]<br/>
+(if anything looks funny here, make sure that this is the right ticket id)<br/>
+<form action="writeresolves.html" method="GET">
+<input type="hidden" name="doedit" value="doedit"/>
+<input type="hidden" name="edit" value="<% $Ticket->id %>"/>
+<strong>Subject:</strong> <% $Ticket->Subject %><br/>
+<strong>Issue summary:</strong><br/>
+<textarea name="toComment" rows="24" cols="70"><% newest("Comment",\$Ticket) %></textarea><br/>
+Resolution:<br/>
+<textarea name="toReply" rows="24" cols="70"><% newest("Correspond",\$Ticket) %></textarea><br/>
+<input type="submit" value="Submit Changes"><br/>
+</form>
+% }
+% }
+
+<%INIT>
+
+use MIME::Entity;
+use CGI qw/:standard/;
+use Data::Dumper;
+
+use MIME::Base64;
+use URI::Escape;
+use Frontier::Client;
+
+require "/var/www/stet/stetsubs.pl";
+
+use HTML::Scrubber;
+my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+
+my ($CurrentUser, $resp, $name) = getUser("x");
+my ($reply, $comment, $id);
+
+if ($create) {
+my $cticket = new RT::Ticket($CurrentUser);
+$comment = MIME::Entity->build(Data => $toComment,
+				      Type => 'text/plain');
+$reply = MIME::Entity->build(Data => $toReply,
+				      Type => 'text/plain');
+my %cticket_vals = ( Queue => "Resolution",
+		    Subject => $subject,
+#                      Owner => 'Nobody',
+                      Requestor => $name, # will work with new users
+#                      MIMEObj => $ticket_body,
+#		      'CustomField-1' => $selectedtext,
+#		      'CustomField-2' => $dompath,
+#		      'CustomField-3' => $url,
+#		      'CustomField-4' => $startid,
+#		      'CustomField-5' => $endid,
+#		      'CustomField-6' => $notetext,
+#		      'CustomField-7' => $name,
+		      );
+  ($id, my $ctransaction_object, my $cerr) = $cticket->Create(%cticket_vals);
+$cticket->Comment(Content => $toComment) if $toComment;
+$cticket->Correspond(Content => $toReply) if $toReply;
+  print STDERR $cerr . "\n" if $cerr;
+}
+elsif ($doedit) {
+my $eticket = new RT::Ticket($CurrentUser);
+$eticket->Load($edit);
+$eticket->Comment(Content => $toComment) if $toComment;
+$eticket->Correspond(Content => $toReply) if $toReply;
+
+}
+
+
+
+$r->content_type('text/html');
+
+sub newest($$) {
+    my $type = shift;
+    my $itemref = shift;
+    my $item = $$itemref;
+    my $trx = $item->Transactions;
+    my $returnme;
+    my $tr;
+    $trx->GotoFirstItem();
+    while ($tr = $trx->Next) {
+	if ($tr->Type =~ /$type/) {
+#	    $returnme .= $tr->Content . " id ". $tr->id;
+	    $returnme = $tr->Attachments->First->Content;
+	}
+    }
+    return $returnme;
+}
+
+
+</%INIT>
+<%ARGS>
+$queue => "Resolution"
+$edit => undef
+$create => undef
+$doedit => undef
+$toReply => undef
+$toComment => undef
+$subject => undef
+</%ARGS>

@@ -20,7 +20,7 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-%#  
+%
 % sub displayTicket($$$);
 %
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -130,6 +130,29 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
             <span class="TktInput">[dissociate: <INPUT TYPE=CHECKBOX NAME="<% $deletelink %>" value="1">]</span>
 %      }
 </h4>
+
+%  if (($item->QueueObj->Name =~ /Resolution/) && (($HasIssueRights) && ($showactions) && (!$deletelink))) {
+<br/>
+  <span class="TktLabel">This Ticket Resolves:</span><br/>
+        <span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+%  }
+    <span class="TktLabel">This <% thingType(\$item) %> is resolved by:</span><br/>
+%   while (my $link = $item->MemberOf->Next) {
+#<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &>
+% if ($HasIssueRights) {
+	   <span class="TktInput">[dissociate from parent: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Type %>-<% $link->Target %>" value="1">]</span>
+% }
+<br/>
+%    }
+<br/>
+% if (($showactions) & (!$deletelink)){
+<br/>
+%  if ($HasIssueRights) {
+       <span class="TktInput indent">add new resolvers: <% pickResolvs(\$item) |n%> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+%  }
+    <br/>
+%    }
+
 % if (!$deletelink) {
 %#   while (my $link = $item->DependsOn->Next) {
 %#    <span class="formHelpIsh">This <% thingType(\$item) %> is part of the discussion  on:<br/> #<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &></span><span class="TktInput">
@@ -467,6 +490,23 @@ my $depth = shift;
     }
 
 return $returnlist;
+}
+
+sub pickResolvs($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+
+    my $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL("Queue = 'Resolution' ");
+    $Tickets->OrderBy( FIELD => 'id', ORDER => 'DESC');
+    my $returnme .= "<select name=\"".$item->id."-MemberOf\">";
+    $returnme .= "<option value=\"\">Pick resolving tickets</option>";
+    while (my $Ticket = $Tickets->Next) {
+	$returnme .= "<option value=\"".$Ticket->id."\">#".$Ticket->id.": ".$Ticket->Subject."</option>";
+    }
+    $returnme .="</select>
+";
+    return $returnme;
 }
 
 </%INIT>

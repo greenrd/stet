@@ -1,5 +1,5 @@
-%# Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
-%# Author: Orion Montoya <orion@mdcclv.com>
+%# Copyright (C) 2006   Software Freedom Law Center, Inc.
+%# Modified-By: Orion Montoya <orion@mdcclv.com>
 %#
 %# This software gives you freedom; it is licensed to you under version
 %# 3 of the GNU Affero General Public License, along with the
@@ -21,6 +21,7 @@
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
 %#  
+%
 % sub displayTicket($$$);
 %
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -114,7 +115,7 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 % my $deletelink = shift;
 % if (!$deletelink) {
 %  if ($resp == 1) {
-    <form action="summarydecision.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
+    <form action="resolve.html" method="POST" name="TicketUpdate" enctype="multipart/form-data">
 <input type="hidden" name="filename" value="<% $filename %>">
        <input type="hidden" name="id" value="<% $item->id %>">
 %  }
@@ -122,7 +123,7 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 
 % if ($item->QueueObj->CurrentUserHasRight('SeeQueue')) {
  <div class="onecomment<% ($item->QueueObj->Name =~ /Drafter/) && " Drafter" %><% $deletelink && " child\" id=\"child".$item->id |n %>">
-  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="summarydecision.html?filename=<% $filename %>&id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
+  <h4><% ($item->QueueObj->Name =~ /Drafter/) && " Drafter's " %><% thingType(\$item) %> <a href="resolve.html?filename=<% $filename %>&id=<% $item->id %>"><% $item->id %>: <% $item->Subject %></a>
 %  if ($item->Queue == $fsfqueue) {
 <div class="admin">This issue has been escalated to the Drafters <!-- by fixme --> </div>
 %  }
@@ -130,6 +131,29 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
             <span class="TktInput">[dissociate: <INPUT TYPE=CHECKBOX NAME="<% $deletelink %>" value="1">]</span>
 %      }
 </h4>
+
+%  if (($item->QueueObj->Name =~ /Resolution/) && (($HasIssueRights) && ($showactions) && (!$deletelink))) {
+<br/>
+  <span class="TktLabel">This Ticket Resolves:</span><br/>
+        <span class="TktInput indent">add new: <INPUT NAME="MemberOf-<% $item->id %>"> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+%  }
+    <span class="TktLabel">This <% thingType(\$item) %> is resolved by:</span><br/>
+%   while (my $link = $item->MemberOf->Next) {
+#<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &>
+% if ($HasIssueRights) {
+	   <span class="TktInput">[dissociate from parent: <INPUT TYPE=CHECKBOX NAME="DeleteLink--<% $link->Type %>-<% $link->Target %>" value="1">]</span>
+% }
+<br/>
+%    }
+<br/>
+% if (($showactions) & (!$deletelink)){
+<br/>
+%  if ($HasIssueRights) {
+       <span class="TktInput indent">add new resolvers: <% pickResolvs(\$item) |n%> <span class="inputcaption">[comment id numbers, space separated]</span></span>
+%  }
+    <br/>
+%    }
+
 % if (!$deletelink) {
 %#   while (my $link = $item->DependsOn->Next) {
 %#    <span class="formHelpIsh">This <% thingType(\$item) %> is part of the discussion  on:<br/> #<& Elements/ShowLink, URI => $link->TargetURI, StetId => $link->id  &></span><span class="TktInput">
@@ -145,7 +169,7 @@ Showing comment <a href="/comments/rt/summarydecision.html?filename=<% $filename
 %   }
 <br/>
   <span class="formHelpIsh">Regarding the text:</span> <span class="ontextText"><q><% $scrubber->scrub($item->FirstCustomFieldValue('NoteSelection')) %></q></span><br/>
-    <span class="formHelpIsh">In section: <span class="nodeLink"><a href="/comments/rt/summarydecision.html?filename=<% $filename %>&Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span></span><br/>
+    <span class="formHelpIsh">In section: <span class="nodeLink"><a href="/comments/rt/resolve.html?filename=<% $filename %>&Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span></span><br/>
 %#    In section: <span class="nodeLink"><a href="/comments/<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>?Query=%20'CF.NoteStartNodeId'%20LIKE%20'<% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %>'%20AND%20'CF.NoteUrl'%20LIKE%20'<%stripCrap($item->FirstCustomFieldValue('NoteUrl'))%>'%20"><% $scrubber->scrub($item->FirstCustomFieldValue('NoteStartNodeId')) %></a></span><br/>
   <span class="formHelpIsh">Submitted by: <% userlink(\$item, \$item) |n%> <span class="date">on <% doDate(\$item) %></span></span><br/>
 <% listAgree(\$item) %>
@@ -459,7 +483,7 @@ my $depth = shift;
 	    $ptkt->Load($parent->TargetObj->id);
 	    $depth++;
 	    my $fn = stripCrap($item->FirstCustomFieldValue('NoteUrl'));
-	    $returnlist = ("&nbsp;" x $depth ). thingType(\$ptkt). "#<a href=\"/comments/rt/summarydecision.html?filename=<% $fn %>&id=".$ptkt->id."\">".$ptkt->id."  ".$ptkt->Subject."</a><br/>\n";
+	    $returnlist = ("&nbsp;" x $depth ). thingType(\$ptkt). "#<a href=\"/comments/rt/resolve.html?filename=<% $fn %>&id=".$ptkt->id."\">".$ptkt->id."  ".$ptkt->Subject."</a><br/>\n";
 
 	    $returnlist = listAncestry(\$ptkt,$depth) . $returnlist;
 	}
@@ -467,6 +491,23 @@ my $depth = shift;
     }
 
 return $returnlist;
+}
+
+sub pickResolvs($) {
+    my $itemref = shift;
+    my $item = $$itemref;
+
+    my $Tickets = RT::Tickets->new($CurrentUser);
+    $Tickets->FromSQL("Queue = 'Resolution' ");
+    $Tickets->OrderBy( FIELD => 'id', ORDER => 'DESC');
+    my $returnme .= "<select name=\"".$item->id."-MemberOf\">";
+    $returnme .= "<option value=\"\">Pick resolving tickets</option>";
+    while (my $Ticket = $Tickets->Next) {
+	$returnme .= "<option value=\"".$Ticket->id."\">#".$Ticket->id.": ".$Ticket->Subject."</option>";
+    }
+    $returnme .="</select>
+";
+    return $returnme;
 }
 
 </%INIT>
