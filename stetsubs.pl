@@ -104,13 +104,16 @@ sub getUser($) {
 	$server = Frontier::Client->new(url => 'http://'.$username.':'.$password.'@gplv3.fsf.org:8800/launch/acl_users/Users/acl_users'); #,
 #					   username => $username,
 #					   password =>  $password);
-	my $respref = $server->call('authRemoteUser',$name,$pass);
+	my $coder = Frontier::RPC2->new;
+	my $xmlpass = $coder->string($pass);
+	my $xmluser = $coder->string($name);
+	my $respref = $server->call('authRemoteUser',$xmluser,$xmlpass);
 	$resp = $$respref;
     }
     else {
 	$resp = 0;
     }
-#    print STDERR "resp to getUser was $resp\n";
+    print STDERR "resp to getUser for $name was $resp\n";
     
 # mangle name for testing:
 #	$name = $name."createtest2"; # have used 1, 45
