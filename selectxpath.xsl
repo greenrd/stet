@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2005   Software Freedom Law Center, Inc.
+<!-- Copyright (C) 2005, 2006   Software Freedom Law Center, Inc.
 --   Author: Orion Montoya <orion@mdcclv.com>
 --
 -- This software gives you freedom; it is licensed to you under version
@@ -34,18 +34,7 @@
         <title><xsl:value-of select="//head/title"/></title>
         <script type="text/javascript" src="stet-intense-shorter.js"/>
 	<script type="text/javascript" language="javascript">
-	  /* for Mozilla */
-	  /*   if (document.addEventListener) {
-	  document.addEventListener("DOMContentLoaded", initPage(), null);
-	  } */
-	  /* for Internet Explorer */
-	  /*@cc_on @*/
-	  /*@if (@_win32)
-	  document.write("&lt;script defer src=ie_onload.js>&lt;"+"/script>");
-	      /*@end @*/
-	      /* for other browsers */
-	      var OnLoad = 'initPage()'; 
-	      window.onload = function() {eval(OnLoad)}; 
+window.onload = initPage();
 </script>
 
         <link rel="stylesheet" type="text/css" href="stet-ie.css"/>

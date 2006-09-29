@@ -33,7 +33,7 @@ function printfire(foo) {
 /*       var ev = document.createEvent("Events"); */
 /*   ev.initEvent("printfire", false, true); */
 /*       dispatchEvent(ev); */
-/*   }  */
+/*   } */
 }
 
 // a few things need to be global
@@ -45,6 +45,8 @@ var filename;
 var firstLoad = "1";
 var noMatch =  0;
 function initPage() {
+  //  alert("starting initPage, supposedly DOM is loaded");
+  //alert(document.getElementsByTagName("*").length);
   // quit if this function has already been called
   if (arguments.callee.done) return;
   // flag this function so we don't do the same thing twice
@@ -53,8 +55,8 @@ function initPage() {
   filename = location.pathname.substring(location.pathname.lastIndexOf('/')+1,location.pathname.length); 
   filename = filename.replace(/.xml|.html/,'');
   //	printfire('filename is '+filename);
-  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments$/))|| (filename.match(/comments\/\?/)) || (filename.match(/comments\/#/)) || (filename.match(/debug/) || (filename.match(/classic/)))) {
-    filename = 'uncertain';
+  if((!filename.length) || (filename.match(/index/)) || (filename.match(/comments?$/))|| (filename.match(/comments?\/\?/)) || (filename.match(/comments?\/#/)) || (filename.match(/debug/) || (filename.match(/classic/)))) {
+    filename = 'gplv3-draft-2';
   }
   if(window.location.search.length) {
    loadXMLDoc('/comments/rt/xmlresults-intense.html',window.location.search.substring(1)+'&filename='+filename);
@@ -75,7 +77,9 @@ function loadFromHash() { // checks the location hash for bookmarked notes to sh
 function loadAll() {
   var getUs = '';
   for (var rtid in ticketObj) {
-    getUs += rtid+':';
+    if ((rtid != '') && (rtid != 'length')) {
+      getUs += rtid+':';
+    }
   }
   getnotes(getUs);
 }
@@ -280,12 +284,12 @@ function loadXMLDoc(url,theData)
     req = new ActiveXObject('Microsoft.XMLHTTP');
   }
   var method;
+  req.onreadystatechange = processReqChange;
   if(theData=='') { method="GET"; } 
   else { method = "POST"; }
   req.open(method, url, true);
   req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
   req.setRequestHeader('X-Referer',document.location);
-  req.onreadystatechange = processReqChange;
   req.send(theData);
 }
 
@@ -379,6 +383,7 @@ function processReqChange()
       } catch(e) {}
       resp_arrN = response.getElementsByTagName("ant");
       if(!!resp_arrN.length && (resp_arrN.length > 0)) {
+	//	printfire("doing processAnt");
 	processAnt(response);
 	did++;
       }
@@ -518,21 +523,21 @@ function processAnt(response) {
   rtnArray = cacheAntVals(response);
   rtidsBySn = rtnArray[0];
   rtidsByP = rtnArray[1];
-  //  alert(rtidsBySn.length);
+  //  printfire("rtidsBySn = "+rtidsBySn);
   highlightSelections(rtidsBySn);
   PLinks(rtidsByP);
-  //  addAllLink();
-  //  unOverlap("annotation",5); // thse won't overlap anymore
+  addAllLink();
+  unOverlap("newannotation",5); // thse won't overlap anymore
   currently('Ready.');
 }
 
 function addAllLink() {
   if (ticketObj.length < 150) {
-        loadAll();
-     var sLnk = document.createElement('a'); 
-/*     sLnk.setAttribute('href','#all'); */
-/*     sLnk.setAttribute('onClick','loadAll()'); */
-     sLnk.appendChild(document.createTextNode('[currently showing all]')); 
+//    loadAll();
+    var sLnk = document.createElement('a'); 
+    sLnk.setAttribute('href','#all');  
+    sLnk.setAttribute('onClick','loadAll()');
+    sLnk.appendChild(document.createTextNode('[show all]')); 
      document.getElementById('statustext').appendChild(document.createTextNode(' ')); 
      document.getElementById('statustext').appendChild(sLnk); 
   }
@@ -572,7 +577,7 @@ function cacheAntVals(response) {
   for (prI = 0; prI < selections_arr.length; prI++) {
     if (selections_arr[prI].firstChild) {
       rtids_arr[prI].firstChild.data ? rtid = rtids_arr[prI].firstChild.data : rtid = "error";
-      //      printfire('prI '+prI+',rtid '+rtid);
+      //printfire('prI '+prI+',rtid '+rtid);
       if (!ticketObj[rtid]) { ticketObj[rtid] = new Object; ticketObj.length++;}
       ticketObj[rtid].startnode = startnodes_arr[prI].firstChild.data.replace(/note\.[0-9]+\./,'');;
       ticketObj[rtid].queue = queues_arr[prI].firstChild.data;
@@ -580,12 +585,14 @@ function cacheAntVals(response) {
       startp = ticketObj[rtid].startnode.replace(/.s[\d+]$/, '');
       if(!rtidsBySn[ticketObj[rtid].startnode]) {
 	rtidsBySn[ticketObj[rtid].startnode] = new Array(rtid);
-	//	alert('pushing '+rtid+' to '+ticketObj[rtid].startnode);
+	//	printfire('1 pushing '+rtid+' to '+ticketObj[rtid].startnode);
+	//printfire("1 rtidsBySn[ticketObj[rtid].startnode][0] = "+rtidsBySn[ticketObj[rtid].startnode][0]);
 	rtidsByP[startp] = new Array(rtid);
       }
       else {
-	//	alert('pushing '+rtid+' to '+ticketObj[rtid].startnode);
+	//	printfire('2 pushing '+rtid+' to '+ticketObj[rtid].startnode);
 	rtidsBySn[ticketObj[rtid].startnode].push(rtid);
+	//printfire("2 rtidsBySn[ticketObj[rtid].startnode][0] = "+rtidsBySn[ticketObj[rtid].startnode][0]);
 	rtidsByP[startp].push(rtid);
       }
     }
@@ -599,8 +606,10 @@ function highlightSelections(rtidsBySn) {
   // (this is GIGO: nothing should be drm.0, only drm.0.0 .  Still, should be fixed at some point)
   // ah, now it has to be fixed so we can highlight new annots.
   for (var section in rtidsBySn) {
+    //printfire('section is '+section);    	
+      var sectObj = document.getElementById(section);
     if(document.getElementById(section)) {
-    //    printfire('section is '+section);    	
+      //printfire('section is '+section);    	
     var Selections = new Array();
     var Rtids = new Array();
     for (var i = 0; i < rtidsBySn[section].length; i++) {
@@ -747,7 +756,7 @@ var theBR3 = document.createElement('br');
 var theBR4 = document.createElement('br');
 
 var pickQueue;
-if (drafter) {
+if (drafter.match(/drafter/)) {
 pickQueue = document.createElement('select');
 pickQueue.setAttribute('name','queue');
 pickQueue.setAttribute('id','queue');
@@ -765,10 +774,67 @@ var optIssues = document.createElement('option');
 optIssues.setAttribute('value','Issues');
 optIssues.appendChild(document.createTextNode('Issues'));
 
+var optComA = document.createElement('option');
+optComA.setAttribute('value','CommitteeA');
+optComA.setAttribute('selected','selected');
+optComA.appendChild(document.createTextNode('CommitteeA'));
+
+var optComB = document.createElement('option');
+optComB.setAttribute('value','CommitteeB');
+optComB.setAttribute('selected','selected');
+optComB.appendChild(document.createTextNode('CommitteeB'));
+
+var optComC = document.createElement('option');
+optComC.setAttribute('value','CommitteeC');
+optComC.setAttribute('selected','selected');
+optComC.appendChild(document.createTextNode('CommitteeC'));
+
+var optComD = document.createElement('option');
+optComD.setAttribute('value','CommitteeD');
+optComD.setAttribute('selected','selected');
+optComD.appendChild(document.createTextNode('CommitteeD'));
+
+var optComT = document.createElement('option');
+optComT.setAttribute('value','CommitteeT');
+optComT.setAttribute('selected','selected');
+optComT.appendChild(document.createTextNode('CommitteeTest'));
+
 pickQueue.appendChild(optDrafter);
 pickQueue.appendChild(optInbox);
 pickQueue.appendChild(optIssues);
+pickQueue.appendChild(optComA);
+pickQueue.appendChild(optComB);
+pickQueue.appendChild(optComC);
+pickQueue.appendChild(optComD);
+pickQueue.appendChild(optComT);
 }
+
+else if (drafter.match(/Committee/)) {
+  var letray = drafter.match(/Committee(.)/);
+  var letter = letray[1];
+
+  pickQueue = document.createElement('select');
+  pickQueue.setAttribute('name','queue');
+  pickQueue.setAttribute('id','queue');
+  
+  var optDrafter = document.createElement('option');
+  optDrafter.setAttribute('value','Committee'+letter);
+  optDrafter.setAttribute('selected','selected');
+  optDrafter.appendChild(document.createTextNode('Committee'+letter));
+  
+  var optInbox = document.createElement('option');
+  optInbox.setAttribute('value','Inbox');
+  optInbox.appendChild(document.createTextNode('Inbox'));
+  
+  var optIssues = document.createElement('option');
+  optIssues.setAttribute('value','Issues');
+  optIssues.appendChild(document.createTextNode('Issues'));
+  
+  pickQueue.appendChild(optDrafter);
+  pickQueue.appendChild(optInbox);
+  pickQueue.appendChild(optIssues);
+}
+
 else {
 pickQueue = document.createElement('input');
 pickQueue.setAttribute('type','hidden');
@@ -1062,14 +1128,14 @@ function showFull (rtid) {
   myCollapsed = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].full+' '+ticketObj[rtid].link+' <a href="javascript:showExcerpt(\''+rtid+'\')">[-]</a>',myCollapsed.id);
   myCollapsed.parentNode.setAttribute('onclick','');
-  unOverlap("annotation",5);
+  unOverlap("newannotation",5);
 }
 
 function showExcerpt (rtid) {
   myFull = document.getElementById('rt'+rtid+'txt');
   loadHTMLtoDiv(ticketObj[rtid].excerpt+' <a href="javascript:showFull(\''+rtid+'\')">[+]</a>',myFull.id);
   myFull.parentNode.setAttribute('onclick','showFull(\''+rtid+'\')');
-  unOverlap("annotation",5);
+  unOverlap("newannotation",5);
 }
 
 function iAgree (rtid,opn) {
@@ -1131,7 +1197,7 @@ function idLinks(cs) {
     newMe.appendChild(Lnk);
     newMe.appendChild(document.createTextNode(' '));
     sLnk = document.createElement('a');
-    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from='+location.pathname);
+    sLnk.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?came_from='+location.pathname+'&filename='+filename);
     sLnk.appendChild(document.createTextNode('search'));
     newMe.appendChild(sLnk);
     st = document.getElementById('statustext');
@@ -1171,18 +1237,21 @@ function qLinks(cs) {
     lLnk.setAttribute('href',list.data);
     lLnk.appendChild(document.createTextNode('[list]'));
     newMe.appendChild(lLnk);
+
+if (!filename.match(/lgpl-draft-1/)) {
     newMe.appendChild(document.createTextNode(' '));
     rat = document.createElement('a');
     rat.setAttribute('href',location.pathname+"?filename="+filename+"&Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'"+filename+"'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");
     rat.appendChild(document.createTextNode('[rationale]'));
     newMe.appendChild(rat);
+}
     newMe.appendChild(document.createElement('br'));
     newMe.appendChild(document.createTextNode('(found '+t.data+': click highlights to show.) ')); // , showing '+rng.data));
  
     sLnk = document.createElement('span');
     sLnk.setAttribute('id','searchlink');
     sLnkA = document.createElement('a');
-    sLnkA.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?filename='+filename+'came_from='+location.pathname);
+    sLnkA.setAttribute('href','http://gplv3.fsf.org/comments/rt/changeshown.html?filename='+filename+'&came_from='+location.pathname);
     sLnkA.appendChild(document.createTextNode('search'));
     sLnk.appendChild(sLnkA)
     newMe.appendChild(sLnk);

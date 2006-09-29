@@ -45,9 +45,6 @@ If you have found a bug in the web or email interfaces, please send
 all useful information to tech@gplv3.fsf.org, where they will be
 entered in our bug tracker.
 
-(This is the first run of the email interface, which will soon be
-automated, so now would be a particularly good time to point out bugs.)
-
 Here is the message you sent us:
 ---------
 {$bodyobj->as_string()}
