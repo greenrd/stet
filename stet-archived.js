@@ -44,6 +44,7 @@ var drafter = '';
 var filename;
 var firstLoad = "1";
 var noMatch =  0;
+
 function initPage() {
   //  alert("starting initPage, supposedly DOM is loaded");
   //alert(document.getElementsByTagName("*").length);
@@ -87,99 +88,11 @@ function loadAll() {
 // this is for browsers with a featureful getSelection object; others
 // have to use an XMLHTTPRequest call.
 function XpathSel() { 
-  if (!readCookie('__ac')) {
+
     document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
     return;
   }
-  var textObj = '';
-  var start = '';
-  var end = '';
-  if (window.getSelection)
-    {
-      textObj = window.getSelection();
-    }
-  else if (document.getSelection)
-    {
-      textObj= document.getSelection();
-    }
-  else if (document.selection)
-    {
-      textObj= document.selection.createRange().text;
-    }
-       if(textObj.length < 1) {
-	 document.getElementById('selectsome').setAttribute('class','error');
-	 document.getElementById('login').innerHTML(textObj.length);
-	 return;
-       }
 
-    try { var sn = textObj.anchorNode; } catch(e) {}
-    if (!sn) {  // lame getSelection object has no anchorNode
-       loadXMLDoc('/comments/rt/formxml.html','selection='+encodeURI(textObj.toString()));
-	
-
-    }
-    else {  // good getSelection
-      try { var startNode = textObj.anchorNode; } catch(e) { }
-      if (startNode.parentNode.getAttribute && startNode.parentNode.getAttribute('class') && startNode.parentNode.getAttribute('class').match(/highlight/)) {
-	startNode = startNode.parentNode;
-      }
-      try { var startid = startNode.parentNode.id; } catch(e) { }
-      try { var start = startNode.parentNode.nodeName; } catch(e) { }
-      var endnode = textObj.focusNode.parentNode;
-      if (endnode.getAttribute && endnode.getAttribute('class') && endnode.getAttribute('class').match(/highlight/)) {
-	endnode = endnode.parentNode;
-      }
-      var endid = endnode.id;
-      var end = endnode.nodeName;
-      if (!readCookie('__ac')) {
-	// emphasizes that You need to log in to make comments.
-	document.getElementById('login').setAttribute('style','color: red; font-weight: bold; font-size: 150%');
-      }
-      else {
-	// create the note form
-	var oStr = getDomPath(startNode);
-	createNoteDiv(startid);
-	var textString = textObj.toString();
-	document.getElementById('DomPath').value = oStr;
-	document.getElementById('Selection').value = textString;
-	loadHTMLtoDiv('comment on: <strong>'+textString+'</strong>','SelectionTxt');
-	document.getElementById('NoteSubj').value = 'Subject/summary [required]';
-	document.getElementById('StartNodeId').value = startid;
-	// document.getElementById('EndNodeId').value = endid;
-	document.getElementById('NoteUrl').value = filename;
-	if ((i = navigator.userAgent.indexOf('MSIE')) >= 0) {
-	  document.getElementById('SelectionTxt').innerHTML += "<br/>Comment submission isn't working on the copy of IE 6 we tested [if IE is really the browser you're using] but you're welcome to try.  If this box doesn't turn gray and then disappear when you click 'Submit', it probably didn't work: you can <a href=\"/comments/email.html\">email your comment</a> instead.";
-	}
-	if(startid != endid) {
-	  noteErr('Your selection does not begin and end in the same sentence.  Please cancel and try again with a shorter selection.  If you want to comment on a whole section, please highlight the section title instead.  startid='+startid+', endid='+endid);
-	}
-	if((startid =='login') || (startid == undefined) || (textString == undefined) || (textString == '')) {
-	  noteErr('You\'ve found a browser-compatibility bug that we\'re trying to fix; we would appreciate an email to stet@gplv3.fsf.org saying exactly what browser you\'re using (though we know about Safari).  For the moment the best way to send your comment would be via email: see http://gplv3.fsf.org/comments/email.html');
-	}
-      }
-    }
-}
-
-function noteErr(msg) {
-  document.getElementById('NoteText').value = msg;
-  document.getElementById('submitNote').setAttribute('disabled','disabled');
-  document.getElementById('NoteSubj').setAttribute('disabled','disabled');
-}
-
-/* // not currently used: could invoke when calling submitComment(); 
-function rmChildNotes(startid) {
-  node = document.getElementById(startid);
-  //  var oldChild;
-  if (node.hasChildNodes()) {
-    for (var nodeCt = 0; nodeCt < node.childNodes.length; nodeCt++) {
-      if (node.childNodes.item(nodeCt).getAttribute('class').match('notegroup')) { 
-	//oldChild.appendChild(
-	node.removeChild(node.childNodes.item(nodeCt));
-	// )
-      }
-    }
-  }
-  } */
 function processDompath(response) {
   currently('asking server about your selection...');
   try { var fail = response.getElementsByTagName("nf")[0].firstChild.data; } catch(e) {}
@@ -214,28 +127,6 @@ function getDomPath(startNode) {
   return oStr;
 }
 
-function submitComment() {
-  // doesn't fire on IE, hmm.
-  if ((document.getElementById('NoteSubj').value == 'Subject/summary [required]') || (document.getElementById('NoteSubj').value == ' ')) {
-    loadHTMLtoDiv('<span class="error">Please enter a brief explanatory subject for this comment</span>','SelectionTxt');
-  }
-  else {
-  var form = document.getElementById('noteify');
-  //rmChildNotes(form.StartNodeId.value);
-  var noteText = form.NoteText.value;
-  loadHTMLtoDiv('Ok, submitting...','SelectionTxt');
-  form.NoteText.style.background = '#aaa';
-  form.NoteSubj.style.background = '#aaa';
-  document.getElementById('submitNote').setAttribute('disabled','disabled');
-  document.getElementById('cancel').setAttribute('disabled','disabled');
-  form.style.background = '#aaa';
-
-  var params = encodeURI('DomPath='+form.DomPath.value+'&amp;Selection='+encodeURIComponent(form.Selection.value)+'&amp;NoteSubj='+encodeURIComponent(form.NoteSubj.value)+'&amp;NoteText='+encodeURIComponent(noteText)+'&amp;StartNodeId='+form.StartNodeId.value+'&amp;NoteUrl='+location.href+'&amp;queue='+form.queue.value);
-
-  var theUrl = '/comments/rt/submitcomment-cachetoo.html'; 
-  loadXMLDoc(theUrl,params);
-  }
-}
 
 // these are all too too slow, maybe cssQuery
  function getElementsByClass(needle)
@@ -364,8 +255,6 @@ function processReqChange()
   if (req.readyState == 4) {
     // only if "OK" or "not modified"
     if ((req.status == 200) || (req.status == 304)) {
-      cancelNote("noteify");
-      cancelNote("loading");
       var response  = req.responseXML.documentElement;
       var resp_arrN;
       var resp_arrA;
@@ -399,7 +288,7 @@ function processReqChange()
 	did++;
       }
       resp_arrA = response.getElementsByTagName("agreement");
-      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
+      if(!!resp_arrA.length && (resp_arrA.length > 0)) {
 	processAgreement(response);
 	did++;
       }
@@ -627,34 +516,12 @@ function makeLinkObj(rtid,agreement,agrtot) {
 	  agreestr = agreestr.replace(/<\/?ua>/g,'');
 	  agreestr = agreestr.replace(/<\/?span>/g,'');
 	  agreestr = agreestr.replace(/<\/?b>/g,'');
-    	  if ((agreestr == "agree") || (agreestr == "unagree")) {
-    	    returnLink += ' | <a id="agree'+rtid+'" href="javascript:iAgree('+rtid+',\''+agreestr+'\')">'+agreestr+'</a> | ';
-    	  }
-    	  else {
-    	    returnLink += ' | <span id="agree'+rtid+'">'+agreestr+'</span> | ';
-    	  }
     	  if (agrtot > 0) {
-    	    returnLink += ' [<span id="agrtot'+rtid+'">'+agrtot+'</span> agree]';
+    	    returnLink += ' [<span id="agrtot'+rtid+'">'+agrtot+'</span> agreed]';
     	  }
 	  return returnLink;
 }
 
-
-
-function processAgreement(response) {
-  currently('Indicating your agreement with this comment...');
-	myId = response.getElementsByTagName("id")[0].firstChild.data;
-	myOpn = response.getElementsByTagName("b")[0].firstChild.data;
-	myLink = document.getElementById('agree'+myId);
-	opOpn = document.createElement('span');
-	myOpn == "agree" ? opOpn.appendChild(document.createTextNode("unagree")) : opOpn.appendChild(document.createTextNode("agree"));
-	var agrcount = response.getElementsByTagName("ct")[0].firstChild.data;
-	loadHTMLtoDiv(agrcount,'agrtot'+myId);
-	ticketObj[myId].link = makeLinkObj(myId,getXMLNodeSerialisation(opOpn),agrcount);
-	showFull(myId);
-	myLink.href = 'javascript:iAgree('+myId+',\''+opOpn+'\')';
-	currently('Ready.');
-      }
 
   
 function onNoteifyBlur() {
@@ -676,215 +543,6 @@ function checkKeyPressed(keyEvent) {
   }
 }
 
-function cancelNote(div) {
-  if (cancelme = document.getElementById(div)) {
-    cancelme.parentNode.removeChild(cancelme);
-  }
-}
-
-function createNoteDiv(startid) {
-
-  // this would be a lot more readable and maintainable if it were
-  // just a string.
-
-var noteifyDiv = document.createElement('form');
-noteifyDiv.setAttribute('action','/comments/rt/submitcomment-cachetoo.html');
-noteifyDiv.setAttribute('class','noteify');
-noteifyDiv.setAttribute('id','noteify');
-noteifyDiv.setAttribute('name','noteify');
-noteifyDiv.setAttribute('onblur','onNoteifyBlur()');
-// noteifyDiv.style.z-index = '100';
-
-var DomPathTxt = document.createElement('span');
-DomPathTxt.setAttribute('id','DomPathTxt');
-DomPathTxt.setAttribute('name','DomPathTxt');
-
-var DomPath = document.createElement('input');
-DomPath.setAttribute('id','DomPath');
-DomPath.setAttribute('name','DomPath');
-DomPath.setAttribute('type','hidden');
-DomPath.setAttribute('class','addnote');
-
-var SelectionTxt = document.createElement('span');
-SelectionTxt.setAttribute('id','SelectionTxt');
-SelectionTxt.setAttribute('name','SelectionTxt');
-
-var Selection = document.createElement('input');
-Selection.setAttribute('id','Selection');
-Selection.setAttribute('name','Selection');
-Selection.setAttribute('type','hidden');
-
-var NoteSubj = document.createElement('input');
-NoteSubj.setAttribute('id','NoteSubj');
-NoteSubj.setAttribute('name','NoteSubj');
-NoteSubj.setAttribute('type','text');
-NoteSubj.setAttribute('size','40');
-NoteSubj.setAttribute('onfocus','if(this.value=="Subject/summary [required]") {this.value="";}');
-NoteSubj.setAttribute('onblur','if(this.value==""){this.value="Subject/summary [required]";}');
-NoteSubj.setAttribute('class','addnote');
-
-var NoteText = document.createElement('textarea');
-NoteText.setAttribute('id','NoteText');
-NoteText.setAttribute('name','NoteText');
-NoteText.setAttribute('rows','10');
-NoteText.setAttribute('cols','40');
-NoteText.setAttribute('class','addnote');
-
-var StartNodeId = document.createElement('input');
-StartNodeId.setAttribute('id','StartNodeId');
-StartNodeId.setAttribute('name','StartNodeId');
-StartNodeId.setAttribute('type','hidden');
-
-var NoteUrl = document.createElement('input');
-NoteUrl.setAttribute('id','NoteUrl');
-NoteUrl.setAttribute('name','NoteUrl');
-NoteUrl.setAttribute('type','hidden');
-
-var cancel = document.createElement('input');
-cancel.setAttribute('type','button');
-cancel.setAttribute('id','cancel');
-cancel.setAttribute('name','cancel');
-cancel.setAttribute('value','cancel');
-cancel.setAttribute('onClick','cancelNote("noteify")');
-cancel.setAttribute('class','annoteButton');
-cancel.setAttribute('class','addnote');
-
-var theBR = document.createElement('br');
-var theBR1 = document.createElement('br');
-var theBR2 = document.createElement('br');
-var theBR3 = document.createElement('br');
-var theBR4 = document.createElement('br');
-
-var pickQueue;
-if (drafter.match(/drafter/)) {
-pickQueue = document.createElement('select');
-pickQueue.setAttribute('name','queue');
-pickQueue.setAttribute('id','queue');
-
-var optDrafter = document.createElement('option');
-optDrafter.setAttribute('value','Drafter');
-optDrafter.setAttribute('selected','selected');
-optDrafter.appendChild(document.createTextNode('Drafter'));
-
-var optInbox = document.createElement('option');
-optInbox.setAttribute('value','Inbox');
-optInbox.appendChild(document.createTextNode('Inbox'));
-
-var optIssues = document.createElement('option');
-optIssues.setAttribute('value','Issues');
-optIssues.appendChild(document.createTextNode('Issues'));
-
-var optComA = document.createElement('option');
-optComA.setAttribute('value','CommitteeA');
-optComA.setAttribute('selected','selected');
-optComA.appendChild(document.createTextNode('CommitteeA'));
-
-var optComB = document.createElement('option');
-optComB.setAttribute('value','CommitteeB');
-optComB.setAttribute('selected','selected');
-optComB.appendChild(document.createTextNode('CommitteeB'));
-
-var optComC = document.createElement('option');
-optComC.setAttribute('value','CommitteeC');
-optComC.setAttribute('selected','selected');
-optComC.appendChild(document.createTextNode('CommitteeC'));
-
-var optComD = document.createElement('option');
-optComD.setAttribute('value','CommitteeD');
-optComD.setAttribute('selected','selected');
-optComD.appendChild(document.createTextNode('CommitteeD'));
-
-var optComT = document.createElement('option');
-optComT.setAttribute('value','CommitteeT');
-optComT.setAttribute('selected','selected');
-optComT.appendChild(document.createTextNode('CommitteeTest'));
-
-pickQueue.appendChild(optDrafter);
-pickQueue.appendChild(optInbox);
-pickQueue.appendChild(optIssues);
-pickQueue.appendChild(optComA);
-pickQueue.appendChild(optComB);
-pickQueue.appendChild(optComC);
-pickQueue.appendChild(optComD);
-pickQueue.appendChild(optComT);
-}
-
-else if (drafter.match(/Committee/)) {
-  var letray = drafter.match(/Committee(.)/);
-  var letter = letray[1];
-
-  pickQueue = document.createElement('select');
-  pickQueue.setAttribute('name','queue');
-  pickQueue.setAttribute('id','queue');
-  
-  var optDrafter = document.createElement('option');
-  optDrafter.setAttribute('value','Committee'+letter);
-  optDrafter.setAttribute('selected','selected');
-  optDrafter.appendChild(document.createTextNode('Committee'+letter));
-  
-  var optInbox = document.createElement('option');
-  optInbox.setAttribute('value','Inbox');
-  optInbox.appendChild(document.createTextNode('Inbox'));
-  
-  var optIssues = document.createElement('option');
-  optIssues.setAttribute('value','Issues');
-  optIssues.appendChild(document.createTextNode('Issues'));
-  
-  pickQueue.appendChild(optDrafter);
-  pickQueue.appendChild(optInbox);
-  pickQueue.appendChild(optIssues);
-}
-
-else {
-pickQueue = document.createElement('input');
-pickQueue.setAttribute('type','hidden');
-pickQueue.setAttribute('name','queue');
-pickQueue.setAttribute('value','Inbox');
-}
-var submit = document.createElement('input');
-submit.setAttribute('type','button');
-submit.setAttribute('id','submitNote');
-submit.setAttribute('value','submit');
-submit.setAttribute('onClick','submitComment()');
-submit.setAttribute('class','annoteButton');
-submit.setAttribute('class','addnote');
-
-noteifyDiv.appendChild(DomPathTxt);
-noteifyDiv.appendChild(DomPath);
-noteifyDiv.appendChild(SelectionTxt);
-noteifyDiv.appendChild(theBR1);
-noteifyDiv.appendChild(Selection);
-noteifyDiv.appendChild(NoteSubj);
-noteifyDiv.appendChild(theBR3);
-noteifyDiv.appendChild(NoteText);
-noteifyDiv.appendChild(StartNodeId);
-//noteifyDiv.appendChild(EndNodeId);
-noteifyDiv.appendChild(NoteUrl);
-//noteifyDiv.appendChild(DocRevision);
-noteifyDiv.appendChild(theBR4);
-noteifyDiv.appendChild(submit);
-noteifyDiv.appendChild(cancel);
-
-if (drafter) {
-pickQueue && noteifyDiv.appendChild(document.createTextNode(' Queue: ')) && noteifyDiv.appendChild(pickQueue);
-}
-else {
-pickQueue && noteifyDiv.appendChild(pickQueue);
-}
-
- thisNode = document.getElementById(startid);
- 
- if ((thisNode.previousSibling) && (thisNode.previousSibling.previousSibling) && (thisNode.previousSibling.previousSibling.appendChild)) {
-   thisNode.previousSibling.previousSibling.appendChild(noteifyDiv);
- }
- else 
-   if ((thisNode.previousSibling) && (thisNode.previousSibling.appendChild)) {
-     thisNode.previousSibling.appendChild(noteifyDiv);
-   }
-   else {
-     thisNode.appendChild(noteifyDiv);
-   }
-}
 
 function intense_annot(rootid,selections,rtids) {
   //alert('rootid is '+rootid.toString());
@@ -1138,12 +796,6 @@ function showExcerpt (rtid) {
   unOverlap("newannotation",5);
 }
 
-function iAgree (rtid,opn) {
-  myAgr = document.getElementById('agree'+rtid);
-  myAgr.setAttribute('href','#');
-  loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
-  loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&amp;opn='+opn);
-}
 
 function unOverlap(cls,gapDesired) {
 items = getElementsByClass(cls);
@@ -1173,15 +825,8 @@ function currently(text) {
 }
 
 function loginbox() {
-  if((!name) && (readCookie('__ac'))) {
-	namepass = decodeBase64(readCookie('__ac'));
-	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/source/stet-2006-03-14.tar.bz2">source</a> <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a><br/>\
-<span id="selectsome" class="selectsome">select some text</span> and <a class="fakelink" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
-  }
-  else {
-    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments. <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a>','login');
-  }
+    loadHTMLtoDiv('This license has been released; no further comments are being accepted.','login');
+
 }
 function idLinks(cs) {
   try { var say = cs.getElementsByTagName('say')[0].firstChild; } catch(e) { }
@@ -1238,7 +883,7 @@ function qLinks(cs) {
     lLnk.appendChild(document.createTextNode('[list]'));
     newMe.appendChild(lLnk);
 
-if (!filename.match(/lgpl-draft-1/)) {
+if ((!filename.match(/lgpl-draft-1/)) && (!filename.match(/gplv3-draft-3/)) && (!filename.match(/gplv3-draft-4/))) {
     newMe.appendChild(document.createTextNode(' '));
     rat = document.createElement('a');
     rat.setAttribute('href',location.pathname+"?filename="+filename+"&Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'"+filename+"'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");
