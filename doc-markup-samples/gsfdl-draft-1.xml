@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="selectxpath.xsl" type="text/xsl" ?>
+<!DOCTYPE gpl SYSTEM "http://gplv3.fsf.org/comments/gpl3.dtd">
+<!-- $Id$ -->
+<gpl>
+  <head>
+    <title>GNU Simpler Free Documentation License</title>
+    <pubdate>Discussion Draft 1 of Version 1, September 2006</pubdate>
+<status>THIS IS A DRAFT, NOT A PUBLISHED VERSION OF THE GNU SIMPLER FREE DOCUMENTATION LICENSE.</status> 
+    <copyright>
+      <year>2000, 2002, 2006</year>
+      <holder>Free Software Foundation, Inc.</holder>
+    </copyright>
+    <legalnotice>
+      <address>
+        <name>Free Software Foundation, Inc.</name>
+        <street>51 Franklin Street, Fifth Floor</street>,
+        <city>Boston</city>,
+        <state>MA</state>
+        <postcode>02110-1301</postcode>
+        <country>USA</country>
+      </address>
+      <p>Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.</p>
+    </legalnotice>
+    <releaseinfo>Fri 22 September 2006</releaseinfo>
+    </head>
+
+  <body>
+    <title>GNU Simpler Free Documentation License</title>
+
+    <section id="gsfdl.preamble" name="What This License Does">
+      <title>WHAT THIS LICENSE DOES</title>
+
+<p id="gsfdl.preamble.p0">
+ <sent id="gsfdl.preamble.p0.s1">The purpose of this License is to make a work of authorship free.</sent>
+ <sent id="gsfdl.preamble.p0.s2">This means giving all users the four essential freedoms:</sent>
+</p>
+
+<p id="gsfdl.preamble.p1">
+ <sent id="gsfdl.preamble.p1.s1">0. The freedom to read, view, or use the work.<br/></sent>
+ <sent id="gsfdl.preamble.p1.s2">1. The freedom to change the work, with access to formats which make that convenient to do.<br/></sent>
+ <sent id="gsfdl.preamble.p1.s3">2. The freedom to make and redistribute copies of the work.<br/></sent>
+ <sent id="gsfdl.preamble.p1.s4">3. The freedom to distribute modified versions.<br/></sent>
+</p>
+
+<p id="gsfdl.preamble.p2">
+ <sent id="gsfdl.preamble.p2.s1">Secondarily, this License assures the author and publisher the credit for their work, while sparing any appearance of being responsible for modifications made by others.</sent>
+</p>
+
+<p id="gsfdl.preamble.p3">
+ <sent id="gsfdl.preamble.p3.s1">This License is a kind of "copyleft", which means that derivative works of the document must themselves be free in the same sense.</sent>
+ <sent id="gsfdl.preamble.p3.s2">It complements the GNU General Public License, which is a copyleft license designed for free software.</sent>
+</p>
+
+<p id="gsfdl.preamble.p4">
+ <sent id="gsfdl.preamble.p4.s1">This License is not limited to "documentation", or even to works that
+are textual; it can be used for any work of authorship meant for human
+appreciation, rather than machine execution.</sent>
+ <sent id="gsfdl.preamble.p4.s2">We recommend this
+License principally for works whose purpose is instruction or
+reference, but it can be used for any work regardless of the subject
+matter, even for art and fiction.</sent>
+ <sent id="gsfdl.preamble.p4.s3">The only kind of work for which
+this should not be used is software.</sent>
+</p>
+</section>
+
+<section id="gsfdl.freemanuals" name="0a. Free Manuals Are Essential">
+<title>0a. FREE MANUALS ARE ESSENTIAL</title>
+<p id="gsfdl.freemanuals.p0">
+ <sent id="gsfdl.freemanuals.p0.s1">Free manuals are essential for free software.</sent>
+ <sent id="gsfdl.freemanuals.p0.s2">Users must have freedom
+to redistribute (including commercial sale of printed copies), so that
+the manual, on-line or on paper, can accompany every copy of the
+program.</sent>
+ <sent id="gsfdl.freemanuals.p0.s3">When users modify the program, adding or changing features,
+they must be free to update the manual too, to keep it accurate.</sent>
+</p>
+
+<p id="gsfdl.freemanuals.p1">
+ <sent id="gsfdl.freemanuals.p1.s1">Although free manuals are essential, many important free programs lack
+good free reference manuals and free introductory texts.</sent>
+ <sent id="gsfdl.freemanuals.p1.s2">Sometimes
+this is because the programs' developers wrote non-free manuals, not
+recognizing the need for documentation to be free.</sent>
+ <sent id="gsfdl.freemanuals.p1.s3">Please help spread
+the the word that free software needs free reference manuals and free
+tutorials.</sent>
+</p>
+
+<p id="gsfdl.freemanuals.p2">
+ <sent id="gsfdl.freemanuals.p2.s1">You can encourage commercial publishers to publish more free manuals
+and textbooks by buying printed copies of them, and by rejecting
+non-free manuals.</sent>
+ <sent id="gsfdl.freemanuals.p2.s2">Pay money for value, but don't pay with your freedom.</sent>
+</p>
+
+<p id="gsfdl.freemanuals.p3">
+ <sent id="gsfdl.freemanuals.p3.s1">If you are writing a manual or textbook, please insist on publishing
+it under a free license.</sent>
+ <sent id="gsfdl.freemanuals.p3.s2">Don't let a publisher talk you out of it; if
+one publisher refuses to use a free license, switch to one that will.</sent>
+ <sent id="gsfdl.freemanuals.p3.s3">If you're not sure whether a proposed license is free, write to
+&lt;licensing@gnu.org&gt;.</sent>
+</p>
+</section>
+
+<section id="gsfdl.applicdef" name="1. Applicability and Definitions">
+<title>1. APPLICABILITY AND DEFINITIONS</title>
+
+<p id="gsfdl.applicdef.p0">
+ <sent id="gsfdl.applicdef.p0.s1">In this License, each licensee is addressed as "you," while "the
+Work" refers to any work, in any medium, that contains a notice placed
+by the copyright holder saying it can be distributed under the terms
+of this License.</sent>
+ <sent id="gsfdl.applicdef.p0.s2">It may physically consist of multiple volumes.</sent>
+ <sent id="gsfdl.applicdef.p0.s3">A
+"modified" work includes versions that have been translated,
+transformed, or adapted, or to which material has been added.</sent>
+ <sent id="gsfdl.applicdef.p0.s4">A work
+"based on" another work means any modified version for which
+permission is necessary under applicable copyright law.</sent>
+</p>
+
+<p id="gsfdl.applicdef.p1">
+ <sent id="gsfdl.applicdef.p1.s1">To "propagate" a work means doing anything with it that requires
+permission under applicable copyright law, except making modifications
+that you do not share.</sent>
+ <sent id="gsfdl.applicdef.p1.s2">Propagation includes copying, distribution
+(with or without modification), making available or communicating to
+the public,publicly displaying or performing the work and in some
+countries other activities as well.</sent>
+ <sent id="gsfdl.applicdef.p1.s3">To "convey" a work means any kind
+of propagation that enables other parties to make or receive copies,
+excluding sublicensing.</sent>
+</p>
+
+<p id="gsfdl.applicdef.p2">
+ <sent id="gsfdl.applicdef.p2.s1">A "Transparent" copy of the Work means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, that is suitable for revision straightforwardly by
+generic editors appropriate to the medium (text, sound, video, etc.),
+and that is suitable (perhaps through programmed format conversion) for
+input to a wide variety of programs for processing that medium.</sent>
+ <sent id="gsfdl.applicdef.p2.s2">Material stored in an otherwise Transparent file format in a way that
+thwarts or discourages subsequent substantial modification by others
+is not Transparent.</sent>
+ <sent id="gsfdl.applicdef.p2.s3">A copy that is not "Transparent" is called
+"Opaque".</sent>
+</p>
+
+
+<p id="gsfdl.applicdef.p3">
+ <sent id="gsfdl.applicdef.p3.s1">Examples of suitable formats for Transparent copies of textual works
+include plain ASCII without markup, Texinfo input format, LaTeX input
+format, SGML or XML using a publicly available DTD or schema,
+OpenDocument format, and standard-conforming simple HTML, PostScript
+or PDF designed for human modification.</sent>
+ <sent id="gsfdl.applicdef.p3.s2">Examples of transparent image
+formats include PNG, XCF and JPG.</sent>
+ <sent id="gsfdl.applicdef.p3.s3">Examples of transparent video
+formats include MPEG2 and Ogg Theora.</sent>
+ <sent id="gsfdl.applicdef.p3.s4">Opaque formats include
+proprietary formats that can be read and edited only by proprietary
+word processors, SGML or XML for which the DTD, schema and/or
+processing tools are not generally available, and the
+machine-generated HTML, PostScript or PDF produced by some word
+processors for output purposes only.</sent>
+</p>
+
+<p id="gsfdl.applicdef.p4">
+ <sent id="gsfdl.applicdef.p4.s1">The "Title Page" means the portion of the work where information such
+as title, authors, date of publication, and copyright notice would
+normally appear.</sent>
+</p>
+
+<p id="gsfdl.applicdef.p5">
+ <sent id="gsfdl.applicdef.p5.s1">A section "Entitled XYZ" means a named section of the Work whose
+title either is precisely XYZ or contains XYZ in parentheses following
+text that translates XYZ in another language.</sent>
+ <sent id="gsfdl.applicdef.p5.s2">(Here XYZ stands for a
+specific section name mentioned below, such as "Acknowledgements",
+"Dedications", "Endorsements", or "History".)</sent>
+ <sent id="gsfdl.applicdef.p5.s3">To "Preserve the Title"
+of such a section when you modify the Work means that it remains a
+section "Entitled XYZ" according to this definition.</sent>
+</p>
+
+<p id="gsfdl.applicdef.p6">
+ <sent id="gsfdl.applicdef.p6.s1">The Work may include Warranty Disclaimers next to the notice which
+states that this License applies to the Work.</sent>
+ <sent id="gsfdl.applicdef.p6.s2">These Warranty
+Disclaimers are considered to be included by reference in this
+License, but only as regards disclaiming warranties: any other
+implication that these Warranty Disclaimers may have is void and has
+no effect on the meaning of this License.</sent>
+</p>
+</section>
+
+<section id="gsfdl.basicperms" name="1a. Basic Permissions">
+<title>1a. BASIC PERMISSIONS</title>
+
+<p id="gsfdl.basicperms.p0">
+ <sent id="gsfdl.basicperms.p0.s1">You have a world-wide, royalty-free license, for the duration of the
+copyright on the Work, to use the Work under the conditions stated
+herein.</sent>
+ <sent id="gsfdl.basicperms.p0.s2">You accept the license if you propagate the Work.</sent>
+</p>
+
+</section>
+
+
+<section id="gsfdl.verbatimcopying" name="2. Verbatim Copying">
+<title>2. VERBATIM COPYING</title>
+
+<p id="gsfdl.verbatimcopying.p0">
+ <sent id="gsfdl.verbatimcopying.p0.s1">You may propagate the Work unmodified in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Work are reproduced in all copies, and that you add no
+other conditions whatsoever to those of this License.</sent>
+</p>
+
+<p id="verbatimcopying.p1">
+ <sent id="verbatimcopying.p1.s1">You need not include a copy of this License in the Work if you have
+registered the work's license with a national agency that maintains a
+network server through which the general public can find out its
+license.</sent>
+</p>
+
+<p id="gsfdl.verbatimcopying.p2">
+ <sent id="gsfdl.verbatimcopying.p2.s1">You may not apply technical measures to obstruct or control the use or
+further copying of any copies you make or distribute, by those to whom
+they may be distributed.</sent>
+ <sent id="gsfdl.verbatimcopying.p2.s2">However, you may charge a fee in exchange
+for copies.</sent>
+ <sent id="gsfdl.verbatimcopying.p3.s3">You may transmit copies with methods that give you legal
+rights to control further use, copying or transmission, only on
+condition that you waive the use of those legal rights to impose any
+conditions aside from those of this License.</sent>
+</p>
+
+<p id="gsfdl.verbatimcopying.p2">
+ <sent id="gsfdl.verbatimcopying.p4.s1">You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.</sent>
+ <sent id="gsfdl.verbatimcopying.p4.s2">You may publically perform the
+Work provided you make a transparent copy of the document
+available as described in section 3 as though you had distributed
+opaque copies to the audience.</sent>
+</p>
+</section>
+
+<section id="gsfdl.copyinquantity" name="3. Copying in Quantity">
+<title>3. COPYING IN QUANTITY</title>
+
+<p id="gsfdl.copyinquantity.p0">
+ <sent id="gsfdl.copyinquantity.p0.s1">If you publish printed copies (or copies in media that commonly have
+printed covers) of the Work, numbering more than 100, the front
+cover must clearly and unambiguously present the full title.</sent>
+ <sent id="gsfdl.copyinquantity.p0.s2">Copying
+with changes limited to the covers, under these conditions, can be
+treated as verbatim copying in other respects.</sent>
+</p>
+
+<p id="gsfdl.copyinquantity.p1">
+ <sent id="gsfdl.copyinquantity.p1.s1">If you convey Opaque copies of the Work numbering
+more than 100, you must also convey a corresponding
+machine-readable Transparent version.</sent>
+ <sent id="gsfdl.copyinquantity.p1.s2">The Transparent version need
+not have identical formatting as long as its contents are the same and
+are clearly visible, and non-textual contents have equal or superior
+resolution and quality.</sent>
+ <sent id="gsfdl.copyinquantity.p1.s3">When you convey the Opaque copies by
+offering access to copy from a designated place, you must offer
+equivalent access to copy the Transparent version from the same place.</sent>
+ <sent id="gsfdl.copyinquantity.p1.s4">Otherwise, you must convey a machine-readable Transparent copy
+along with each Opaque copy, or state in or with each Opaque copy a
+computer-network location from which the general network-using public
+has anonymous gratis access to download, using public-standard network
+protocols, a corresponding Transparent copy of the Work.</sent>
+ <sent id="gsfdl.copyinquantity.p1.s5">Under
+the latter option, you must take reasonably prudent steps, when you
+begin conveying of Opaque copies in quantity, to ensure that this
+Transparent copy will remain thus accessible at the stated location
+until at least one year after the last time you convey an Opaque
+copy (directly or through your agents or retailers) of that edition to
+the public.</sent>
+</p>
+
+<p id="gsfdl.copyinquantity.p2">
+ <sent id="gsfdl.copyinquantity.p2.s1">It is requested, but not required, that you contact the authors of the
+Work well before conveying any large number of copies, to give
+them a chance to provide you with an updated version of the Work.</sent>
+</p>
+</section>
+
+<section id="gsfdl.modifications" name="4. Modifications">
+<title>4. MODIFICATIONS</title>
+
+<p id="gsfdl.modifications.p0">
+ <sent id="gsfdl.modifications.p0.s1">You may convey a Modified Version of the Work under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Work, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.</sent>
+ <sent id="gsfdl.modifications.p0.s2">In addition, you must do these things in the Modified Version:</sent>
+</p>
+
+<p id="gsfdl.modifications.p1">
+ <sent id="gsfdl.modifications.p1.s1">A. Use a title distinct
+   from that of the Work, and from those of previous versions
+   of the Work as listed in the History section.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s2">B. List as authors (on the Title Page, if any), one or more persons or entities
+   responsible for authorship of the modifications in the Modified Version.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s3">C. Credit (on the Title Page, if any) at least five of the principal authors of
+   the Work (all of them, if it has fewer than five) if the material
+   derived from the Work is more than 1/4 of the total.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s4">D. Prominently state the name of the publisher of the Modified Version.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s5">E. Preserve all the copyright notices of the Work.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s6">F. Add an appropriate copyright notice for your modifications
+   adjacent to the other copyright notices.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s7">G. Include, immediately after the copyright notices, a license notice
+   giving the public permission to use the Modified Version under the
+   terms of this License, in the form shown in the Addendum below.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s8">H. Include an unaltered copy of this License.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s9">I. Preserve the section Entitled "History", Preserve its Title, and add
+   to it an item stating at least the title, year, new authors, and
+   publisher of the Modified Version.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s10">If
+   there is no section Entitled "History" in the Work, create one
+   stating the title, year, authors, and publisher of the Work,
+   then add an item describing the Modified
+   Version as stated in the previous sentence.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s11">J. Preserve the network location, if any, given in the Work for
+   public access to a Transparent copy of the Work, and likewise
+   the network locations given in the Work for previous versions
+   it was based on.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s12">These may be placed in the "History" section.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s13">You may omit a network location for a work that was published at
+   least four years before the Work itself.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s14">K. For any section Entitled "Acknowledgements" or "Dedications",
+   Preserve the Title of the section, and preserve in the section all
+   the substance and tone of each of the contributor acknowledgements
+   and/or dedications given therein.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s15">Acknowledgments and Dedications
+   can be deleted when a Modified Version deletes all material to
+   which the Acknowledgments and Dedications could reasonably have 
+   applied.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s16">L. Delete any section Entitled "Endorsements".<br/></sent>
+ <sent id="gsfdl.modifications.p1.s17">Such a section
+   may not be included in the Modified Version.<br/></sent>
+ <sent id="gsfdl.modifications.p1.s18">M. Do not retitle any existing section to be Entitled "Endorsements".<br/></sent>
+ <sent id="gsfdl.modifications.p1.s19">N. Preserve any Warranty Disclaimers.<br/></sent>
+</p>
+
+<p id="gsfdl.modifications.p2">
+ <sent id="gsfdl.modifications.p2.s1">Authors and publishers of previous versions can release you from above
+requirements to cite or refer to them or their versions.</sent>
+</p>
+
+<p id="gsfdl.modifications.p3">
+ <sent id="gsfdl.modifications.p3.s1">You may add a section Entitled "Endorsements", provided it contains
+nothing but endorsements of your Modified Version by various
+parties--for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.</sent>
+</p>
+
+<p id="gsfdl.modifications.p4">
+ <sent id="gsfdl.modifications.p4.s1">The author(s) and publisher(s) of the Work do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.</sent>
+</p>
+</section>
+
+<section id="gsfdl.combinations" name="5. Combinations">
+<title>5. COMBINATIONS</title>
+
+<p id="gsfdl.combinations.p0">
+ <sent id="gsfdl.combinations.p0.s1">You may combine the Work with other works released under this
+License, under the terms defined in section 4 above for modified
+versions.</sent>
+ <sent id="gsfdl.combinations.p0.s2">Clause 4C applies to all the principal authors of all the
+combined documents, taken together.</sent>
+</p>
+
+<p id="gsfdl.combinations.p1">
+ <sent id="gsfdl.combinations.p1.s1">The combined work need only contain one copy of this License.</sent>
+ <sent id="gsfdl.combinations.p1.s2">In the
+combination, you must preserve all warranty disclaimers, combine any
+sections Entitled "History" in the various original works, forming
+one section Entitled "History"; likewise combine any sections Entitled
+"Acknowledgements", and any sections Entitled "Dedications".</sent>
+ <sent id="gsfdl.combinations.p1.s3">You must
+delete all sections Entitled "Endorsements".</sent>
+</p>
+</section>
+
+<section id="gsfdl.collections" name="6. Collections of Documents">
+<title>6. COLLECTIONS</title>
+
+<p id="gsfdl.collections.p0">
+ <sent id="gsfdl.collections.p0.s1">You may make a collection consisting of the Work and other works
+released under this License, and replace the individual copies of this
+License in the various works with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the works in all other respects.</sent>
+</p>
+
+<p id="gsfdl.collections.p1">
+ <sent id="gsfdl.collections.p1.s1">You may extract one of the collected works from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted work, and follow this License in all
+other respects regarding verbatim copying of that work.</sent>
+</p>
+</section>
+
+<section id="gsfdl.excerpts" name="6a. Excerpts">
+<title>6a. EXCERPTS</title>
+
+<p id="gsfdl.excerpts.p0">
+ <sent id="gsfdl.excerpts.p0.s1">You may publish a work, a Modified Version, or a collection, of up
+to 20,000 characters of text (excluding formatting mark-up) in
+electronic form, or up to 12 normal printed pages, or up to a minute
+of audio or video, as an Excerpt.</sent>
+ <sent id="gsfdl.excerpts.p0.s2">An Excerpt follows the applicable
+rules of this license, except that the following required
+materials--the copy of this license, title page materials, historical
+copyright notices, warranty disclaimers, and any required
+sections--may be replaced by one or more publicly accessible URLs
+referring to the same materials.</sent>
+</p>
+</section>
+
+<section id="gsfdl.aggregation" name="7. Aggregation with Independent Works">
+<title>7. AGGREGATION WITH INDEPENDENT WORKS</title>
+
+<p id="gsfdl.aggregation.p0">
+ <sent id="gsfdl.aggregation.p0.s1">A compilation of the Work or its derivatives with other separate
+and independent works, in or on a volume of a storage or
+distribution medium, is called an "aggregate" if the combination and the copyright
+resulting from the compilation are not used to limit the legal rights
+of the compilation's users beyond what the individual works permit.</sent>
+ <sent id="gsfdl.aggregation.p0.s2">Including the Work in an aggregate does not cause this License to
+apply to the other works in the aggregate which are not themselves
+derivative works of the Work.</sent>
+</p>
+</section>
+
+<section id="gsfdl.translation" name="8. Translation">
+<title>8. TRANSLATION</title>
+
+<p id="gsfdl.translation.p0">
+ <sent id="gsfdl.translation.p0.s1">Translation is considered a kind of modification, so you may
+distribute translations of the Work under the terms of section 4.</sent>
+ <sent id="gsfdl.translation.p0.s2">You may include a translation of this License, and all the license
+notices in the Work, and any Warrany Disclaimers, provided that
+you also include the original English version of this License and the
+original versions of those notices and disclaimers.</sent>
+ <sent id="gsfdl.translation.p0.s3">In case of a
+disagreement between the translation and the original version of this
+License or a notice or disclaimer, the original version will prevail.</sent>
+</p>
+
+<p id="gsfdl.translation.p1">
+ <sent id="gsfdl.translation.p1.s1">If a section in the Work is Entitled "Acknowledgements",
+"Dedications", or "History", the requirement (section 4) to Preserve
+its Title (section 1) will typically require changing the actual
+title.</sent>
+</p>
+</section>
+
+<section id="gsfdl.termination" name="9. Termination">
+<title>9. TERMINATION</title>
+
+<p id="gsfdl.termination.p0">
+ <sent id="gsfdl.termination.p0.s1">You may not propagate or modify the Work except as
+expressly provided for under this License.</sent>
+ <sent id="gsfdl.termination.p0.s2">Any attempt otherwise to
+do so is void.</sent>
+ <sent id="gsfdl.termination.p0.s3">If you violate this License, any copyright holder may
+put you on notice by notifying you of the violation, by any reasonable
+means, provided 60 days have not elapsed since the last violation.</sent>
+ <sent id="gsfdl.termination.p0.s4">Having put you on notice, the copyright holder may then terminate your
+license at any time.</sent>
+ <sent id="gsfdl.termination.p0.s5">However, parties who have received copies, or
+rights, from you under this License will not have their licenses
+terminated so long as they remain in full compliance.</sent>
+</p>
+</section>
+
+<section id="gsfdl.futurevisions" name="10. Future Revisions of this License">
+<title>10. FUTURE REVISIONS OF THIS LICENSE</title>
+
+<p id="gsfdl.futurevisions.p0">
+ <sent id="gsfdl.futurevisions.p0.s1">The Free Software Foundation may publish new, revised versions of the
+GNU Simpler Free Documentation License from time to time.</sent>
+ <sent id="gsfdl.futurevisions.p0.s2">Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.</sent>
+ <sent id="gsfdl.futurevisions.p0.s3">See
+http://www.gnu.org/copyleft/.</sent>
+</p>
+
+<p id="gsfdl.futurevisions.p1">
+ <sent id="gsfdl.futurevisions.p1.s1">Each version of the License is given a distinguishing version number.</sent>
+ <sent id="gsfdl.futurevisions.p1.s2">If the Work specifies that a particular numbered version of this
+License "or any later version" applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.</sent>
+ <sent id="gsfdl.futurevisions.p1.s3">If the Work does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.</sent>
+</p>
+
+<p id="gsfdl.futurevisions.p2">
+ <sent id="gsfdl.futurevisions.p2.s1">For instructions on how to use this License,
+see http://www.gnu.org/licenses/.</sent>
+</p>
+
+</section>
+  </body>
+</gpl>
