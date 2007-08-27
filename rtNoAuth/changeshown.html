@@ -93,6 +93,14 @@ Type
 % if ($drafterQ->CurrentUserHasRight('SeeQueue')) {
 <OPTION VALUE="Drafter">Drafters' comments</OPTION>
 % }
+%# committee queues: A->8182, B->8183, C->8184, D->8185, T->8186 [for testing]
+%    foreach my $id ("CommitteeA","CommitteeB","CommitteeC","CommitteeD","CommitteeT") {
+%	$drafterQ->Load($id);
+%	if ($drafterQ->CurrentUserHasRight('CreateTicket')) {
+<OPTION VALUE="<% $id %>"><% $id %></OPTION>
+%	}
+%    }
+
 </SELECT>
 </td></tr>
 
@@ -196,11 +204,11 @@ Filename commented on
 </SELECT>
 </td>
 <td>
-<input disabled name="ValueOf&#39;CF.NoteUrl&#39;" size="20" value="gplv3-draft-1">
+<input name="ValueOf&#39;CF.NoteUrl&#39;" size="20" value="<% $filename %>">
 </td></tr>
 
 <input type="hidden" NAME="&#39;CF.NoteUrl&#39;Op" VALUE="LIKE">
-<input type="hidden" name="ValueOf&#39;CF.NoteUrl&#39;" value="gplv3-draft-1">
+<!-- <input type="hidden" name="ValueOf&#39;CF.NoteUrl&#39;" value="<% $filename %>"> -->
 
 
 
@@ -1019,6 +1027,7 @@ $session{'CurrentSearchHash'} = $search_hash;
 
 # {{{ Show the results, if we were asked.
 if ( $ARGS{"DoSearch"} ) {
+if ($came_from !~ m#^/comment#) { $came_from = "/comments/$came_from"; }
 my $redirurl = "$came_from?Query=$Query&Order=$Order&OrderBy=$OrderBy&Rows=$RowsPerPage";
    $m->redirect($redirurl);
     $m->abort();
@@ -1055,6 +1064,7 @@ $HideResults => 0
 $came_from => '/comments/rt/readsay.html'
 $Delete => 1
 $NewQuery => 1
+$filename => undef
 </%ARGS>
 
 

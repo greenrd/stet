@@ -79,7 +79,7 @@ $url =~ s/.*\/([^\/]+)\.(html|xml).*/$1/;
 $urlpath = $url;
 $urlpath =~ s/http:\/\/([^\/]+)\/?(.*)\?.*/$2/;
 
- print STDERR "url $url\nurlpath $urlpath\n\n";
+# print STDERR "url $url\nurlpath $urlpath\n\n";
  $dompath = $ARGS{'DomPath'};
  $selectedtext = URI::Escape::uri_unescape($ARGS{'Selection'});
  $notesubj = URI::Escape::uri_unescape($ARGS{'NoteSubj'});
@@ -111,7 +111,7 @@ my $ticket_body = MIME::Entity->build(Data => $notetext,
 my %ticket_vals = ( Queue => $realqueue,
 		    Subject => $notesubj,
 #                      Owner => 'Nobody',
-                      Requestor => $name, # will work with new users
+                      Requestor => $CurrentUser->EmailAddress, # name, # will work with new users
                       #InitialPriority => '11',
                       #FinalPriority => '20',
                       MIMEObj => $ticket_body,
@@ -124,7 +124,7 @@ my %ticket_vals = ( Queue => $realqueue,
 #		      'CustomField-7' => $name,
 		      );
   ($id, my $transaction_object, my $err) = $ticket->Create(%ticket_vals);
-  print STDERR $err . "\n" if $err;
+  print STDERR "submitcomment-cachetoo err: $err \n" if $err;
   system("/home/orion/cacheresults.sh ".$urlpath." &");
 }
 }

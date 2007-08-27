@@ -399,7 +399,7 @@ function processReqChange()
 	did++;
       }
       resp_arrA = response.getElementsByTagName("agreement");
-      if(!!resp_arrN.length && (resp_arrN.length > 0)) {
+      if(!!resp_arrA.length && (resp_arrA.length > 0)) {
 	processAgreement(response);
 	did++;
       }
@@ -1142,7 +1142,7 @@ function iAgree (rtid,opn) {
   myAgr = document.getElementById('agree'+rtid);
   myAgr.setAttribute('href','#');
   loadHTMLtoDiv(myAgr.innerHTML+'ing...',myAgr.id);
-  loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&amp;opn='+opn);
+  loadXMLDoc('/comments/rt/agree.html','rtid='+rtid+'&opn='+opn);
 }
 
 function unOverlap(cls,gapDesired) {
@@ -1176,11 +1176,11 @@ function loginbox() {
   if((!name) && (readCookie('__ac'))) {
 	namepass = decodeBase64(readCookie('__ac'));
 	var name = namepass.substr(0,namepass.indexOf(':'));
-	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/source/stet-2006-03-14.tar.bz2">source</a> <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a><br/>\
+	loadHTMLtoDiv('you are '+name+': <a href="http://gplv3.fsf.org/logout">logout</a> <a href="http://gplv3.fsf.org/comments/source/stet-2006-03-14.tar.bz2">source</a><br/>\
 <span id="selectsome" class="selectsome">select some text</span> and <a class="fakelink" onmousedown="javascript:XpathSel()">add a comment</a> | <a href="http://gplv3.fsf.org/comments/email.html">email your comment</a>','login');
   }
   else {
-    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments. <a href=\"http://gplv3.fsf.org/comments/classic.html\">old interface</a>','login');
+    loadHTMLtoDiv('You need to <a href=\"http://gplv3.fsf.org/login_form?came_from='+location.pathname+'\">log in</a> to make comments.','login');
   }
 }
 function idLinks(cs) {
@@ -1238,7 +1238,7 @@ function qLinks(cs) {
     lLnk.appendChild(document.createTextNode('[list]'));
     newMe.appendChild(lLnk);
 
-if (!filename.match(/lgpl-draft-1/)) {
+if ((!filename.match(/lgpl-draft-1/)) && (!filename.match(/gplv3-draft-3/)) && (!filename.match(/gplv3-draft-4/))) {
     newMe.appendChild(document.createTextNode(' '));
     rat = document.createElement('a');
     rat.setAttribute('href',location.pathname+"?filename="+filename+"&Query=%20Creator%20=%20'ratiodoc'%20%20AND%20'CF.NoteUrl'%20LIKE%20'"+filename+"'%20&Order=DESC&OrderBy=id&StartAt=1&Rows=80");

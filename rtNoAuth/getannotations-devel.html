@@ -71,14 +71,24 @@ my $rsslink = "/comments/rt/rssresults.rdf?" . (($ARGS{'Query'}) ? ("Query=".$AR
 my $listlink = "/comments/rt/readsay.html?" . (($ARGS{'Query'}) ? ("Query=".$ARGS{'Query'}) : ("id=".$ARGS{'id'})) . "&Order=DESC";
 
 ($CurrentUser, $resp, $name) = getUser("foo");
-print STDERR "Currentuser $CurrentUser, $resp\n";
+print STDERR "Currentuser ".$CurrentUser->Name.", $resp\n";
 
 my $drafter = '';
 my $DrafterQueue = RT::Queue->new($CurrentUser);
 $DrafterQueue->Load('Drafter');
-if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
+if ($DrafterQueue->CurrentUserHasRight('CreateTicket')) {
   $drafter = "drafter";
 }
+else {
+# committee queues: A->8182, B->8183, C->8184, D->8185, T->8186 [for testing]
+    foreach my $id ("CommitteeA","CommitteeB","CommitteeC","CommitteeD","CommitteeT") {
+	$DrafterQueue->Load($id);
+	if ($DrafterQueue->CurrentUserHasRight('CreateTicket')) {
+	    $drafter = "$id";
+	}
+    }
+}
+
 
 $r->content_type('text/xml');
 

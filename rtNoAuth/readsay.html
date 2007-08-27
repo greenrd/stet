@@ -63,13 +63,13 @@ Showing comments <% humanQuery($ARGS{'Query'}) |n %> <a class="rsslink" href="<%
 ( found <% $Tickets->CountAll()%>, showing newest <% $StartAt %>-<% (($StartAt + $Rows) > $Tickets->CountAll()) ? $Tickets->CountAll() : ($StartAt + $Rows - 1) %>:
 %   if ($Tickets->CountAll() > $Rows) {
 %       if ($StartAt > 1 ) {
-      <a href="/comments/rt/readsay.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>">prev <% $Rows %></a>
+      <a href="/comments/rt/readsay.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% (($StartAt - $Rows) < 0) ? 1 : ($StartAt - $Rows) |n%>&Order=<% $Order %>">prev <% $Rows %></a>
 %       }
 %   if (($Tickets->CountAll() > $Rows) && ($Tickets->CountAll() < $StartAt + $Rows)) {
 |
 %   }
 %   if ($Tickets->CountAll() > $StartAt + $Rows) {
-         <a href="/comments/rt/readsay.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>">next <% $Rows %></a>
+         <a href="/comments/rt/readsay.html?filename=<% $filename %>&Query=<% $ARGS{'Query'} |n %>&amp;Rows=<%$Rows%>&amp;StartAt=<% $StartAt + $Rows %>&Order=<% $Order %>">next <% $Rows %></a>
 %   }
 %}
 )
@@ -97,7 +97,10 @@ Showing comment <a href="/comments/rt/readsay.html?filename=<% $filename %>&id=<
 </span>
 %
 % while (my $item = $Tickets ? $Tickets->Next : $Ticket) {
-% my $showactions = $Tickets ? 0 : 1;
+
+# DISABLES ADDITIONAL ACTIONS FOR DRAFTERS
+
+% my $showactions = ($Tickets || !$resp) ? 0 : 1;
 <% displayTicket(\$item,$showactions,0) %>
 % $Ticket = '';
 % $rc++;
@@ -252,7 +255,7 @@ Showing comment <a href="/comments/rt/readsay.html?filename=<% $filename %>&id=<
 % }
 % }
  <br>
-%  if ($resp == 1) {
+%  if (($resp == 1) && ($item->CreatorObj->Name ne "ratiodoc")) {
         <input type=hidden name="UpdateType" value="public">
         <span class="TktLabel">Add comments:</span> <br/>
 	<textarea class="messagebox" COLS=72 ROWS=15 WRAP=HARD NAME="UpdateContent" onfocus="if(this.value=='Enter additional comments here') {this.value='';}" onblur="if(this.value==''){this.value='Enter additional comments here';}"></textarea><br/>
@@ -276,7 +279,9 @@ Showing comment <a href="/comments/rt/readsay.html?filename=<% $filename %>&id=<
 <%INIT>
 use CGI qw/:standard/;
 use HTML::Scrubber;
-our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+use DateTime;
+
+our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br q blockquote ] ] );
 require "/var/www/stet/stetsubs.pl";
 our $issuequeue = 5; 
 our $fsfqueue = 6;
@@ -284,6 +289,8 @@ my $rc = 0;
 our ($name, $resp, $CurrentUser, $HasIssueRights);
 my ($pass, $agr_vals, $thing);
 ($CurrentUser, $resp, $name) = getUser("foo");
+
+
 $CurrentUser = $session{'CurrentUser'};
 
 my $rsslink = "/comments/rt/rssresults.rdf?id=".$ARGS{'id'}."&Query=".$ARGS{'Query'};
@@ -327,6 +334,10 @@ if (!$filename) {
     }
 }
 
+# DISABLE SPECIFIC LICENSES HERE:
+ if ($filename =~ m/^(gplv3-|lgpl-)/) { $resp = 0; }
+
+
 my $NewQueueObj = RT::Queue->new( $CurrentUser );
 $NewQueueObj->Load($issuequeue); 
 
@@ -366,7 +377,7 @@ sub getThread($) {
     my $item = $$itemref;
     my $Transactions = $item->Transactions;
     my $allcomments = '';
-    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br q blockquote ] ] );
     while (my $Transaction = $Transactions->Next) {
 	
 	if ($Transaction->Type =~ /^(Create|Correspond|Comment$)/) {
@@ -423,8 +434,16 @@ sub userlink($$) {
 sub doDate($) {
     my $itemref = shift;
     my $item = $$itemref;
-    $item->Created =~ m/(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d):\d\d/;
-    return  "$1 at $2 ". getTZ($item->Created);
+    $item->Created =~ m/(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
+    my $dt = DateTime->new( year => $1,
+			      month => $2,
+			      day => $3,
+			      hour => $4,
+			      minute => $5,
+			      second => $6,
+			     time_zone => 'UTC');
+    $dt->set_time_zone("America/New_York");
+    return  $dt->strftime("%Y-%m-%d at %H:%M %Z");
 }
 
 sub getTZ($) {  # RT doesn't store dates with timezones.  
@@ -439,7 +458,8 @@ if ($date > 10) {  # after the end of October...
     $eastern = "EST";
 }
 
-return $eastern;
+#return $eastern;
+return "UTC";
 }
 
 sub listAgree($) {

@@ -252,7 +252,7 @@ Showing comment <a href="/comments/rt/readsay.html?filename=<% $filename %>&id=<
 % }
 % }
  <br>
-%  if ($resp == 1) {
+%  if (($resp == 1) && ($item->CreatorObj->Name != "ratiodoc")) {
         <input type=hidden name="UpdateType" value="public">
         <span class="TktLabel">Add comments:</span> <br/>
 	<textarea class="messagebox" COLS=72 ROWS=15 WRAP=HARD NAME="UpdateContent" onfocus="if(this.value=='Enter additional comments here') {this.value='';}" onblur="if(this.value==''){this.value='Enter additional comments here';}"></textarea><br/>
@@ -276,7 +276,9 @@ Showing comment <a href="/comments/rt/readsay.html?filename=<% $filename %>&id=<
 <%INIT>
 use CGI qw/:standard/;
 use HTML::Scrubber;
-our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+use DateTime;
+
+our $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br q blockquote ] ] );
 require "/var/www/stet/stetsubs.pl";
 our $issuequeue = 5; 
 our $fsfqueue = 6;
@@ -366,7 +368,7 @@ sub getThread($) {
     my $item = $$itemref;
     my $Transactions = $item->Transactions;
     my $allcomments = '';
-    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br ] ] );
+    my $scrubber = HTML::Scrubber->new( allow => [ qw[ a b i u br q blockquote ] ] );
     while (my $Transaction = $Transactions->Next) {
 	
 	if ($Transaction->Type =~ /^(Create|Correspond|Comment$)/) {
@@ -423,8 +425,16 @@ sub userlink($$) {
 sub doDate($) {
     my $itemref = shift;
     my $item = $$itemref;
-    $item->Created =~ m/(\d\d\d\d-\d\d-\d\d) (\d\d:\d\d):\d\d/;
-    return  "$1 at $2 ". getTZ($item->Created);
+    $item->Created =~ m/(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/;
+    my $dt = DateTime->new( year => $1,
+			      month => $2,
+			      day => $3,
+			      hour => $4,
+			      minute => $5,
+			      second => $6,
+			     time_zone => 'UTC');
+    $dt->set_time_zone("America/New_York");
+    return  $dt->strftime("%Y-%m-%d at %H:%M %Z");
 }
 
 sub getTZ($) {  # RT doesn't store dates with timezones.  
@@ -439,7 +449,8 @@ if ($date > 10) {  # after the end of October...
     $eastern = "EST";
 }
 
-return $eastern;
+#return $eastern;
+return "UTC";
 }
 
 sub listAgree($) {

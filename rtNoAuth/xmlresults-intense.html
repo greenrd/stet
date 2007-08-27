@@ -20,7 +20,6 @@
 %# You should have received a copy of the GNU Affero General Public
 %# License, version 3, and the GNU General Public License, version 2,
 %# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-%
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 %
 <response>
@@ -119,12 +118,22 @@ my ($Tickets, $Ticket);
 my $drafter = '';
 my $DrafterQueue = RT::Queue->new($CurrentUser);
 $DrafterQueue->Load('Drafter');
-if ($DrafterQueue->CurrentUserHasRight('SeeQueue')) {
+if ($DrafterQueue->CurrentUserHasRight('CreateTicket')) {
   $drafter = "drafter";
 }
+else {
+# committee queues: A->8182, B->8183, C->8184, D->8185, T->8186 [for testing]
+    foreach my $id ("CommitteeA","CommitteeB","CommitteeC","CommitteeD","CommitteeT") {
+	$DrafterQueue->Load($id);
+	if ($DrafterQueue->CurrentUserHasRight('CreateTicket')) {
+	    $drafter = "$id";
+	}
+    }
+}
+
 
 if ($ARGS{'Query'}) {
-my $Qargs = '';
+    my $Qargs = '';
 unless ($ARGS{'Query'} =~ /Queue/) {
  $Qargs = " AND 'Queue.Name' != 'Drafter'";
 if ($drafter) {
